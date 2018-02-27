@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-#include <string>
 enum Tokens {
     INTEGER = 257,
     STRING,
@@ -33,5 +31,3 @@ enum Tokens {
     COLONEQ // :=
 
 };
-
-std::vector<Tokens> build_token_list(std::string input);
