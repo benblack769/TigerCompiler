@@ -3,7 +3,7 @@
 #include <algorithm>
 using namespace std;
 
-TEST_CASE("All symbols start with different codes", "[diff_codes]") {
+TEST_CASE("Basic case", "[basic_case]") {
     auto expected = { STRING, WHITESPACE, INTEGER, WHITESPACE, IDENTIFIER };
     auto tok_list = build_token_list("\"hi there\" 123 argvar");
     REQUIRE(expected.size() == tok_list.size());

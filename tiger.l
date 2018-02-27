@@ -1,7 +1,7 @@
 %option noyywrap
 %{
 #include "tokens.hh"
-#include <vector>
+#include "test_function.hh"
 
 %}
 
