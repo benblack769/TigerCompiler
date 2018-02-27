@@ -17,16 +17,3 @@ using namespace std;
 .       { printf("Unrecognized character %c\n", yytext[0]); return BAD_TOKEN; }
 
 %%
-
-int main()
-{
-    std::vector<int> stack;
-
-    while (int tok = yylex()) {
-        cout << tok << endl;
-        cout << yytext << endl;
-        //switch(tok) {
-        //}
-    }
-    return 0;
-}
