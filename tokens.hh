@@ -4,12 +4,34 @@
 enum Tokens {
     INTEGER = 257,
     STRING,
-    ARRAY_KW,
     SEMICOLON,
     IDENTIFIER,
-    EOL,
-    WHITESPACE,
-    BAD_TOKEN
+    EOL, // \n\r , \r\n , \r , \n
+    WHITESPACE, // space or tab
+    BAD_TOKEN, 
+    LPAREN, // (
+    RPAREN, // )
+    COMMA, // ,
+    COLON, // :
+    LBRACK, // [
+    RBRACK, // ]
+    LBRACE, // {
+    RBRACE, // }
+    PERIOD, // .
+    PLUS, // +
+    MINUS, // -
+    ASTERISK, // *
+    FSLASH, // /
+    EQUAL, // =
+    LRCOMPARISON, // <>
+    LESSTHAN, // <
+    GREATERTHAN, // >
+    LESSEQ, // <=
+    GREATEREQ, // >=
+    AMPERSAND, // &
+    VERTICAL, // |
+    COLONEQ // :=
+
 };
 
 std::vector<Tokens> build_token_list(std::string input);
