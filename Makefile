@@ -7,11 +7,11 @@ LDFLAGS=$(CXXFLAGS)
 
 all: test_lexer
 
-flex: tiger.l
+lex.yy.c: tiger.l
 	flex $^
 
-lex.o: flex
-	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ lex.yy.c
+lex.o: lex.yy.c
+	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ $^
 
 catch.o: catch.cc
 	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ $^

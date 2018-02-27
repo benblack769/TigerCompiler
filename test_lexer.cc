@@ -1,11 +1,11 @@
 #include "catch.hpp"
+#include "tokens.hh"
+#include <algorithm>
+using namespace std;
 
 TEST_CASE("All symbols start with different codes", "[diff_codes]") {
-  for (unsigned i = 0; i < 256; ++i) {
-    for (unsigned j = 0; i < 256; ++i) {
-      if (i != j) {
-        REQUIRE(i != j);
-      }
-    }
-  }
+    auto expected = { STRING, INTEGER };
+    auto tok_list = build_token_list("\"hi there\" 123 /* */");
+    REQUIRE(expected.size() == tok_list.size());
+    REQUIRE(std::equal(expected.begin(), expected.end(), tok_list.begin()));
 }
