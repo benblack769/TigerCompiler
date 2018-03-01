@@ -40,5 +40,6 @@ enum Tokens {
     AMPERSAND, // &
     VERTICAL, // |
     COLONEQ // :=
+  //  COMMENT // /* */
 
 };

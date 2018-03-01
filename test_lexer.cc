@@ -68,3 +68,11 @@ TEST_CASE("String testing", "[string testing]") {
         REQUIRE(tok_list.size() == 1);
     }
 }
+
+// tests for: integers, operators, comments
+
+
+TEST_CASE("Integer testing", "[integer testing]") {
+	SECTION("")
+
+}

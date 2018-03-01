@@ -1,4 +1,6 @@
 %option noyywrap
+%option stack
+%x comment
 %{
 #include "tokens.hh"
 #include "test_function.hh"
@@ -6,6 +8,14 @@
 %}
 
 %%
+	int depth = 0;
+
+"/*" BEGIN(comment);
+
+<comment>[^*\n]* 
+<comment>"*"+[^*/\n]*
+<comment>\n
+<comment>"*"+"/" BEGIN(initial);
 
 \n      { return EOL; }
 [0-9]+  { return INTEGER; }
