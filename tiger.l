@@ -12,12 +12,13 @@ str_escapes (\\(\"|\\))
 %%
 	int depth = 0;
 
-"/*" BEGIN(comment);
+"/*" { BEGIN(comment); depth++; } 
+<comment>[^\*/] /* eat anything that isn't a * or / */
+<comment>"/*" { depth++; }
+<comment>"*/" { if (depth == 1) { BEGIN(INITIAL); } else { depth--;} }
 
-<comment>[^*\n]* 
-<comment>"*"+[^*/\n]*
-<comment>\n
-<comment>"*"+"/" BEGIN(initial);
+
+
 
 "("   { return LPAREN; }
 ")"   { return RPAREN; }

@@ -125,7 +125,12 @@ TEST_CASE("String testing", "[string testing]") {
 // tests for: integers, operators, comments
 
 
-TEST_CASE("Integer testing", "[integer testing]") {
-	SECTION("")
+TEST_CASE("Test comments") {
+	auto tok_list = build_token_list("/* hello */");
+	REQUIRE(tok_list.size() == 0);
 
+	SECTION("nested comments") {
+		auto tok_list = build_token_list("/* hello /* hello2 */ */");
+		REQUIRE(tok_list.size() == 0);
+	}
 }
