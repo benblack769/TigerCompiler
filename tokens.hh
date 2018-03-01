@@ -1,27 +1,27 @@
 #pragma once
 
 // keywords [not able to be used as identifiers]:
-/* 
-‘array’, ‘if’, ‘then’, ‘else’, ‘while’, ‘for’, 
+/*
+‘array’, ‘if’, ‘then’, ‘else’, ‘while’, ‘for’,
 ‘to’, ‘do’,
 ‘let’, ‘in’, ‘end’,
-‘of’, ‘break’, 
+‘of’, ‘break’,
 ‘nil’, ‘function’, ‘var’,
-‘type’, ‘import’ and ‘primitive’ 
+‘type’, ‘import’ and ‘primitive’
 */
 enum Tokens {
     INTEGER = 257,
     STRING,
-    SEMICOLON,
     IDENTIFIER,
     KEYWORD, // see comment above
-    EOL, // \n\r , \r\n , \r , \n
+    //EOL, // \n\r , \r\n , \r , \n
     WHITESPACE, // space or tab
-    BAD_TOKEN, 
+    BAD_TOKEN, // catch all
     LPAREN, // (
     RPAREN, // )
     COMMA, // ,
     COLON, // :
+    SEMICOLON, // :
     LBRACK, // [
     RBRACK, // ]
     LBRACE, // {
@@ -39,6 +39,22 @@ enum Tokens {
     GREATEREQ, // >=
     AMPERSAND, // &
     VERTICAL, // |
-    COLONEQ // :=
-
+    COLONEQ, // :=
+    ARRAY_KW
+    ,IF_KW
+    ,THEN_KW
+    ,ELSE_KW
+    ,WHILE_KW
+    ,FOR_KW
+    ,TO_KW
+    ,DO_KW
+    ,LET_KW
+    ,IN_KW
+    ,END_KW
+    ,OF_KW
+    ,BREAK_KW
+    ,NIL_KW
+    ,FUNCTION_KW
+    ,VAR_KW
+    ,TYPE_KW
 };
