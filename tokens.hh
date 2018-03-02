@@ -39,11 +39,11 @@ enum Tokens {
     GREATEREQ, // >=
     AMPERSAND, // &
     VERTICAL, // |
-<<<<<<< HEAD
-    COLONEQ // :=
+//<<<<<<< HEAD
+  //  COLONEQ // :=
   //  COMMENT // /* */
 
-=======
+//=======
     COLONEQ, // :=
     ARRAY_KW
     ,IF_KW
@@ -62,5 +62,5 @@ enum Tokens {
     ,FUNCTION_KW
     ,VAR_KW
     ,TYPE_KW
->>>>>>> fc698916eb933db8b973d4edc03567856c500676
+//>>>>>>> fc698916eb933db8b973d4edc03567856c500676
 };
