@@ -15,7 +15,7 @@ str_escapes (\\(\"|\\))
 "/*" { BEGIN(comment); depth++; }
 <comment>[^\*/] /* eat anything that isn't a * or / */
 <comment>"/*" { depth++; }
-<comment>"*/" {  depth--; if (depth == 0) { BEGIN(INITIAL); } }
+<comment>"*/" { depth--; if (depth == 0) { BEGIN(INITIAL); } }
 
 
 

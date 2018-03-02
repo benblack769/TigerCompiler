@@ -133,8 +133,8 @@ TEST_CASE("Test comments") {
 		auto tok_list = build_token_list("/* hello /* hello2 */ */");
 		REQUIRE(tok_list.size() == 0);
 	}
-	SECTION("sequential comments") {
-		auto tok_list = build_token_list("/* hello *//* hello2 */");
-		REQUIRE(tok_list.size() == 0);
+	SECTION("sequential comments bug fixed") {
+		auto tok_list = build_token_list("/* hello *//* hello2 */identifier");
+		REQUIRE(tok_list.size() > 0);
 	}
 }
