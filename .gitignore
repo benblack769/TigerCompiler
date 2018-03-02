@@ -1,0 +1,3 @@
+*.o
+test_lexer
+lex.yy.c
