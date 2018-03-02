@@ -1,14 +1,6 @@
 #pragma once
 
-// keywords [not able to be used as identifiers]:
-/*
-‘array’, ‘if’, ‘then’, ‘else’, ‘while’, ‘for’,
-‘to’, ‘do’,
-‘let’, ‘in’, ‘end’,
-‘of’, ‘break’,
-‘nil’, ‘function’, ‘var’,
-‘type’, ‘import’ and ‘primitive’
-*/
+
 enum Tokens {
     INTEGER = 257,
     STRING,
@@ -39,12 +31,16 @@ enum Tokens {
     GREATEREQ, // >=
     AMPERSAND, // &
     VERTICAL, // |
-//<<<<<<< HEAD
-  //  COLONEQ // :=
-  //  COMMENT // /* */
-
-//=======
     COLONEQ, // :=
+    // keywords [not able to be used as identifiers]:
+    /*
+    ‘array’, ‘if’, ‘then’, ‘else’, ‘while’, ‘for’,
+    ‘to’, ‘do’,
+    ‘let’, ‘in’, ‘end’,
+    ‘of’, ‘break’,
+    ‘nil’, ‘function’, ‘var’,
+    ‘type’, ‘import’ and ‘primitive’
+    */
     ARRAY_KW
     ,IF_KW
     ,THEN_KW
@@ -62,5 +58,4 @@ enum Tokens {
     ,FUNCTION_KW
     ,VAR_KW
     ,TYPE_KW
-//>>>>>>> fc698916eb933db8b973d4edc03567856c500676
 };
