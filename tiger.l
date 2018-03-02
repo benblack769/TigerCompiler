@@ -5,17 +5,17 @@
 #include "tokens.hh"
 #include "test_function.hh"
 
+int depth = 0;
 %}
 
 str_escapes (\\(\"|\\))
 
 %%
-	int depth = 0;
 
-"/*" { BEGIN(comment); depth++; } 
+"/*" { BEGIN(comment); depth++; }
 <comment>[^\*/] /* eat anything that isn't a * or / */
 <comment>"/*" { depth++; }
-<comment>"*/" { if (depth == 1) { BEGIN(INITIAL); } else { depth--;} }
+<comment>"*/" {  depth--; if (depth == 0) { BEGIN(INITIAL); } }
 
 
 
