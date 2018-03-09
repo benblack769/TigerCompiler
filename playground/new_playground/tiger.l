@@ -11,6 +11,11 @@ str_escapes (\\(\"|\\))
 
 %%
 
+"/*" { BEGIN(comment); depth++; }
+<comment>[^\*/] /* eat anything that isn't a * or / */
+<comment>"/*" { depth++; }
+<comment>"*/" { depth--; if (depth == 0) { BEGIN(INITIAL); } }
+
 
 "("   { return LPAREN; }
 ")"   { return RPAREN; }
@@ -54,6 +59,7 @@ str_escapes (\\(\"|\\))
 "type"     { return TYPE_KW; }
 [ \t\n\r] {}
 [a-zA-Z][a-zA-Z0-9_]*  { yylval.str = yytext; return IDENTIFIER; }
+_main   { return IDENTIFIER; }
 \"([^\\]|{str_escapes})*\"  { yylval.str = yytext; return STRING; }
 [0-9]+  { yylval.int_value = atoll(yytext); return INTEGER;  }
 .       { printf("Unrecognized character %c\n", yytext[0]); return BAD_TOKEN; }
