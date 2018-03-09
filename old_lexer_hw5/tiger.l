@@ -2,8 +2,9 @@
 %option stack
 %x comment
 %{
-#include "ast.hh"
-#include "tiger.tab.h"
+#include "tokens.hh"
+#include "test_function.hh"
+
 int depth = 0;
 %}
 
@@ -15,6 +16,8 @@ str_escapes (\\(\"|\\))
 <comment>[^\*/] /* eat anything that isn't a * or / */
 <comment>"/*" { depth++; }
 <comment>"*/" { depth--; if (depth == 0) { BEGIN(INITIAL); } }
+
+
 
 
 "("   { return LPAREN; }
@@ -57,11 +60,20 @@ str_escapes (\\(\"|\\))
 "function"     { return FUNCTION_KW; }
 "var"     { return VAR_KW; }
 "type"     { return TYPE_KW; }
-[ \t\n\r] {}
-[a-zA-Z][a-zA-Z0-9_]*  { yylval.str = yytext; return IDENTIFIER; }
+[0-9]+  { return INTEGER;  }
+[ \t\n\r]+  { return WHITESPACE; }
+\"([^\\]|{str_escapes})*\"  { return STRING; }
+[a-zA-Z][a-zA-Z0-9_]*  { return IDENTIFIER; }
 _main   { return IDENTIFIER; }
-\"([^\\]|{str_escapes})*\"  { yylval.str = yytext; return STRING; }
-[0-9]+  { yylval.int_value = atoll(yytext); return INTEGER;  }
 .       { printf("Unrecognized character %c\n", yytext[0]); return BAD_TOKEN; }
 
 %%
+std::vector<Tokens> build_token_list(std::string input){
+    YY_BUFFER_STATE buf_state = yy_scan_string(input.c_str());
+    std::vector<Tokens> res;
+    while (int tok = yylex()) {
+        res.push_back(static_cast<Tokens>(tok));
+    }
+    yy_delete_buffer(buf_state);
+    return res;
+}
