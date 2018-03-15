@@ -76,14 +76,77 @@ int yyparse();
 
 %%
 start_expr:
-    expr { std::cout << *($1); }
+ expr { std::cout << *($1); }
+ | decs {}
+ ;
 
 expr: IDENTIFIER { $$ = new tiger::IdASTNode($1); }
+ | NIL_KW {}
  | STRING { $$ = new tiger::StringASTNode($1); }
  | INTEGER { $$ = new tiger::IntASTNode($1); }
  | '-' expr { $$ = new tiger::NegateASTNode($2); }
+ | expr op expr {}
+ | LPAREN exprseq RPAREN {}
+ | IDENTIFIER LPAREN exprlist RPAREN {}
+ | typeid LBRACE fieldlist RBRACE {}
+ | typeid LBRACE RBRACE { /* fieldlist is optional */ }
+ | typeid LBRACK expr RBRACK OF_KW expr {}
+ | IF_KW expr THEN_KW expr {}
+ | IF_KW expr THEN_KW expr ELSE_KW expr {}
+ | WHILE_KW expr DO_KW expr {}
+ | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr {}
+ | BREAK_KW { std::cout << "\tFound 'break' \n";}
+ | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ } 
+ | LET_KW declist IN_KW END_KW { /* withOUT optional exprseq */ }
+ | lvalue {}
+ | lvalue ':=' expr {}
  ;
 
+lvalue: IDENTIFIER {}
+ | lvalue '.' IDENTIFIER {}
+ | lvalue LBRACK expr RBRACK {}
+ ;
+
+fieldlist: IDENTIFIER '=' expr {}
+ | fieldlist ',' IDENTIFIER '=' expr {}
+ ;
+
+declist: declaration {}
+ | declist declaration {}
+ ;
+
+declaration: typedec {}
+ | vardec {}
+ | fundec {}
+ ;
+
+typedec: TYPE_KW typeid '=' type {}
+
+type: typeid {}
+ | LBRACE typefields RBRACE {}
+ | LBRACE RBRACE { /* typefields is optional */}
+
+exprseq: expr {}
+ | exprseq ';' expr {}
+ ;
+    
+exprlist: expr {}
+ | exprlist ',' expr {}
+ ;
+
+op: '+' {}
+ | '-' {}
+ | '*' {}
+ | '/' {}
+ | '=' {}
+ | '<>' {}
+ | '>' {}
+ | '<' {}
+ | '>=' {}
+ | '<=' {}
+ | '&' {}
+ | '|' {}
+ ;
 lvalue: IDENTIFIER { $$ = new tiger::IdASTNode($1); }
     | lvalue PERIOD IDENTIFIER { $$ = new tiger::IdASTNode($1); }
 
