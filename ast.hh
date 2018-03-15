@@ -1,14 +1,4 @@
 #pragma once
-/* Companion source code for "flex & bison", published by O'Reilly
- * Media, ISBN 978-0-596-15597-1
- * Copyright (c) 2009, Taughannock Networks. All rights reserved.
- * See the README file for license conditions and contact info.
- * $Header: /home/johnl/flnb/code/RCS/fb3-1.h,v 2.1 2009/11/08 02:53:18 johnl Exp $
- */
-/*
- * Declarations for a calculator fb3-1
- */
-
 #include <string>
 #include <cstdlib>
 #include <ostream>
@@ -22,7 +12,6 @@ namespace tiger {
 // Base AST node class, to define the hierarchy.
 class ASTNode {
  public:
-  using value_t = double;  // All values will be floating-point
   using ASTptr = const ASTNode*; // Can't use smart ptr in union :(
 
   ASTNode() = default;
@@ -41,7 +30,7 @@ inline std::ostream & operator << (std::ostream & os, const ASTNode & node){
 
 class StringASTNode: public ASTNode{
 public:
-    StringASTNode(char * in_str):
+    StringASTNode(const char * in_str):
         mystring(in_str){}
 
     virtual ~StringASTNode() = default;
