@@ -7,7 +7,6 @@
 void yyerror(char *s, ...);
 
 namespace tiger {
-enum class ASTType{ ID, STRING, INTEGER, NEGATE, BINARY_OP };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Base AST node class, to define the hierarchy.
@@ -31,7 +30,7 @@ inline std::ostream & operator << (std::ostream & os, const ASTNode & node){
 
 class StringASTNode: public ASTNode{
 public:
-    StringASTNode(char * in_str):
+    StringASTNode(const char * in_str):
         mystring(in_str){}
 
     virtual ~StringASTNode() = default;

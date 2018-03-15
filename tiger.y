@@ -7,6 +7,8 @@
 int yylex();
 int yyparse();
 
+tiger::ASTNode * rootnode;
+
 %}
 
 %union {
@@ -66,10 +68,9 @@ int yyparse();
 %type <node> expr lvalue
 
 
-
 %%
 start_expr:
-    expr { std::cout << *($1); }
+    expr { rootnode = const_cast <tiger::ASTNode*>($1);std::cout << *($1); }
 
 expr: IDENTIFIER { $$ = new tiger::IdASTNode($1); }
  | STRING { $$ = new tiger::StringASTNode($1); }
