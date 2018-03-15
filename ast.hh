@@ -7,6 +7,7 @@
 void yyerror(char *s, ...);
 
 namespace tiger {
+enum class ASTType{ ID, STRING, INTEGER, NEGATE, BINARY_OP };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Base AST node class, to define the hierarchy.
