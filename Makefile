@@ -13,7 +13,7 @@ lex.yy.c: tiger.l
 	flex $^
 
 tiger.tab.c tiger.tab.h: tiger.y
-	bison -d $^
+	bison -d -v $^
 
 tiger.tab.o: tiger.tab.c
 	$(CXX) $(CXXFLAGS)  -Wno-write-strings -Wno-deprecated -c -o $@ $^
