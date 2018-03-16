@@ -95,11 +95,6 @@ expr: IDENTIFIER { $$ = new tiger::IdASTNode($1); }
  | lvalue ':=' expr {}
  ;
 
-lvalue: IDENTIFIER {}
- | lvalue '.' IDENTIFIER {}
- | lvalue LBRACK expr RBRACK {}
- ;
-
 fieldlist: IDENTIFIER '=' expr {}
  | fieldlist ',' IDENTIFIER '=' expr {}
  ;
@@ -114,10 +109,19 @@ declaration: typedec {}
  ;
 
 typedec: TYPE_KW typeid '=' type {}
+ ;
 
 type: typeid {}
  | LBRACE typefields RBRACE {}
  | LBRACE RBRACE { /* typefields is optional */}
+ | ARRAY_KW OF_KW typeid {}
+ ;
+
+typefields: typefield {}
+ | typefields ',' typefield {}
+ ;
+typefield: IDENTIFIER ':' typeid {}
+ ;
 
 exprseq: expr {}
  | exprseq ';' expr {}
@@ -140,7 +144,8 @@ op: '+' {}
  | '&' {}
  | '|' {}
  ;
+
 lvalue: IDENTIFIER { $$ = new tiger::IdASTNode($1); }
     | lvalue PERIOD IDENTIFIER { $$ = new tiger::IdASTNode($1); }
-
+    ;
 %%
