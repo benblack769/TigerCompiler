@@ -78,55 +78,68 @@ tiger::ASTNode * rootnode;
 
 
 %%
-start_expr: expr { rootnode = const_cast <tiger::ASTNode*>($1);std::cout << *($1); }
- | decs {}
+start_expr: expr {  }
  ;
 
-expr: IDENTIFIER { $$ = new tiger::IdASTNode($1); }
- | NIL_KW {}
- | STRING { $$ = new tiger::StringASTNode($1); }
- | INTEGER { $$ = new tiger::IntASTNode($1); }
- | '-' expr { $$ = new tiger::NegateASTNode($2); }
- | expr op expr {}
- | LPAREN exprseq RPAREN {}
- | IDENTIFIER LPAREN exprlist RPAREN {}
- | typeid LBRACE fieldlist RBRACE {}
- | typeid LBRACE RBRACE { /* fieldlist is optional */ }
- | typeid LBRACK expr RBRACK OF_KW expr {}
- | IF_KW expr THEN_KW expr {}
- | IF_KW expr THEN_KW expr ELSE_KW expr {}
- | WHILE_KW expr DO_KW expr {}
- | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr {}
+expr: IDENTIFIER {  }
+ | NIL_KW { }
+ | STRING { }
+ | INTEGER {  }
+ | '-' expr {  }
+ | expr op expr { std::cout << "\texpr -> expr op expr\n"; }
+ | LPAREN exprseq RPAREN { std::cout << "\texpr -> LPAREN exprseq RPAREN\n"; }
+ | IDENTIFIER LPAREN exprlist RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN exprlist RPAREN\n"; }
+ | typeid LBRACE fieldlist RBRACE { std::cout << "\ttypeid lbrace fieldlist rbrace found\n"; }
+ | typeid LBRACE RBRACE { /* fieldlist is optional */ std::cout << "\ttypeid lbrace rbrace found\n"; }
+ | typeid LBRACK expr RBRACK OF_KW expr { std::cout << "\ttypeid lbrack expr rbrack of expr found\n"; }
+ | IF_KW expr THEN_KW expr { std::cout << "\tif expr then expr found\n"; }
+ | IF_KW expr THEN_KW expr ELSE_KW expr { std::cout << "\tif expr then expr else expr found\n"; }
+ | WHILE_KW expr DO_KW expr { std::cout << "\twhile expr do expr\n"; }
+ | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr { std::cout << "\tfor identifier coloneq expr to expr do expr\n"; }
  | BREAK_KW { std::cout << "\tFound 'break' \n";}
- | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ }
- | LET_KW declist IN_KW END_KW { /* withOUT optional exprseq */ }
- | lvalue {}
- | lvalue ':=' expr {}
+ | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ std::cout << "\tlet declist in exprseq end found\n"; }
+ | LET_KW declist IN_KW END_KW { /* withOUT optional exprseq */ std::cout << "\tlet declist in end found\n"; }
+ | lvalue { std::cout << "\tlvalue found\n"; }
+ | lvalue COLONEQ expr { std::cout << "\tlvalue := expr found\n"; }
  ;
 
-lvalue: IDENTIFIER {}
- | lvalue '.' IDENTIFIER {}
- | lvalue LBRACK expr RBRACK {}
+fieldlist: IDENTIFIER '=' expr { std::cout << "\tidentifier = expr found\n"; }
+ | fieldlist ',' IDENTIFIER '=' expr { std::cout << "\tfieldlist , identifier = expr\n"; }
  ;
 
-fieldlist: IDENTIFIER '=' expr {}
- | fieldlist ',' IDENTIFIER '=' expr {}
+declist: declaration { std::cout << "\tdeclaration found\n"; }
+ | declist declaration { std::cout << "\tdeclist declaration found\n"; }
  ;
 
-declist: declaration {}
- | declist declaration {}
+declaration: typedec { std::cout << "\ttypedec found\n"; }
+ | vardec { std::cout << "\tvardec found\n"; }
+ | fundec { std::cout << "\tfundec found\n"; }
  ;
 
-declaration: typedec {}
- | vardec {}
- | fundec {}
+vardec: VAR_KW IDENTIFIER COLONEQ expr { std::cout << "\tvar identifier := expr found\n"; }
+ | VAR_KW IDENTIFIER COLON typeid COLONEQ expr { std::cout << "\tvar identifier : typeid := expr found\n"; }
  ;
 
-typedec: TYPE_KW typeid '=' type {}
+fundec: FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN EQUAL expr { std::cout << "\tfunction identifier ( typefields ) = expr found\n"; }
+ | FUNCTION_KW IDENTIFIER LPAREN RPAREN EQUAL expr { std::cout << "\tfunction identifier () = expr found\n"; }
+ | FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN COLON typeid EQUAL expr { std::cout << "\tfunction identifier ( typefields ) : typeid = expr found\n"; }
+ | FUNCTION_KW IDENTIFIER LPAREN RPAREN COLON typeid EQUAL expr { std::cout << "\tfunction identifier () : typeid = expr found\n"; }
+ ;
 
-type: typeid {}
- | LBRACE typefields RBRACE {}
- | LBRACE RBRACE { /* typefields is optional */}
+typedec: TYPE_KW typeid '=' type { std::cout << "\ttype typeid = type found \n"; }
+ ;
+
+type: typeid { std::cout << "\ttypeid found\n"; }
+ | LBRACE typefields RBRACE { std::cout << "\tlbrace typefields rbrace found\n"; }
+ | LBRACE RBRACE { /* typefields is optional */ std::cout << "\tlbrace rbrace found\n"; }
+ | ARRAY_KW OF_KW typeid { std::cout << "\tarray of typeid found\n"; }
+ ;
+
+typefields: typefield { std::cout << "typefield found\n"; }
+ | typefields ',' typefield { std::cout << "typefields , typefield found\n"; }
+ ;
+typefield: IDENTIFIER ':' typeid { std::cout << "\tidentifier found\n"; }
+ ;
 
 exprseq: expr {}
  | exprseq ';' expr {}
@@ -136,20 +149,23 @@ exprlist: expr {}
  | exprlist ',' expr {}
  ;
 
+typeid: IDENTIFIER { std::cout << "\ttypeid found\n"; }
+
 op: '+' {}
  | '-' {}
  | '*' {}
  | '/' {}
  | '=' {}
- | '<>' {}
+ | LRCOMPARISON {}
  | '>' {}
  | '<' {}
- | '>=' {}
- | '<=' {}
+ | GREATEREQ {}
+ | LESSEQ {}
  | '&' {}
  | '|' {}
  ;
-lvalue: IDENTIFIER { $$ = new tiger::IdASTNode($1); }
-    | lvalue PERIOD IDENTIFIER { $$ = new tiger::IdASTNode($1); }
 
+lvalue: IDENTIFIER {  }
+    | lvalue PERIOD IDENTIFIER {  }
+    ;
 %%
