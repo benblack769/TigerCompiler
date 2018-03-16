@@ -12,7 +12,16 @@ tiger::ASTNode * rootnode;
 %}
 
 %union {
-  tiger::ASTNode::ASTptr node;
+  tiger::ExprNode* expr;
+  tiger::ExprListNode* expr_list;
+  tiger::ExprSequenceNode* expr_seq;
+  tiger::FieldListNode* field_list;
+  tiger::LvalueNode* lvalue;
+  tiger::DeclarationListNode* decl_list;
+  tiger::DeclarationNode* decl_node;
+  tiger::TypeDeclaration* type_decl;
+  tiger::TypeFeilds* type_field;
+  tiger::TypeID* type_id;
   int64_t int_value;
   char * str;
 }
@@ -89,7 +98,7 @@ expr: IDENTIFIER { $$ = new tiger::IdASTNode($1); }
  | WHILE_KW expr DO_KW expr {}
  | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr {}
  | BREAK_KW { std::cout << "\tFound 'break' \n";}
- | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ } 
+ | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ }
  | LET_KW declist IN_KW END_KW { /* withOUT optional exprseq */ }
  | lvalue {}
  | lvalue ':=' expr {}
@@ -122,7 +131,7 @@ type: typeid {}
 exprseq: expr {}
  | exprseq ';' expr {}
  ;
-    
+
 exprlist: expr {}
  | exprlist ',' expr {}
  ;

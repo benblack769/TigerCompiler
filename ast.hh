@@ -16,17 +16,99 @@ class ASTNode {
 
   ASTNode() = default;
   virtual ~ASTNode() = default;
-  virtual void print(std::ostream & os) const = 0; // For void printing purposes
+  virtual void print(std::ostream & os) const = 0;
 };
-
-//} //namespace tiger
 
 inline std::ostream & operator << (std::ostream & os, const ASTNode & node){
     node.print(os);
     return os;
 }
 
-//namespace tiger {
+class ExprNode: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
+
+class ExprListNode: public ASTNode {
+ public:
+  ASTNode();
+  virtual ~ASTNode(){
+      for(ExprNode * node : list){
+          delete node;
+      }
+  }
+  virtual append_to(ExprNode * expr){
+      list.push_back(expr);
+  }
+  virtual void print(std::ostream & os){
+      for(size_t i = 0; i < list.size(); i++){
+          os << list[i];
+          if(i != list.size()-1){
+              os << ";\n";
+          }
+      }
+  }
+private:
+    vector<ExprNode *> list;
+};
+
+class ExprSequenceNode: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
+
+class FieldListNode: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
+
+class LvalueNode: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
+
+class DeclarationListNode: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
+
+class DeclarationNode: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
+
+class TypeDeclaration: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
+
+class TypeFeilds: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
+
+class TypeID: public ASTNode {
+ public:
+  ASTNode() = default;
+  virtual ~ASTNode() = default;
+  virtual void print(std::ostream & os) const = 0;
+};
 
 class StringASTNode: public ASTNode{
 public:

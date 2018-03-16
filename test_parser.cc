@@ -19,10 +19,12 @@ ASTNode * get_ast_node(std::string input){
     yy_delete_buffer(buf_state);
     return rootnode;
 }
+
 template<class NodeType>
 bool node_is_type(const ASTNode * node){
     return (dynamic_cast<NodeType*>(const_cast<ASTNode *>(node))) != nullptr;
 }
+
 TEST_CASE("Test node type checking", "[basic_case]") {
     REQUIRE(node_is_type<StringASTNode>(new StringASTNode("hithere")));
     REQUIRE(!node_is_type<StringASTNode>(new IntASTNode(12123)));
