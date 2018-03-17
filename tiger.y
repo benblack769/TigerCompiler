@@ -7,15 +7,37 @@
 int yylex();
 int yyparse();
 
+using namespace tiger;
 tiger::ASTNode * rootnode;
 
 %}
 
 %union {
-  tiger::ASTNode::ASTptr node;
+  tiger::ExprNode* expr;
+  tiger::ExprListNode* expr_list;
+  tiger::ExprSequenceNode* expr_seq;
+  tiger::FieldListNode* field_list;
+  tiger::LvalueNode* lvalue;
+  tiger::DeclarationListNode* decl_list;
+  tiger::DeclarationNode* decl_node;
+  tiger::TypeDeclarationNode* type_decl;
+  tiger::TypeFeildsNode* type_field;
+  tiger::TypeIDNode* type_id;
   int64_t int_value;
   char * str;
+  void * _unimplemented;
+  tiger::exprs::BinaryOp bin_op;
 }
+/* declare types */
+%type <expr> expr
+%type <lvalue> lvalue
+%type <field_list> fieldlist
+%type <decl_list> declist
+%type <decl_node> declaration vardec fundec typedec
+%type <_unimplemented> type typefields typefield exprseq exprlist typeid
+
+%type <bin_op> op
+
 
 /* declare tokens */
 %token BAD_TOKEN
@@ -73,19 +95,17 @@ tiger::ASTNode * rootnode;
 %left ASTERISK FSLASH
 %nonassoc UMINUS
 
-%type <node> expr lvalue
-
 
 %%
-start_expr: expr {  }
+start_expr: expr { rootnode = $1; }
  ;
 
 expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPAREN\n"; }
- | NIL_KW { std::cout << "\texpr -> NIL_KW\n"; }
- | STRING { std::cout << "\texpr -> STRING\n"; }
- | INTEGER { std::cout << "\texpr -> INTEGER\n"; }
- | '-' expr %prec UMINUS{ std::cout << "\texpr -> '-' expr\n"; }
- | expr op expr { std::cout << "\texpr -> expr op expr\n"; }
+ | NIL_KW { $$ = new exprs::NilNode(); }
+ | STRING { $$ = new exprs::StringNode($1); }
+ | INTEGER { $$ = new exprs::IntNode($1); }
+ | '-' expr %prec UMINUS{ $$ = new exprs::NegateNode($2); }
+ | expr op expr { std::cout << "\texpr -> expr op expr\n"; $$ = new exprs::BinaryNode($1,$3,$2); }
  | LPAREN exprseq RPAREN { std::cout << "\texpr -> LPAREN exprseq RPAREN\n"; }
  | IDENTIFIER LPAREN exprlist RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN exprlist RPAREN\n"; }
  | typeid LBRACE fieldlist RBRACE { std::cout << "\texpr -> typeid LBRACE fieldlist RBRACE\n"; }
@@ -96,9 +116,9 @@ expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPARE
  | WHILE_KW expr DO_KW expr { std::cout << "\texpr -> WHILE_KW expr DO_KW expr\n"; }
  | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr { std::cout << "\texpr -> FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr\n"; }
  | BREAK_KW { std::cout << "\texpr -> BREAK_KW\n";}
- | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ std::cout << "\texpr -> LET_KW declist IN_KW exprseq END_KW\n"; } 
+ | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ std::cout << "\texpr -> LET_KW declist IN_KW exprseq END_KW\n"; }
  | LET_KW declist IN_KW END_KW { /* withOUT optional exprseq */ std::cout << "\texpr -> LET_KW declist IN_KW END_KW\n"; }
- | lvalue { std::cout << "\texpr -> lvalue\n"; }
+ | lvalue { std::cout << "\texpr -> lvalue\n"; $$ = new exprs::LvalNode($1); }
  | lvalue COLONEQ expr { std::cout << "\texpr -> lvalue COLONEQ expr\n"; }
  ;
 
@@ -120,7 +140,7 @@ vardec: VAR_KW IDENTIFIER COLONEQ expr { std::cout << "\tvardec -> VAR_KW IDENTI
  ;
 
 fundec: FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN EQUAL expr { std::cout << "\tfundec -> FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN EQUAL expr\n"; }
- | FUNCTION_KW IDENTIFIER LPAREN RPAREN EQUAL expr { std::cout << "\tfindec -> FUNCTION_KW IDENTIFIER LPAREN RPAREN EQUAL expr\n"; } 
+ | FUNCTION_KW IDENTIFIER LPAREN RPAREN EQUAL expr { std::cout << "\tfindec -> FUNCTION_KW IDENTIFIER LPAREN RPAREN EQUAL expr\n"; }
  | FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN COLON typeid EQUAL expr { std::cout << "\tfundec -> FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN COLON typeid EQUAL expr\n"; }
  | FUNCTION_KW IDENTIFIER LPAREN RPAREN COLON typeid EQUAL expr { std::cout << "\tfundec -> FUNCTION_KW IDENTIFIER LPAREN RPAREN COLON typeid EQUAL expr\n"; }
  ;
@@ -143,28 +163,28 @@ typefield: IDENTIFIER COLON typeid { std::cout << "\ttypefield -> IDENTIFIER\n";
 exprseq: expr { std::cout << "\texprseq -> expr\n"; }
  | exprseq SEMICOLON expr { std::cout << "\texprseq ';' expr\n"; }
  ;
-    
+
 exprlist: expr { std::cout << "\texprlist -> expr\n"; }
  | exprlist COMMA expr { std::cout << "\texprlist -> exprlist ',' expr\n"; }
  ;
 
 typeid: IDENTIFIER { std::cout << "\ttypeid -> IDENTIFIER\n"; }
 
-op: PLUS { std::cout << "\top -> '+'\n"; }
- | MINUS { std::cout << "\top -> '-'\n"; }
- | ASTERISK { std::cout << "\top -> '*'\n"; }
- | FSLASH { std::cout << "\top -> '/'\n"; }
- | EQUAL { std::cout << "\top -> '='\n"; }
- | LRCOMPARISON { std::cout << "\top -> LRCOMPARISON\n"; }
- | GREATERTHAN { std::cout << "\top -> '>'\n";}
- | LESSTHAN { std::cout << "\top -> '<'\n"; }
- | GREATEREQ { std::cout << "\top -> GREATEREQ\n"; } 
- | LESSEQ { std::cout << "\top -> LESSEQ\n"; }
- | AMPERSAND { std::cout << "\top -> '&'\n"; }
- | VERTICAL { std::cout << "\top -> '|'\n"; }
+op: PLUS { std::cout << "\top -> '+'\n"; $$ = exprs::BinaryOp::ADD; }
+ | MINUS { std::cout << "\top -> '-'\n"; $$ = exprs::BinaryOp::SUB; }
+ | ASTERISK { std::cout << "\top -> '*'\n"; $$ = exprs::BinaryOp::MUL; }
+ | FSLASH { std::cout << "\top -> '/'\n"; $$ = exprs::BinaryOp::DIV; }
+ | EQUAL { std::cout << "\top -> '='\n"; $$ = exprs::BinaryOp::EQUAL; }
+ | LRCOMPARISON { std::cout << "\top -> LRCOMPARISON\n"; $$ = exprs::BinaryOp::LESSGREATER; }
+ | GREATERTHAN { std::cout << "\top -> '>'\n"; $$ = exprs::BinaryOp::GREATER; }
+ | GREATEREQ { std::cout << "\top -> GREATEREQ\n"; $$ = exprs::BinaryOp::GREATEREQ; }
+ | LESSTHAN { std::cout << "\top -> '<'\n"; $$ = exprs::BinaryOp::LESS; }
+ | LESSEQ { std::cout << "\top -> LESSEQ\n"; $$ = exprs::BinaryOp::LESSEQ; }
+ | AMPERSAND { std::cout << "\top -> '&'\n"; $$ = exprs::BinaryOp::AND; }
+ | VERTICAL { std::cout << "\top -> '|'\n"; $$ = exprs::BinaryOp::OR; }
  ;
 
-lvalue: IDENTIFIER { std::cout << "\tlvalue -> IDENTIFIER\n"; }
+lvalue: IDENTIFIER { std::cout << "\tlvalue -> IDENTIFIER\n"; $$ = new lvals::IdLval($1); }
     | lvalue PERIOD IDENTIFIER { std::cout << "\tlvalue -> PERIOD IDENTIFIER\n"; }
     ;
 %%

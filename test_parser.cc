@@ -2,6 +2,7 @@
 #include "ast.hh"
 #include "tiger.tab.h"
 #include <algorithm>
+#include <iostream>
 using namespace std;
 
 using namespace tiger;
@@ -19,17 +20,24 @@ ASTNode * get_ast_node(std::string input){
     yy_delete_buffer(buf_state);
     return rootnode;
 }
+
 template<class NodeType>
 bool node_is_type(const ASTNode * node){
     return (dynamic_cast<NodeType*>(const_cast<ASTNode *>(node))) != nullptr;
 }
+
 TEST_CASE("Test node type checking", "[basic_case]") {
-    REQUIRE(node_is_type<StringASTNode>(new StringASTNode("hithere")));
-    REQUIRE(!node_is_type<StringASTNode>(new IntASTNode(12123)));
+    using namespace exprs;
+    REQUIRE(node_is_type<StringNode>(new StringNode("hithere")));
+    REQUIRE(!node_is_type<StringNode>(new IntNode(12123)));
 }
 
 TEST_CASE("Basic case", "[basic_case]") {
     //get_ast_node("x + y");
+    get_ast_node("x := y");
+    cout << *get_ast_node("x + y * z") << "\n";
+    cout << *get_ast_node("x * y + z") << "\n";
+    get_ast_node("x := y");
     get_ast_node("x := y");
     get_ast_node("function_call(arg1,arg2)");
     get_ast_node("if x then y else z");
@@ -52,6 +60,7 @@ TEST_CASE("Large cases", "[basic_case]") {
 }
 
 TEST_CASE("Operator testing") {
+
 	printf("==== Operator Test 1====\n");
 	get_ast_node("x + y + z");
 	printf("==== Operator Test 2 ====\n");
@@ -59,3 +68,4 @@ TEST_CASE("Operator testing") {
 	printf("==== Operator Test 3 ====\n");
 	get_ast_node("-x");
 }
+

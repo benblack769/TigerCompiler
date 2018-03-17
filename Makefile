@@ -15,20 +15,20 @@ lex.yy.c: tiger.l
 tiger.tab.c tiger.tab.h: tiger.y
 	bison -d -v $^
 
-tiger.tab.o: tiger.tab.c
-	$(CXX) $(CXXFLAGS)  -Wno-write-strings -Wno-deprecated -c -o $@ $^
+tiger.tab.o: tiger.tab.c ast.hh
+	$(CXX) $(CXXFLAGS)  -Wno-write-strings -Wno-deprecated -c -o $@  tiger.tab.c
 
 lex.yy.o: lex.yy.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
-ast.o: ast.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $^
+ast.o: ast.cpp ast.hh
+	$(CXX) $(CXXFLAGS) -c -o $@  ast.cpp
 
 catch.o: catch.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ $^
 
-test_parser.o: test_parser.cc
-	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ $^
+test_parser.o: test_parser.cc ast.hh
+	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ test_parser.cc 
 
 test_parser: tiger.tab.o lex.yy.o ast.o catch.o test_parser.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^

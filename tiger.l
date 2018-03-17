@@ -58,7 +58,7 @@ str_escapes (\\(\"|\\))
 "var"     { return VAR_KW; }
 "type"     { return TYPE_KW; }
 [ \t\n\r] {}
-[a-zA-Z][a-zA-Z0-9_]*  { yylval.str = yytext; return IDENTIFIER; }
+[a-zA-Z][a-zA-Z0-9_]*  { yylval.str = strdup(yytext); return IDENTIFIER; }
 _main   { return IDENTIFIER; }
 \"([^\\]|{str_escapes})*\"  { yylval.str = yytext; return STRING; }
 [0-9]+  { yylval.int_value = atoll(yytext); return INTEGER;  }
