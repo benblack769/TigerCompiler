@@ -92,11 +92,14 @@ tiger::ASTNode * rootnode;
     VERTICAL
     COLONEQ
 
+%nonassoc THEN_KW
+%nonassoc ELSE_KW
 %left VERTICAL
 %left AMPERSAND
 %nonassoc LESSEQ GREATEREQ EQUAL LRCOMPARISON LESSTHAN GREATERTHAN
 %left PLUS MINUS
 %left ASTERISK FSLASH
+%nonassoc UMINUS
 
 
 %%
@@ -107,7 +110,7 @@ expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPARE
  | NIL_KW { $$ = new exprs::NilNode(); }
  | STRING { $$ = new exprs::StringNode($1); }
  | INTEGER { $$ = new exprs::IntNode($1); }
- | '-' expr { $$ = new exprs::NegateNode($2); }
+ | '-' expr %prec UMINUS{ $$ = new exprs::NegateNode($2); }
  | expr op expr { std::cout << "\texpr -> expr op expr\n"; $$ = new exprs::BinaryNode($1,$3,$2); }
  | LPAREN exprseq RPAREN { std::cout << "\texpr -> LPAREN exprseq RPAREN\n"; $$ = new exprs::ExprSequenceEval($2);  }
  | IDENTIFIER LPAREN exprlist RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN exprlist RPAREN\n"; $$ = new exprs::FunctionCall($1,$3); }
