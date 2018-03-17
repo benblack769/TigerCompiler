@@ -108,8 +108,8 @@ expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPARE
  | typeid LBRACE fieldlist RBRACE { std::cout << "\texpr -> typeid LBRACE fieldlist RBRACE\n"; }
  | typeid LBRACE RBRACE { /* fieldlist is optional */ std::cout << "\texpr -> typeid LBRACE RBRACE\n"; }
  | typeid LBRACK expr RBRACK OF_KW expr { std::cout << "\texpr -> typeid LBRACK expr RBRACK OF_KW expr\n"; }
- | IF_KW expr THEN_KW expr { std::cout << "\texpr -> IF_KW expr THEN_KW expr \n"; }
- | IF_KW expr THEN_KW expr ELSE_KW expr { std::cout << "\texpr -> IF_KW expr THEN_KW expr ELSE_KW expr\n"; }
+ | IF_KW expr THEN_KW expr { std::cout << "\texpr -> IF_KW expr THEN_KW expr \n"; $$ = new exprs::IfThen($2, $4); }
+ | IF_KW expr THEN_KW expr ELSE_KW expr { std::cout << "\texpr -> IF_KW expr THEN_KW expr ELSE_KW expr\n"; $$ = new exprs::IfThenElse($2, $4, $6); }
  | WHILE_KW expr DO_KW expr { std::cout << "\texpr -> WHILE_KW expr DO_KW expr\n"; }
  | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr { std::cout << "\texpr -> FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr\n"; }
  | BREAK_KW { std::cout << "\texpr -> BREAK_KW\n";}
