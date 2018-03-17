@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <cassert>
+#include <iostream>
 
 /* interface to the lexer */
 void yyerror(char *s, ...);
@@ -168,19 +169,17 @@ namespace exprs{
         int64_t my_int;
     };
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // A node type that evaluates to a numeric constant:
-    class IdNode : public ExprNode {
+    class LvalNode : public ExprNode {
      public:
-      IdNode(char * in_id):
-         my_id(in_id){}
-      virtual ~IdNode() = default;
+      LvalNode(LvalueNode * in_node):
+         lval(in_node){}
+      virtual ~LvalNode() = default;
 
       virtual void print(std::ostream & os) const override{
-          os << my_id;
+          os << *lval;
       }
      private:
-      std::string my_id;
+      LvalueNode * lval;
     };
 
     class NegateNode : public ExprNode {
@@ -199,11 +198,12 @@ namespace exprs{
     };
 
     enum class BinaryOp { ADD, SUB, MUL, DIV, GREATEREQ, GREATER, LESS, LESSEQ, EQUAL, LESSGREATER, AND, OR };
-    inline std::string str_rep(BinaryOp op){
+    inline const char * str_rep(BinaryOp op){
         switch(op){
             case BinaryOp::ADD: return "+";
             case BinaryOp::SUB: return "-";
             case BinaryOp::MUL: return "*";
+            case BinaryOp::DIV: return "/";
             case BinaryOp::GREATEREQ: return ">=";
             case BinaryOp::GREATER: return ">";
             case BinaryOp::LESS: return "<";
@@ -404,5 +404,22 @@ namespace exprs{
     };
 }
 
+namespace lvals{
+    class IdLval : public LvalueNode {
+     public:
+      IdLval(const char * in_id):
+         my_id(in_id){}
+      virtual ~IdLval(){
+          delete my_id;
+      }
+
+      virtual void print(std::ostream & os) const override{
+          os << my_id;
+      }
+     private:
+      const char * my_id;
+    };
+
+}
 
 } // namespace

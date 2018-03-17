@@ -2,6 +2,7 @@
 #include "ast.hh"
 #include "tiger.tab.h"
 #include <algorithm>
+#include <iostream>
 using namespace std;
 
 using namespace tiger;
@@ -33,6 +34,10 @@ TEST_CASE("Test node type checking", "[basic_case]") {
 
 TEST_CASE("Basic case", "[basic_case]") {
     //get_ast_node("x + y");
+    get_ast_node("x := y");
+    cout << *get_ast_node("x + y * z") << "\n";
+    cout << *get_ast_node("x * y + z") << "\n";
+    get_ast_node("x := y");
     get_ast_node("x := y");
     get_ast_node("function_call(arg1,arg2)");
     get_ast_node("if x then y else z");
