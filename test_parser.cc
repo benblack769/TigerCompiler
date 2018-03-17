@@ -52,5 +52,10 @@ TEST_CASE("Large cases", "[basic_case]") {
 }
 
 TEST_CASE("Operator testing") {
-	string str = ""
+	printf("==== Operator Test 1====\n");
+	get_ast_node("x + y + z");
+	printf("==== Operator Test 2 ====\n");
+	get_ast_node("x * y + z");
+	printf("==== Operator Test 3 ====\n");
+	get_ast_node("-x");
 }

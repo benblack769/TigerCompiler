@@ -64,11 +64,14 @@ tiger::ASTNode * rootnode;
     VERTICAL
     COLONEQ
 
+%nonassoc THEN_KW
+%nonassoc ELSE_KW
 %left VERTICAL
 %left AMPERSAND
 %nonassoc LESSEQ GREATEREQ EQUAL LRCOMPARISON LESSTHAN GREATERTHAN
 %left PLUS MINUS
 %left ASTERISK FSLASH
+%nonassoc UMINUS
 
 %type <node> expr lvalue
 
@@ -78,10 +81,10 @@ start_expr: expr {  }
  ;
 
 expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPAREN\n"; }
- | NIL_KW { }
- | STRING { }
- | INTEGER {  }
- | '-' expr {  }
+ | NIL_KW { std::cout << "\texpr -> NIL_KW\n"; }
+ | STRING { std::cout << "\texpr -> STRING\n"; }
+ | INTEGER { std::cout << "\texpr -> INTEGER\n"; }
+ | '-' expr %prec UMINUS{ std::cout << "\texpr -> '-' expr\n"; }
  | expr op expr { std::cout << "\texpr -> expr op expr\n"; }
  | LPAREN exprseq RPAREN { std::cout << "\texpr -> LPAREN exprseq RPAREN\n"; }
  | IDENTIFIER LPAREN exprlist RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN exprlist RPAREN\n"; }
@@ -142,7 +145,7 @@ exprseq: expr { std::cout << "\texprseq -> expr\n"; }
  ;
     
 exprlist: expr { std::cout << "\texprlist -> expr\n"; }
- | exprlist COMMA expr { std::cout << "exprlist -> exprlist ',' expr\n"; }
+ | exprlist COMMA expr { std::cout << "\texprlist -> exprlist ',' expr\n"; }
  ;
 
 typeid: IDENTIFIER { std::cout << "\ttypeid -> IDENTIFIER\n"; }
