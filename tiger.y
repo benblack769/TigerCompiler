@@ -64,6 +64,11 @@ tiger::ASTNode * rootnode;
     VERTICAL
     COLONEQ
 
+%left VERTICAL
+%left AMPERSAND
+%nonassoc LESSEQ GREATEREQ EQUAL LRCOMPARISON LESSTHAN GREATERTHAN
+%left PLUS MINUS
+%left ASTERISK FSLASH
 
 %type <node> expr lvalue
 
@@ -117,7 +122,7 @@ fundec: FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN EQUAL expr { std::cout <
  | FUNCTION_KW IDENTIFIER LPAREN RPAREN COLON typeid EQUAL expr { std::cout << "\tfundec -> FUNCTION_KW IDENTIFIER LPAREN RPAREN COLON typeid EQUAL expr\n"; }
  ;
 
-typedec: TYPE_KW typeid '=' type { std::cout << "\typedec -> TYPE_KW typeid '=' type\n"; }
+typedec: TYPE_KW typeid EQUAL type { std::cout << "\typedec -> TYPE_KW typeid '=' type\n"; }
  ;
 
 type: typeid { std::cout << "\ttype -> typeid\n"; }
@@ -129,31 +134,31 @@ type: typeid { std::cout << "\ttype -> typeid\n"; }
 typefields: typefield { std::cout << "\ttypefields -> typefield\n"; }
  | typefields ',' typefield { std::cout << "\ttypefields -> typefields ',' typefield\n"; }
  ;
-typefield: IDENTIFIER ':' typeid { std::cout << "\ttypefield -> IDENTIFIER\n"; }
+typefield: IDENTIFIER COLON typeid { std::cout << "\ttypefield -> IDENTIFIER\n"; }
  ;
 
 exprseq: expr { std::cout << "\texprseq -> expr\n"; }
- | exprseq ';' expr { std::cout << "\texprseq ';' expr\n"; }
+ | exprseq SEMICOLON expr { std::cout << "\texprseq ';' expr\n"; }
  ;
     
 exprlist: expr { std::cout << "\texprlist -> expr\n"; }
- | exprlist ',' expr { std::cout << "exprlist -> exprlist ',' expr\n"; }
+ | exprlist COMMA expr { std::cout << "exprlist -> exprlist ',' expr\n"; }
  ;
 
 typeid: IDENTIFIER { std::cout << "\ttypeid -> IDENTIFIER\n"; }
 
-op: '+' { std::cout << "\top -> '+'\n"; }
- | '-' { std::cout << "\top -> '-'\n"; }
- | '*' { std::cout << "\top -> '*'\n"; }
- | '/' { std::cout << "\top -> '/'\n"; }
- | '=' { std::cout << "\top -> '='\n"; }
+op: PLUS { std::cout << "\top -> '+'\n"; }
+ | MINUS { std::cout << "\top -> '-'\n"; }
+ | ASTERISK { std::cout << "\top -> '*'\n"; }
+ | FSLASH { std::cout << "\top -> '/'\n"; }
+ | EQUAL { std::cout << "\top -> '='\n"; }
  | LRCOMPARISON { std::cout << "\top -> LRCOMPARISON\n"; }
- | '>' { std::cout << "\top -> '>'\n";}
- | '<' { std::cout << "\top -> '<'\n"; }
+ | GREATERTHAN { std::cout << "\top -> '>'\n";}
+ | LESSTHAN { std::cout << "\top -> '<'\n"; }
  | GREATEREQ { std::cout << "\top -> GREATEREQ\n"; } 
  | LESSEQ { std::cout << "\top -> LESSEQ\n"; }
- | '&' { std::cout << "\top -> '&'\n"; }
- | '|' { std::cout << "\top -> '|'\n"; }
+ | AMPERSAND { std::cout << "\top -> '&'\n"; }
+ | VERTICAL { std::cout << "\top -> '|'\n"; }
  ;
 
 lvalue: IDENTIFIER { std::cout << "\tlvalue -> IDENTIFIER\n"; }

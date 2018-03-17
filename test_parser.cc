@@ -51,6 +51,6 @@ TEST_CASE("Large cases", "[basic_case]") {
     get_ast_node(str);
 }
 
-TEST_CASE("Alternative testing") {
-	
+TEST_CASE("Operator testing") {
+	string str = ""
 }
