@@ -26,8 +26,9 @@ bool node_is_type(const ASTNode * node){
 }
 
 TEST_CASE("Test node type checking", "[basic_case]") {
-    REQUIRE(node_is_type<StringASTNode>(new StringASTNode("hithere")));
-    REQUIRE(!node_is_type<StringASTNode>(new IntASTNode(12123)));
+    using namespace exprs;
+    REQUIRE(node_is_type<StringNode>(new StringNode("hithere")));
+    REQUIRE(!node_is_type<StringNode>(new IntNode(12123)));
 }
 
 TEST_CASE("Basic case", "[basic_case]") {
@@ -54,5 +55,5 @@ TEST_CASE("Large cases", "[basic_case]") {
 }
 
 TEST_CASE("Operator testing") {
-	string str = ""
+	string str = "";
 }

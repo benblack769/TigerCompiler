@@ -199,7 +199,7 @@ namespace exprs{
     };
 
     enum class BinaryOp { ADD, SUB, MUL, DIV, GREATEREQ, GREATER, LESS, LESSEQ, EQUAL, LESSGREATER, AND, OR };
-    std::string str_rep(BinaryOp op){
+    inline std::string str_rep(BinaryOp op){
         switch(op){
             case BinaryOp::ADD: return "+";
             case BinaryOp::SUB: return "-";
