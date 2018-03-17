@@ -21,8 +21,8 @@ tiger.tab.o: tiger.tab.c
 lex.yy.o: lex.yy.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
-ast.o: ast.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $^
+ast.o: ast.cpp ast.hh
+	$(CXX) $(CXXFLAGS) -c -o $@  ast.cpp
 
 catch.o: catch.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ $^

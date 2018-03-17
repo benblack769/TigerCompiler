@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include "ast.hh"
 
 extern int yylineno; /* from lexer */
 

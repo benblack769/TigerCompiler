@@ -19,9 +19,9 @@ tiger::ASTNode * rootnode;
   tiger::LvalueNode* lvalue;
   tiger::DeclarationListNode* decl_list;
   tiger::DeclarationNode* decl_node;
-  tiger::TypeDeclaration* type_decl;
-  tiger::TypeFeilds* type_field;
-  tiger::TypeID* type_id;
+  tiger::TypeDeclarationNode* type_decl;
+  tiger::TypeFeildsNode* type_field;
+  tiger::TypeIDNode* type_id;
   int64_t int_value;
   char * str;
 }
