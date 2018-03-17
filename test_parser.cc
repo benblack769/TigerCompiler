@@ -31,7 +31,7 @@ TEST_CASE("Test node type checking", "[basic_case]") {
 }
 
 TEST_CASE("Basic case", "[basic_case]") {
-    get_ast_node("x + y");
+    //get_ast_node("x + y");
     get_ast_node("x := y");
     get_ast_node("function_call(arg1,arg2)");
     get_ast_node("if x then y else z");
@@ -51,4 +51,8 @@ TEST_CASE("Large cases", "[basic_case]") {
       /* table[1].val = 42. */\
     end";
     get_ast_node(str);
+}
+
+TEST_CASE("Operator testing") {
+	string str = ""
 }
