@@ -43,6 +43,7 @@ tiger::ASTNode * rootnode;
 %type <type_fields> typefields
 
 %type <bin_op> op
+%type <bin_op> PLUS
 
 
 /* declare tokens */
