@@ -41,7 +41,8 @@ TEST_CASE("Basic case", "[basic_case]") {
     cout << *get_ast_node("if x then if y then z else w else a") << "\n";
     cout << *get_ast_node("if if y then z else w then x else a") << "\n";
     cout << *get_ast_node("if x then if y then z else a") << "\n";
-    get_ast_node("x := y");
+    cout << *get_ast_node("x.y.z") << "\n";
+    get_ast_node("x.z[3].y");
     get_ast_node("x := y");
     get_ast_node("function_call(arg1,arg2)");
     get_ast_node("if x then y else z");

@@ -35,6 +35,27 @@ class ExprNode: public ASTNode {
   virtual void print(std::ostream & os) const override = 0;
 };
 
+class LvalueNode: public ASTNode {
+ public:
+  LvalueNode() = default;
+  virtual ~LvalueNode() = default;
+  virtual void print(std::ostream & os) const override = 0;
+};
+
+class DeclarationNode: public ASTNode {
+ public:
+  DeclarationNode() = default;
+  virtual ~DeclarationNode() = default;
+  virtual void print(std::ostream & os) const override = 0;
+};
+
+class TypeNode: public ASTNode {
+ public:
+  TypeNode() = default;
+  virtual ~TypeNode() = default;
+  virtual void print(std::ostream & os) const override = 0;
+};
+
 //helpers for list nodes
 template<class item_ty>
 inline std::vector<ASTNode *> base_list(const std::vector<std::unique_ptr<item_ty>> & list){
@@ -78,57 +99,91 @@ class ExprSequenceNode: public ASTNode {
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ";\n");
   }
-  //TODO: this is the incorrect type, should be an ID, expr pair
   std::vector<std::unique_ptr<ExprNode>> list;
+};
+
+class FieldNode: public ASTNode{
+ public:
+  FieldNode(std::string in_id, ExprNode * in_expr):
+    id(in_id),
+    expr(in_expr){}
+  virtual ~FieldNode(){
+      delete expr;
+  }
+  virtual void print(std::ostream & os) const override{
+      os << id << " = " << *expr;
+  }
+protected:
+    std::string id;
+    ExprNode * expr;
+};
+
+class TypeIDNode : public ASTNode {
+ public:
+  TypeIDNode(std::string in_id):
+     my_id(in_id){}
+  virtual ~TypeIDNode(){
+  }
+  virtual void print(std::ostream & os) const override{
+      os << my_id;
+  }
+ private:
+  std::string my_id;
+};
+
+class TypeFeildNode: public ASTNode {
+ public:
+  TypeFeildNode(std::string in_id, TypeIDNode * in_ty):
+    id(in_id),
+    ty(in_ty){}
+  virtual ~TypeFeildNode(){
+      delete ty;
+  }
+  virtual void print(std::ostream & os) const override{
+      os << id << " : " << *ty;
+  }
+protected:
+    std::string id;
+    TypeIDNode * ty;
 };
 
 class FieldListNode: public ASTNode {
  public:
-  FieldListNode() = default;
-  virtual ~FieldListNode() = default;
-  virtual void print(std::ostream & os) const override = 0;
+  FieldListNode(){}
+  virtual ~FieldListNode(){}
+  virtual void append_to(FieldNode * expr){
+      list.push_back(std::unique_ptr<FieldNode>(expr));
+  }
+  virtual void print(std::ostream & os) const override {
+      print_list(os, base_list(list), ";\n");
+  }
+  std::vector<std::unique_ptr<FieldNode>> list;
 };
 
-class LvalueNode: public ASTNode {
- public:
-  LvalueNode() = default;
-  virtual ~LvalueNode() = default;
-  virtual void print(std::ostream & os) const override = 0;
-};
 
 class DeclarationListNode: public ASTNode {
  public:
-  DeclarationListNode() = default;
-  virtual ~DeclarationListNode() = default;
-  virtual void print(std::ostream & os) const override = 0;
+   DeclarationListNode(){}
+   virtual ~DeclarationListNode(){}
+   virtual void append_to(DeclarationNode * expr){
+       list.push_back(std::unique_ptr<DeclarationNode>(expr));
+   }
+   virtual void print(std::ostream & os) const override {
+       print_list(os, base_list(list), ";\n");
+   }
+   std::vector<std::unique_ptr<DeclarationNode>> list;
 };
-
-class DeclarationNode: public ASTNode {
- public:
-  DeclarationNode() = default;
-  virtual ~DeclarationNode() = default;
-  virtual void print(std::ostream & os) const override = 0;
-};
-
-class TypeDeclarationNode: public ASTNode {
- public:
-  TypeDeclarationNode() = default;
-  virtual ~TypeDeclarationNode() = default;
-  virtual void print(std::ostream & os) const override = 0;
-};
-
 class TypeFeildsNode: public ASTNode {
  public:
-  TypeFeildsNode() = default;
-  virtual ~TypeFeildsNode() = default;
-  virtual void print(std::ostream & os) const override = 0;
-};
-
-class TypeIDNode: public ASTNode {
- public:
-  TypeIDNode() = default;
-  virtual ~TypeIDNode() = default;
-  virtual void print(std::ostream & os) const override = 0;
+   TypeFeildsNode(){}
+   virtual ~TypeFeildsNode(){}
+   virtual void append_to(TypeFeildNode * expr){
+       list.push_back(std::unique_ptr<TypeFeildNode>(expr));
+   }
+   virtual void print(std::ostream & os) const override {
+       print_list(os, base_list(list), ";\n");
+   }
+   std::vector<std::unique_ptr<TypeFeildNode>> list;
 };
 
 
@@ -136,7 +191,7 @@ namespace exprs{
 
     class StringNode: public ExprNode{
     public:
-        StringNode(const char * in_str):
+        StringNode(std::string in_str):
             mystring(in_str){}
 
         virtual ~StringNode() = default;
@@ -198,7 +253,7 @@ namespace exprs{
     };
 
     enum class BinaryOp { ADD, SUB, MUL, DIV, GREATEREQ, GREATER, LESS, LESSEQ, EQUAL, LESSGREATER, AND, OR };
-    inline const char * str_rep(BinaryOp op){
+    inline std::string str_rep(BinaryOp op){
         switch(op){
             case BinaryOp::ADD: return "+";
             case BinaryOp::SUB: return "-";
@@ -407,19 +462,171 @@ namespace exprs{
 namespace lvals{
     class IdLval : public LvalueNode {
      public:
-      IdLval(const char * in_id):
+      IdLval(std::string in_id):
          my_id(in_id){}
       virtual ~IdLval(){
-          delete my_id;
       }
 
       virtual void print(std::ostream & os) const override{
           os << my_id;
       }
      private:
-      const char * my_id;
+      std::string my_id;
     };
 
+    class AttrAccess : public LvalueNode {
+     public:
+      AttrAccess(LvalueNode * lval, std::string in_id):
+         lvalnode(lval),
+         my_id(in_id){}
+
+      virtual ~AttrAccess(){
+          delete lvalnode;
+      }
+      virtual void print(std::ostream & os) const override{
+          os << *lvalnode << "." << my_id;
+      }
+     private:
+      LvalueNode * lvalnode;
+      std::string my_id;
+    };
+
+    class BracketAccess : public LvalueNode {
+     public:
+      BracketAccess(LvalueNode * lval, ExprNode * expr):
+         _lval(lval),
+         _expr(expr){}
+
+      virtual ~BracketAccess(){
+          delete _lval;
+          delete _expr;
+      }
+      virtual void print(std::ostream & os) const override{
+          os << *_lval << "[" << *_expr << "]";
+      }
+     private:
+      LvalueNode * _lval;
+      ExprNode * _expr;
+    };
+}
+namespace decls{
+    class VarDecl: public DeclarationNode {
+     public:
+      VarDecl(std::string id, TypeIDNode * type_id, ExprNode * expr, bool has_type_decl):
+        _id(id),
+        _type_id(type_id),
+        _expr(expr),
+        _has_type_decl(has_type_decl){}
+
+        virtual ~VarDecl(){
+            delete _type_id;
+            delete _expr;
+        }
+        virtual void print(std::ostream & os) const override{
+            os << "var" << _id;
+            if(_has_type_decl){
+                os << " : " << *_type_id;
+            }
+            os <<  " = " << *_expr << "]";
+        }
+     protected:
+         std::string _id;
+         TypeIDNode * _type_id;
+         ExprNode * _expr;
+         bool _has_type_decl;
+    };
+    class FuncDecl: public DeclarationNode {
+     public:
+      FuncDecl(std::string id, TypeFeildsNode * ty_fields, TypeIDNode * type_id, ExprNode * expr, bool has_type_decl):
+        _id(id),
+        _ty_fields(ty_fields),
+        _type_id(type_id),
+        _expr(expr),
+        _has_type_decl(has_type_decl){}
+
+        virtual ~FuncDecl(){
+            delete _ty_fields;
+            delete _type_id;
+            delete _expr;
+        }
+        virtual void print(std::ostream & os) const override{
+            os << "function" << _id << "(" << *_ty_fields << ")";
+            if(_has_type_decl){
+                os << " : " << *_type_id;
+            }
+            os <<  " = " << *_expr << "]";
+        }
+     protected:
+         std::string _id;
+         TypeFeildsNode * _ty_fields;
+         TypeIDNode * _type_id;
+         ExprNode * _expr;
+         bool _has_type_decl;
+    };
+    class TypeDecl: public DeclarationNode {
+     public:
+      TypeDecl(TypeIDNode * id, TypeNode * type):
+        _id(id),
+        _type(type){}
+
+        virtual ~TypeDecl(){
+            delete _id;
+            delete _type;
+        }
+        virtual void print(std::ostream & os) const override{
+            os << "type" << *_id << "=" << *_type;
+        }
+     protected:
+         TypeIDNode * _id;
+         TypeNode * _type;
+    };
+}
+
+namespace types{
+
+    class BasicType : public TypeNode {
+     public:
+        BasicType(TypeIDNode * in_type)
+            :type(in_type){}
+
+        virtual ~BasicType(){
+            delete type;
+        }
+        virtual void print(std::ostream & os) const override{
+            os << *type;
+        }
+    private:
+        TypeIDNode * type;
+    };
+    class ArrayType : public TypeNode {
+     public:
+        ArrayType(TypeIDNode * in_type)
+            :type(in_type){}
+
+        virtual ~ArrayType(){
+            delete type;
+        }
+        virtual void print(std::ostream & os) const override{
+            os << "array of " << *type;
+        }
+    private:
+        TypeIDNode * type;
+    };
+
+    class TypeFeildType : public TypeNode {
+     public:
+        TypeFeildType(TypeFeildsNode * _type_fields)
+            :type_fields(_type_fields){}
+
+        virtual ~TypeFeildType(){
+            delete type_fields;
+        }
+        virtual void print(std::ostream & os) const override{
+            os << "{" << *type_fields << "}";
+        }
+    private:
+        TypeFeildsNode * type_fields;
+    };
 }
 
 } // namespace
