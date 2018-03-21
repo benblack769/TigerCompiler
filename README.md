@@ -2,7 +2,7 @@
 ## Ben Black, Brandon Finley
 
 
-### Issues Encountered: 
+### Issues Encountered:
 After outlining the initial grammar and running `bison -d`, we had roughly 30 reduce/reduce errors and roughly 100 shift/reduce errors.  
 We solved the reduce/reduce errors in one swoop by amppending a missing terminal in our grammar.  
 We eliminated a number of the shift/reduce errors by first dictating precedence for the mathematical operators.  
@@ -16,4 +16,8 @@ expr: expr op expr
 
 Upon examining the `tiger.output` file that `bison -d` produces, we found that at almost every possible instance, the compiler
 is confused about whether to shift at the first `expr` or to reduce at the last `expr` present in some other rule.  
-Solution pending.  
+Solution pending.
+
+### AST design
+
+The AST was designed to capture as much type structure as possible. So there is an expression, lvalue, etc class which all expression 

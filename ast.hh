@@ -27,6 +27,10 @@ inline std::ostream & operator << (std::ostream & os, const ASTNode & node){
     node.print(os);
     return os;
 }
+inline std::ostream & operator << (std::ostream & os, const ASTNode * node){
+    node->print(os);
+    return os;
+}
 
 class ExprNode: public ASTNode {
  public:
@@ -424,6 +428,44 @@ namespace exprs{
         }
     };
 
+    class ArrCreate : public ExprNode {
+     public:
+        ArrCreate(TypeIDNode * type, ExprNode * arr_size_expr, ExprNode * arr_value_expr):
+            _type(type),
+            _value_expr(arr_value_expr),
+            _size_expr(arr_size_expr){}
+        virtual ~ArrCreate(){
+            delete _type;
+            delete _value_expr;
+            delete _size_expr;
+        }
+        virtual void print(std::ostream & os) const override{
+            os << *_type << "[" << *_size_expr << "]" << " of " << *_value_expr;
+        }
+    private:
+        TypeIDNode * _type;
+        ExprNode * _value_expr;
+        ExprNode * _size_expr;
+    };
+
+    class RecCreate : public ExprNode {
+     public:
+        RecCreate(TypeIDNode * type, FieldListNode * fields):
+            _type(type),
+            _fields(fields)
+            {}
+        virtual ~RecCreate(){
+            delete _type;
+            delete _fields;
+        }
+        virtual void print(std::ostream & os) const override{
+            os << *_type << "{}" << *_fields << "}";
+        }
+    private:
+        TypeIDNode * _type;
+        FieldListNode * _fields;
+    };
+
     class LetIn : public ExprNode {
      public:
         LetIn(DeclarationListNode * decl_list, ExprSequenceNode * expr_sequ):
@@ -434,7 +476,7 @@ namespace exprs{
             delete _expr_sequ;
         }
         virtual void print(std::ostream & os) const override{
-            os << "let" << _decl_list << "in" << _expr_sequ;
+            os << "let" << *_decl_list << "in" << *_expr_sequ;
         }
     private:
         DeclarationListNode * _decl_list;

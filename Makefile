@@ -2,8 +2,8 @@ CXX=g++   # Can switch to g++ if desired
 CC=gcc   # Can switch to g++ if desired
 
 # CXX=g++-6
-CFLAGS=-g -O2 -Wall -pedantic
-CXXFLAGS=-g -O2 -std=c++14   #-Werror
+CFLAGS=-g -O0 -Wall -pedantic
+CXXFLAGS=-g -O0 -std=c++14   #-Werror
 #CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -Wextra -Werror
 LDFLAGS=$(CXXFLAGS)
 
@@ -28,7 +28,7 @@ catch.o: catch.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ $^
 
 test_parser.o: test_parser.cc ast.hh
-	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ test_parser.cc 
+	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ test_parser.cc
 
 test_parser: tiger.tab.o lex.yy.o ast.o catch.o test_parser.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
