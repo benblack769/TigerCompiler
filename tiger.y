@@ -42,7 +42,6 @@ tiger::ASTNode * rootnode;
 %type <type_field> typefield
 %type <type_fields> typefields
 
-%type <bin_op> op
 
 
 /* declare tokens */
@@ -94,6 +93,7 @@ tiger::ASTNode * rootnode;
 
 %nonassoc THEN_KW
 %nonassoc ELSE_KW
+%nonassoc FAKE
 %left VERTICAL
 %left AMPERSAND
 %nonassoc LESSEQ GREATEREQ EQUAL LRCOMPARISON LESSTHAN GREATERTHAN
@@ -110,22 +110,33 @@ expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPARE
  | NIL_KW { $$ = new exprs::NilNode(); }
  | STRING { $$ = new exprs::StringNode($1); }
  | INTEGER { $$ = new exprs::IntNode($1); }
- | '-' expr %prec UMINUS{ $$ = new exprs::NegateNode($2); }
- | expr op expr { std::cout << "\texpr -> expr op expr\n"; $$ = new exprs::BinaryNode($1,$3,$2); }
+ | '-' expr %prec UMINUS { $$ = new exprs::NegateNode($2); }
+ | expr PLUS expr { /*std::cout << "\texpr -> expr op expr\n"; $$ = new exprs::BinaryNode($1,$3,$2);*/ }
+ | expr VERTICAL expr {}
+ | expr AMPERSAND expr {}
+ | expr LESSEQ expr {}
+ | expr GREATEREQ expr {}
+ | expr EQUAL expr {}
+ | expr LRCOMPARISON expr {}
+ | expr LESSTHAN expr {}
+ | expr GREATERTHAN expr {}
+ | expr MINUS expr {}
+ | expr ASTERISK expr {}
+ | expr FSLASH expr {}
  | LPAREN exprseq RPAREN { std::cout << "\texpr -> LPAREN exprseq RPAREN\n"; $$ = new exprs::ExprSequenceEval($2);  }
  | IDENTIFIER LPAREN exprlist RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN exprlist RPAREN\n"; $$ = new exprs::FunctionCall($1,$3); free($1); }
  | typeid LBRACE fieldlist RBRACE { std::cout << "\texpr -> typeid LBRACE fieldlist RBRACE\n"; }
  | typeid LBRACE RBRACE { /* fieldlist is optional */ std::cout << "\texpr -> typeid LBRACE RBRACE\n"; }
- | typeid LBRACK expr RBRACK OF_KW expr { std::cout << "\texpr -> typeid LBRACK expr RBRACK OF_KW expr\n"; }
+ | typeid LBRACK expr RBRACK OF_KW expr %prec FAKE { std::cout << "\texpr -> typeid LBRACK expr RBRACK OF_KW expr\n"; }
  | IF_KW expr THEN_KW expr { std::cout << "\texpr -> IF_KW expr THEN_KW expr \n"; $$ = new exprs::IfThen($2, $4); }
  | IF_KW expr THEN_KW expr ELSE_KW expr { std::cout << "\texpr -> IF_KW expr THEN_KW expr ELSE_KW expr\n"; $$ = new exprs::IfThenElse($2, $4, $6); }
- | WHILE_KW expr DO_KW expr { std::cout << "\texpr -> WHILE_KW expr DO_KW expr\n"; $$ = new exprs::WhileDo($2, $4); }
- | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr { std::cout << "\texpr -> FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr\n"; $$ = new exprs::ForToDo($2, $4, $6, $8);  free($2); }
+ | WHILE_KW expr DO_KW expr %prec FAKE { std::cout << "\texpr -> WHILE_KW expr DO_KW expr\n"; $$ = new exprs::WhileDo($2, $4); }
+ | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr %prec FAKE{ std::cout << "\texpr -> FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr\n"; $$ = new exprs::ForToDo($2, $4, $6, $8); free($2); }
  | BREAK_KW { std::cout << "\texpr -> BREAK_KW\n"; $$ = new exprs::Break(); }
  | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ std::cout << "\texpr -> LET_KW declist IN_KW exprseq END_KW\n"; $$ = new exprs::LetIn($2, $4); }
  | LET_KW declist IN_KW END_KW { /* withOUT optional exprseq */ std::cout << "\texpr -> LET_KW declist IN_KW END_KW\n"; $$ = new exprs::LetIn($2, new ExprSequenceNode()); }
  | lvalue { std::cout << "\texpr -> lvalue\n"; $$ = new exprs::LvalNode($1); }
- | lvalue COLONEQ expr { std::cout << "\texpr -> lvalue COLONEQ expr\n"; $$ = new exprs::AssignNode($1, $3); }
+ | lvalue COLONEQ expr %prec FAKE { std::cout << "\texpr -> lvalue COLONEQ expr\n"; $$ = new exprs::AssignNode($1, $3); }
  ;
 
 fieldlist: IDENTIFIER '=' expr { std::cout << "\tfieldlist -> IDENTIFIER '=' expr\n"; $$ = new FieldListNode(); $$->append_to(new FieldNode($1,$3));  free($1); }
@@ -176,19 +187,6 @@ exprlist: expr { std::cout << "\texprlist -> expr\n";  $$ = new ExprListNode(); 
 
 typeid: IDENTIFIER { std::cout << "\ttypeid -> IDENTIFIER\n"; $$ = new TypeIDNode($1); free($1); }
 
-op: PLUS { std::cout << "\top -> '+'\n"; $$ = exprs::BinaryOp::ADD; }
- | MINUS { std::cout << "\top -> '-'\n"; $$ = exprs::BinaryOp::SUB; }
- | ASTERISK { std::cout << "\top -> '*'\n"; $$ = exprs::BinaryOp::MUL; }
- | FSLASH { std::cout << "\top -> '/'\n"; $$ = exprs::BinaryOp::DIV; }
- | EQUAL { std::cout << "\top -> '='\n"; $$ = exprs::BinaryOp::EQUAL; }
- | LRCOMPARISON { std::cout << "\top -> LRCOMPARISON\n"; $$ = exprs::BinaryOp::LESSGREATER; }
- | GREATERTHAN { std::cout << "\top -> '>'\n"; $$ = exprs::BinaryOp::GREATER; }
- | GREATEREQ { std::cout << "\top -> GREATEREQ\n"; $$ = exprs::BinaryOp::GREATEREQ; }
- | LESSTHAN { std::cout << "\top -> '<'\n"; $$ = exprs::BinaryOp::LESS; }
- | LESSEQ { std::cout << "\top -> LESSEQ\n"; $$ = exprs::BinaryOp::LESSEQ; }
- | AMPERSAND { std::cout << "\top -> '&'\n"; $$ = exprs::BinaryOp::AND; }
- | VERTICAL { std::cout << "\top -> '|'\n"; $$ = exprs::BinaryOp::OR; }
- ;
 
 lvalue: IDENTIFIER { std::cout << "\tlvalue -> IDENTIFIER\n"; $$ = new lvals::IdLval($1); free($1); }
     | lvalue PERIOD IDENTIFIER { std::cout << "\tlvalue -> PERIOD IDENTIFIER\n"; $$ = new lvals::AttrAccess($1,$3); free($3); }
