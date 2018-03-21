@@ -105,24 +105,24 @@ tiger::ASTNode * rootnode;
 %%
 start_expr: expr { rootnode = $1; }
  ;
-
+ 
 expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPAREN\n";  $$ = new exprs::FunctionCall($1,new ExprListNode()); free($1); }
  | NIL_KW { $$ = new exprs::NilNode(); }
  | STRING { $$ = new exprs::StringNode($1); }
  | INTEGER { $$ = new exprs::IntNode($1); }
  | '-' expr %prec UMINUS { $$ = new exprs::NegateNode($2); }
- | expr PLUS expr { /*std::cout << "\texpr -> expr op expr\n"; $$ = new exprs::BinaryNode($1,$3,$2);*/ }
- | expr VERTICAL expr {}
- | expr AMPERSAND expr {}
- | expr LESSEQ expr {}
- | expr GREATEREQ expr {}
- | expr EQUAL expr {}
- | expr LRCOMPARISON expr {}
- | expr LESSTHAN expr {}
- | expr GREATERTHAN expr {}
- | expr MINUS expr {}
- | expr ASTERISK expr {}
- | expr FSLASH expr {}
+ | expr PLUS expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::ADD); }
+ | expr VERTICAL expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::OR); }
+ | expr AMPERSAND expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::AND); }
+ | expr LESSEQ expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::LESSEQ); }
+ | expr GREATEREQ expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::GREATEREQ); }
+ | expr EQUAL expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::EQUAL); }
+ | expr LRCOMPARISON expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::LESSGREATER); }
+ | expr LESSTHAN expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::LESS); }
+ | expr GREATERTHAN expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::GREATER); }
+ | expr MINUS expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::SUB); }
+ | expr ASTERISK expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::MUL); }
+ | expr FSLASH expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::EQUAL); }
  | LPAREN exprseq RPAREN { std::cout << "\texpr -> LPAREN exprseq RPAREN\n"; $$ = new exprs::ExprSequenceEval($2);  }
  | IDENTIFIER LPAREN exprlist RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN exprlist RPAREN\n"; $$ = new exprs::FunctionCall($1,$3); free($1); }
  | typeid LBRACE fieldlist RBRACE { std::cout << "\texpr -> typeid LBRACE fieldlist RBRACE\n"; }
