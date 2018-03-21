@@ -44,7 +44,7 @@ TEST_CASE("Test node type checking", "[basic_case]") {
     REQUIRE(node_is_type<StringNode>(new StringNode("hithere")));
     REQUIRE(!node_is_type<StringNode>(new IntNode(12123)));
 }
-/*
+
 TEST_CASE("Basic case", "[basic_case]") {
     //get_ast_node_from_string("x + y");
     get_ast_node_from_string("x := y");
@@ -55,45 +55,37 @@ TEST_CASE("Basic case", "[basic_case]") {
     cout << *get_ast_node_from_string("if if y then z else w then x else a") << "\n";
     cout << *get_ast_node_from_string("if x then if y then z else a") << "\n";
     cout << *get_ast_node_from_string("x.y.z") << "\n";
-    get_ast_node_from_string("x.z[3].y");
-    get_ast_node_from_string("x := y");
-    get_ast_node_from_string("function_call(arg1,arg2)");
-    get_ast_node_from_string("if x then y else z");
-    get_ast_node_from_string("if x then if y then z else w else a");
-    get_ast_node_from_string("if x then b");
+    cout << *get_ast_node_from_string("x.z[3].y") << "\n";
+    cout << *get_ast_node_from_string("x := y") << "\n";
+    cout << *get_ast_node_from_string("function_call(arg1,arg2)") << "\n";
+    cout << *get_ast_node_from_string("if x then y else z") << "\n";
+    cout << *get_ast_node_from_string("if x then if y then z else w else a") << "\n";
+    cout << *get_ast_node_from_string("if x then b") << "\n";
 }
-*/
-TEST_CASE("Large cases", "[basic_case]") {
-    string str = "let\
-      type rec = { val : int }\
-      type rec_arr = array of rec\
-      var  table := rec_arr[2] of nil\
-    in\
-      for i := 0 to 1 do\
-        table[i] := rec { val = 42 };\
-      table[0].val := 51\
-      /* table[1].val = 42. */\
-    end";
-    //get_ast_node_from_string(str);
-}
+
 bool check_file(string filename){
+    /*
+`   Checks file in two ways: by hand and automatically
+
+    1. It prints out the generated AST node to a file for manual inspection. This should be the same tiger program as before
+    2. ASTNode prints out a valid tiger language program that describes the same language.
+        So it automatically uses the generated AST node to compile another ASTNode, which should be  exactly the same as the original one.
+    */
     ASTNode * node = get_ast_node_from_file(filename);
     stringstream stream1;
     stringstream stream2;
-    stringstream stream3;
     node->print(stream1);
-    //cout << "stream: " << stream1.str() << endl;
-    //cout.flush();
-    ASTNode * node2 = get_ast_node_from_string(stream1.str());
-    node2->print(stream2);
-    ASTNode * node3 = get_ast_node_from_string(stream2.str());
-    node3->print(stream3);
+    string str1 = stream1.str();
+
     ofstream cmp_file(filename+".cmp");
-    cmp_file << stream1.str();
-    //node3->print(cmp_file);
-    //node2->print(cmp_file);
-    //node3->print(cmp_file);
-    return (stream3.str() == stream2.str()) && (stream1.str() == stream2.str());
+    cmp_file << str1;
+
+    ASTNode * node2 = get_ast_node_from_string(str1);
+    node2->print(stream2);
+    string str2 = stream2.str();
+    delete node;
+    delete node2;
+    return (str1 == str2);
 }
 TEST_CASE("File testing") {
     //cout << get_ast_node_from_string("(\"hi there\\n\")");
@@ -104,13 +96,12 @@ TEST_CASE("File testing") {
     REQUIRE(check_file("language_examples/record.t"));
     REQUIRE(check_file("language_examples/sequences.t"));
 }
-/*TEST_CASE("Operator testing") {
+TEST_CASE("Operator testing") {
 
-	printf("==== Operator Test 1====\n");
-	get_ast_node_from_string("x + y + z");
+	printf("==== Operator Testing====\n");
+	cout << *get_ast_node_from_string("x + y + z") << "\n";
 	printf("==== Operator Test 2 ====\n");
-	get_ast_node_from_string("x * y + z");
+	cout << *get_ast_node_from_string("x * y + z") << "\n";
 	printf("==== Operator Test 3 ====\n");
-	get_ast_node_from_string("-x");
+	cout << *get_ast_node_from_string("-x") << "\n";
 }
-*/

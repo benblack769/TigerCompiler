@@ -581,7 +581,7 @@ namespace decls{
             if(_has_type_decl){
                 os << " : " << *_type_id;
             }
-            os <<  " = " << *_expr;
+            os <<  " := " << *_expr;
         }
      protected:
          std::string _id;
