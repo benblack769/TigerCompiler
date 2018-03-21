@@ -100,6 +100,12 @@ class ExprSequenceNode: public ASTNode {
   virtual void append_to(ExprNode * expr){
       list.push_back(std::unique_ptr<ExprNode>(expr));
   }
+  virtual bool empty(){
+      return list.size() == 0;
+  }
+  virtual bool singleton(){
+      return list.size() == 1;
+  }
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ";\n");
   }
@@ -159,7 +165,7 @@ class FieldListNode: public ASTNode {
       list.push_back(std::unique_ptr<FieldNode>(expr));
   }
   virtual void print(std::ostream & os) const override {
-      print_list(os, base_list(list), ";\n");
+      print_list(os, base_list(list), ",");
   }
   std::vector<std::unique_ptr<FieldNode>> list;
 };
@@ -173,7 +179,7 @@ class DeclarationListNode: public ASTNode {
        list.push_back(std::unique_ptr<DeclarationNode>(expr));
    }
    virtual void print(std::ostream & os) const override {
-       print_list(os, base_list(list), ";\n");
+       print_list(os, base_list(list), "\n");
    }
    std::vector<std::unique_ptr<DeclarationNode>> list;
 };
@@ -185,7 +191,7 @@ class TypeFeildsNode: public ASTNode {
        list.push_back(std::unique_ptr<TypeFeildNode>(expr));
    }
    virtual void print(std::ostream & os) const override {
-       print_list(os, base_list(list), ";\n");
+       print_list(os, base_list(list), ", ");
    }
    std::vector<std::unique_ptr<TypeFeildNode>> list;
 };
@@ -200,7 +206,7 @@ namespace exprs{
 
         virtual ~StringNode() = default;
         virtual void print(std::ostream & os) const override{
-            os << '"' << mystring << '"';
+            os << mystring;
         }
     protected:
         std::string mystring;
@@ -339,7 +345,12 @@ namespace exprs{
             delete exprs;
         }
         virtual void print(std::ostream & os) const override{
-            os << "(" << *exprs << ")";
+            if(exprs->singleton()){
+                os << *exprs;
+            }
+            else{
+                os << "(" << *exprs << ")";
+            }
         }
     private:
         ExprSequenceNode * exprs;
@@ -355,7 +366,7 @@ namespace exprs{
             delete _res;
         }
         virtual void print(std::ostream & os) const override{
-            os << "if" << "(" << *_cond << ")" << "then" << "(" << *_res<< ")";
+            os << " if " << "(" << *_cond << ")" << " then " << "(" << *_res<< ")";
         }
     private:
         ExprNode * _cond;
@@ -374,7 +385,7 @@ namespace exprs{
             delete _res_2;
         }
         virtual void print(std::ostream & os) const override{
-            os << "if" << "(" << *_cond << ")" << "then" << "(" << *_res_1<< ")" << "else" << "(" << *_res_2 << ")";
+            os << " if " << "(" << *_cond << ")" << " then " << "(" << *_res_1<< ")" << " else " << "(" << *_res_2 << ")";
         }
     private:
         ExprNode * _cond;
@@ -392,7 +403,7 @@ namespace exprs{
             delete _res;
         }
         virtual void print(std::ostream & os) const override{
-            os << "while" << "(" << *_cond << ")" << "do" << "(" << *_res<< ")";
+            os << " while " << "(" << *_cond << ")" << " do " << "(" << *_res<< ")";
         }
     private:
         ExprNode * _cond;
@@ -401,6 +412,7 @@ namespace exprs{
     class ForToDo : public ExprNode {
      public:
         ForToDo(std::string var_id, ExprNode * initial, ExprNode * end, ExprNode * eval_expr):
+            _var_id(var_id),
             _initial(initial),
             _end(end),
             _eval_expr(eval_expr){}
@@ -410,7 +422,7 @@ namespace exprs{
             delete _eval_expr;
         }
         virtual void print(std::ostream & os) const override{
-            os << "for" << _var_id << ":=" << *_initial << "to" << *_end << "do" << *_eval_expr;
+            os << " for " << _var_id << ":=" << *_initial << " to " << *_end << " do " << *_eval_expr;
         }
     private:
         std::string _var_id;
@@ -424,7 +436,7 @@ namespace exprs{
         Break(){}
         virtual ~Break() = default;
         virtual void print(std::ostream & os) const override{
-            os << "break";
+            os << " break ";
         }
     };
 
@@ -459,7 +471,7 @@ namespace exprs{
             delete _fields;
         }
         virtual void print(std::ostream & os) const override{
-            os << *_type << "{}" << *_fields << "}";
+            os << *_type << "{" << *_fields << "}";
         }
     private:
         TypeIDNode * _type;
@@ -476,7 +488,7 @@ namespace exprs{
             delete _expr_sequ;
         }
         virtual void print(std::ostream & os) const override{
-            os << "let" << *_decl_list << "in" << *_expr_sequ;
+            os << " let " << *_decl_list << " in " << *_expr_sequ << " end ";
         }
     private:
         DeclarationListNode * _decl_list;
@@ -565,11 +577,11 @@ namespace decls{
             delete _expr;
         }
         virtual void print(std::ostream & os) const override{
-            os << "var" << _id;
+            os << " var " << _id;
             if(_has_type_decl){
                 os << " : " << *_type_id;
             }
-            os <<  " = " << *_expr << "]";
+            os <<  " = " << *_expr;
         }
      protected:
          std::string _id;
@@ -592,11 +604,11 @@ namespace decls{
             delete _expr;
         }
         virtual void print(std::ostream & os) const override{
-            os << "function" << _id << "(" << *_ty_fields << ")";
+            os << " function " << _id << "(" << *_ty_fields << ")";
             if(_has_type_decl){
                 os << " : " << *_type_id;
             }
-            os <<  " = " << *_expr << "]";
+            os <<  " = " << *_expr;
         }
      protected:
          std::string _id;
@@ -616,7 +628,7 @@ namespace decls{
             delete _type;
         }
         virtual void print(std::ostream & os) const override{
-            os << "type" << *_id << "=" << *_type;
+            os << " type " << *_id << "=" << *_type;
         }
      protected:
          TypeIDNode * _id;
@@ -649,7 +661,7 @@ namespace types{
             delete type;
         }
         virtual void print(std::ostream & os) const override{
-            os << "array of " << *type;
+            os << " array of " << *type;
         }
     private:
         TypeIDNode * type;

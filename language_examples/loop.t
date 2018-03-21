@@ -4,7 +4,7 @@ let
   var  table := rec_arr[2] of nil
 in
   for i := 0 to 1 do
-    table[i] := rec { val = 42 };
-  table[0].val := 51
+    table.t[i] := rec { val = 42 };
+  table.t[0].val := 51
   /* table[1].val = 42. */
 end

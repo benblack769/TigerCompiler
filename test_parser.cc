@@ -89,15 +89,16 @@ bool check_file(string filename){
     ASTNode * node3 = get_ast_node_from_string(stream2.str());
     node3->print(stream3);
     ofstream cmp_file(filename+".cmp");
-    cmp_file << stream3.str();
-    node->print(cmp_file);
-    node2->print(cmp_file);
-    node3->print(cmp_file);
+    cmp_file << stream1.str();
+    //node3->print(cmp_file);
+    //node2->print(cmp_file);
+    //node3->print(cmp_file);
     return (stream3.str() == stream2.str()) && (stream1.str() == stream2.str());
 }
 TEST_CASE("File testing") {
+    //cout << get_ast_node_from_string("(\"hi there\\n\")");
+    //cout << get_ast_node_from_string("let var v := 4 in end");
     REQUIRE(check_file("language_examples/arr.t"));
-    REQUIRE(check_file("language_examples/array_assign.t"));
     REQUIRE(check_file("language_examples/func_call.t"));
     REQUIRE(check_file("language_examples/loop.t"));
     REQUIRE(check_file("language_examples/record.t"));

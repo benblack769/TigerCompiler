@@ -7,8 +7,6 @@
 int depth = 0;
 %}
 
-str_escapes (\\(\"|\\))
-
 %%
 
 "/*" { BEGIN(comment); depth++; }
@@ -60,7 +58,7 @@ str_escapes (\\(\"|\\))
 [ \t\n\r] {}
 [a-zA-Z][a-zA-Z0-9_]*  { yylval.str = strdup(yytext); return IDENTIFIER; }
 _main   { return IDENTIFIER; }
-\"([^\\]|{str_escapes})*\"  { yylval.str = yytext; return STRING; }
+\"([^\\]|(\\(\"|\\|[a-z])))*\"  { yylval.str = strdup(yytext); return STRING; }
 [0-9]+  { yylval.int_value = atoll(yytext); return INTEGER;  }
 .       { printf("Unrecognized character %c\n", yytext[0]); return BAD_TOKEN; }
 

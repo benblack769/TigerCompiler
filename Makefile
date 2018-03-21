@@ -7,7 +7,7 @@ CXXFLAGS=-g -O0 -std=c++14   #-Werror
 #CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -Wextra -Werror
 LDFLAGS=$(CXXFLAGS)
 
-all: test_parser test_lexer
+all: test_parser test_lexer parse_and_print
 
 lex.yy.c: tiger.l
 	flex $^
@@ -39,10 +39,15 @@ test_lexer.o: test_lexer.cc
 test_lexer: lex.yy.o test_lexer.o catch.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
+parse_and_print.o: parse_and_print.cc
+	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ $^
+
+parse_and_print: parse_and_print.o tiger.tab.o lex.yy.o ast.o
+	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 test: all
 	./test_lexer
 	./test_parser
 
 clean:
-	rm -f *.o test_parser tiger.tab.* lex.yy.c test_lexer
+	rm -f *.o test_parser tiger.tab.* lex.yy.c test_lexer parse_and_print

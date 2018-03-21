@@ -108,9 +108,9 @@ start_expr: expr { rootnode = $1; }
 
 expr: IDENTIFIER LPAREN RPAREN { $$ = new exprs::FunctionCall($1,new ExprListNode()); free($1); }
  | NIL_KW { $$ = new exprs::NilNode(); }
- | STRING { $$ = new exprs::StringNode($1); }
+ | STRING { $$ = new exprs::StringNode($1); free($1); }
  | INTEGER { $$ = new exprs::IntNode($1); }
- | '-' expr %prec UMINUS { $$ = new exprs::NegateNode($2); }
+ | MINUS expr %prec UMINUS { $$ = new exprs::NegateNode($2); }
  | expr PLUS expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::ADD); }
  | expr VERTICAL expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::OR); }
  | expr AMPERSAND expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::AND); }
@@ -139,8 +139,8 @@ expr: IDENTIFIER LPAREN RPAREN { $$ = new exprs::FunctionCall($1,new ExprListNod
  | lvalue COLONEQ expr %prec FAKE { $$ = new exprs::AssignNode($1, $3); }
  ;
 
-fieldlist: IDENTIFIER '=' expr {  $$ = new FieldListNode(); $$->append_to(new FieldNode($1,$3));  free($1); }
- | fieldlist ',' IDENTIFIER '=' expr { $$ = $1; $$->append_to(new FieldNode($3,$5));  free($3); }
+fieldlist: IDENTIFIER EQUAL expr {  $$ = new FieldListNode(); $$->append_to(new FieldNode($1,$3));  free($1); }
+ | fieldlist COMMA IDENTIFIER EQUAL expr { $$ = $1; $$->append_to(new FieldNode($3,$5));  free($3); }
  ;
 
 declist: declaration {  $$ = new DeclarationListNode(); $$->append_to($1); }
@@ -172,7 +172,7 @@ type: typeid { $$ = new types::BasicType($1); }
  ;
 
 typefields: typefield { $$ = new TypeFeildsNode(); $$->append_to($1); }
- | typefields ',' typefield { $$ = $1; $$->append_to($3); }
+ | typefields COMMA typefield { $$ = $1; $$->append_to($3); }
  ;
 typefield: IDENTIFIER COLON typeid { $$ = new TypeFeildNode($1,$3); free($1); }
  ;
@@ -186,10 +186,10 @@ exprlist: expr {  $$ = new ExprListNode(); $$->append_to($1); }
  ;
 
 typeid: IDENTIFIER { $$ = new TypeIDNode($1); free($1); }
+ ;
 
-
-lvalue: IDENTIFIER {  $$ = new lvals::IdLval($1); free($1); }
-    | lvalue PERIOD IDENTIFIER { $$ = new lvals::AttrAccess($1,$3); free($3); }
-    | lvalue LBRACK expr RBRACK { $$ = new lvals::BracketAccess($1,$3); }
-;
+lvalue: IDENTIFIER { $$ = new lvals::IdLval($1); free($1); }
+  | lvalue LBRACK expr RBRACK { $$ = new lvals::BracketAccess($1,$3); }
+  | lvalue PERIOD IDENTIFIER { $$ = new lvals::AttrAccess($1,$3); free($3); }
+ ;
 %%
