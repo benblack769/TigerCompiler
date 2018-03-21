@@ -106,21 +106,21 @@ tiger::ASTNode * rootnode;
 start_expr: expr { rootnode = $1; }
  ;
 
-expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPAREN\n"; }
+expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPAREN\n";  $$ = new exprs::FunctionCall($1,new ExprListNode()); free($1); }
  | NIL_KW { $$ = new exprs::NilNode(); }
  | STRING { $$ = new exprs::StringNode($1); }
  | INTEGER { $$ = new exprs::IntNode($1); }
  | '-' expr %prec UMINUS{ $$ = new exprs::NegateNode($2); }
  | expr op expr { std::cout << "\texpr -> expr op expr\n"; $$ = new exprs::BinaryNode($1,$3,$2); }
  | LPAREN exprseq RPAREN { std::cout << "\texpr -> LPAREN exprseq RPAREN\n"; $$ = new exprs::ExprSequenceEval($2);  }
- | IDENTIFIER LPAREN exprlist RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN exprlist RPAREN\n"; $$ = new exprs::FunctionCall($1,$3); }
+ | IDENTIFIER LPAREN exprlist RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN exprlist RPAREN\n"; $$ = new exprs::FunctionCall($1,$3); free($1); }
  | typeid LBRACE fieldlist RBRACE { std::cout << "\texpr -> typeid LBRACE fieldlist RBRACE\n"; }
  | typeid LBRACE RBRACE { /* fieldlist is optional */ std::cout << "\texpr -> typeid LBRACE RBRACE\n"; }
  | typeid LBRACK expr RBRACK OF_KW expr { std::cout << "\texpr -> typeid LBRACK expr RBRACK OF_KW expr\n"; }
  | IF_KW expr THEN_KW expr { std::cout << "\texpr -> IF_KW expr THEN_KW expr \n"; $$ = new exprs::IfThen($2, $4); }
  | IF_KW expr THEN_KW expr ELSE_KW expr { std::cout << "\texpr -> IF_KW expr THEN_KW expr ELSE_KW expr\n"; $$ = new exprs::IfThenElse($2, $4, $6); }
  | WHILE_KW expr DO_KW expr { std::cout << "\texpr -> WHILE_KW expr DO_KW expr\n"; $$ = new exprs::WhileDo($2, $4); }
- | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr { std::cout << "\texpr -> FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr\n"; $$ = new exprs::ForToDo($2, $4, $6, $8);  }
+ | FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr { std::cout << "\texpr -> FOR_KW IDENTIFIER COLONEQ expr TO_KW expr DO_KW expr\n"; $$ = new exprs::ForToDo($2, $4, $6, $8);  free($2); }
  | BREAK_KW { std::cout << "\texpr -> BREAK_KW\n"; $$ = new exprs::Break(); }
  | LET_KW declist IN_KW exprseq END_KW { /* with optional exprseq */ std::cout << "\texpr -> LET_KW declist IN_KW exprseq END_KW\n"; $$ = new exprs::LetIn($2, $4); }
  | LET_KW declist IN_KW END_KW { /* withOUT optional exprseq */ std::cout << "\texpr -> LET_KW declist IN_KW END_KW\n"; $$ = new exprs::LetIn($2, new ExprSequenceNode()); }
@@ -128,8 +128,8 @@ expr: IDENTIFIER LPAREN RPAREN { std::cout << "\texpr -> IDENTIFIER LPAREN RPARE
  | lvalue COLONEQ expr { std::cout << "\texpr -> lvalue COLONEQ expr\n"; $$ = new exprs::AssignNode($1, $3); }
  ;
 
-fieldlist: IDENTIFIER '=' expr { std::cout << "\tfieldlist -> IDENTIFIER '=' expr\n"; $$ = new FieldListNode(); $$->append_to(new FieldNode($1,$3)); }
- | fieldlist ',' IDENTIFIER '=' expr { std::cout << "\tfieldlist -> fieldlist ',' IDENTIFIER\n"; $$ = $1; $$->append_to(new FieldNode($3,$5)); }
+fieldlist: IDENTIFIER '=' expr { std::cout << "\tfieldlist -> IDENTIFIER '=' expr\n"; $$ = new FieldListNode(); $$->append_to(new FieldNode($1,$3));  free($1); }
+ | fieldlist ',' IDENTIFIER '=' expr { std::cout << "\tfieldlist -> fieldlist ',' IDENTIFIER\n"; $$ = $1; $$->append_to(new FieldNode($3,$5));  free($3); }
  ;
 
 declist: declaration { std::cout << "\tdeclist -> declaration\n"; $$ = new DeclarationListNode(); $$->append_to($1); }
@@ -141,14 +141,14 @@ declaration: typedec { std::cout << "\tdeclaration -> typedec\n"; $$ = $1; }
  | fundec { std::cout << "\tdeclaration -> fundec\n";  $$ = $1; }
  ;
 
-vardec: VAR_KW IDENTIFIER COLONEQ expr { std::cout << "\tvardec -> VAR_KW IDENTIFIER COLONEQ expr\n"; $$ = new decls::VarDecl($2,nullptr,$4, false);}
- | VAR_KW IDENTIFIER COLON typeid COLONEQ expr { std::cout << "\tvardec -> VAR_KW IDENTIFIER COLON typeid COLONEQ expr\n";  $$ = new decls::VarDecl($2, $4, $6, true); }
+vardec: VAR_KW IDENTIFIER COLONEQ expr { std::cout << "\tvardec -> VAR_KW IDENTIFIER COLONEQ expr\n"; $$ = new decls::VarDecl($2,nullptr,$4, false);  free($2); }
+ | VAR_KW IDENTIFIER COLON typeid COLONEQ expr { std::cout << "\tvardec -> VAR_KW IDENTIFIER COLON typeid COLONEQ expr\n";  $$ = new decls::VarDecl($2, $4, $6, true); free($2); }
  ;
 
-fundec: FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN EQUAL expr { $$ = new decls::FuncDecl($2,$4,nullptr,$7,false); }
- | FUNCTION_KW IDENTIFIER LPAREN RPAREN EQUAL expr {  $$ = new decls::FuncDecl($2,new TypeFeildsNode(),nullptr,$6,false); }
- | FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN COLON typeid EQUAL expr { $$ = new decls::FuncDecl($2,$4,$7,$9,true); }
- | FUNCTION_KW IDENTIFIER LPAREN RPAREN COLON typeid EQUAL expr { $$ = new decls::FuncDecl($2,new TypeFeildsNode(),$6,$8,true); }
+fundec: FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN EQUAL expr { $$ = new decls::FuncDecl($2,$4,nullptr,$7,false); free($2); }
+ | FUNCTION_KW IDENTIFIER LPAREN RPAREN EQUAL expr {  $$ = new decls::FuncDecl($2,new TypeFeildsNode(),nullptr,$6,false); free($2); }
+ | FUNCTION_KW IDENTIFIER LPAREN typefields RPAREN COLON typeid EQUAL expr { $$ = new decls::FuncDecl($2,$4,$7,$9,true); free($2); }
+ | FUNCTION_KW IDENTIFIER LPAREN RPAREN COLON typeid EQUAL expr { $$ = new decls::FuncDecl($2,new TypeFeildsNode(),$6,$8,true); free($2); }
  ;
 
 typedec: TYPE_KW typeid EQUAL type { std::cout << "\typedec -> TYPE_KW typeid '=' type\n"; $$ = new decls::TypeDecl($2,$4); }
@@ -163,7 +163,7 @@ type: typeid { std::cout << "\ttype -> typeid\n"; $$ = new types::BasicType($1);
 typefields: typefield { std::cout << "\ttypefields -> typefield\n"; $$ = new TypeFeildsNode(); $$->append_to($1); }
  | typefields ',' typefield { std::cout << "\ttypefields -> typefields ',' typefield\n"; $$ = $1; $$->append_to($3); }
  ;
-typefield: IDENTIFIER COLON typeid { std::cout << "\ttypefield -> IDENTIFIER\n"; $$ = new TypeFeildNode($1,$3); }
+typefield: IDENTIFIER COLON typeid { std::cout << "\ttypefield -> IDENTIFIER\n"; $$ = new TypeFeildNode($1,$3); free($1); }
  ;
 
 exprseq: expr { std::cout << "\texprseq -> expr\n"; $$ = new ExprSequenceNode(); $$->append_to($1); }
@@ -174,7 +174,7 @@ exprlist: expr { std::cout << "\texprlist -> expr\n";  $$ = new ExprListNode(); 
  | exprlist COMMA expr { std::cout << "exprlist -> exprlist ',' expr\n";  $$ = $1; $$->append_to($3); }
  ;
 
-typeid: IDENTIFIER { std::cout << "\ttypeid -> IDENTIFIER\n"; $$ = new TypeIDNode($1); }
+typeid: IDENTIFIER { std::cout << "\ttypeid -> IDENTIFIER\n"; $$ = new TypeIDNode($1); free($1); }
 
 op: PLUS { std::cout << "\top -> '+'\n"; $$ = exprs::BinaryOp::ADD; }
  | MINUS { std::cout << "\top -> '-'\n"; $$ = exprs::BinaryOp::SUB; }
@@ -190,7 +190,7 @@ op: PLUS { std::cout << "\top -> '+'\n"; $$ = exprs::BinaryOp::ADD; }
  | VERTICAL { std::cout << "\top -> '|'\n"; $$ = exprs::BinaryOp::OR; }
  ;
 
-lvalue: IDENTIFIER { std::cout << "\tlvalue -> IDENTIFIER\n"; $$ = new lvals::IdLval($1); }
-    | lvalue PERIOD IDENTIFIER { std::cout << "\tlvalue -> PERIOD IDENTIFIER\n"; $$ = new lvals::AttrAccess($1,$3);  }
+lvalue: IDENTIFIER { std::cout << "\tlvalue -> IDENTIFIER\n"; $$ = new lvals::IdLval($1); free($1); }
+    | lvalue PERIOD IDENTIFIER { std::cout << "\tlvalue -> PERIOD IDENTIFIER\n"; $$ = new lvals::AttrAccess($1,$3); free($3); }
     ;
 %%
