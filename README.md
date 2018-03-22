@@ -17,8 +17,6 @@ expr: expr op expr
 Upon examining the `tiger.output` file that `bison -d` produces, we found that at almost every possible instance, the compiler
 is confused about whether to shift at the first `expr` or to reduce at the last `expr` present in some other rule.  
 
-Solution pending.
-
 As of March 20 2018, we managed to resolve the S/R errors by declaring a fake token (`FAKE`) with a low precedence and applying the precedence to all rules where conflicts were present.
 
 Later, when adding array indexing, there was another reduce/reduce conflict between array indexing (lvalue) and array creation (expr). For example,
