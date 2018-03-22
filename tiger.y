@@ -10,6 +10,11 @@ int yyparse();
 using namespace tiger;
 tiger::ASTNode * rootnode;
 
+struct IdArray{
+    char * id;
+    tiger::ExprNode* arrexpr;
+};
+
 %}
 
 %union {
@@ -28,6 +33,7 @@ tiger::ASTNode * rootnode;
   int64_t int_value;
   char * str;
   tiger::exprs::BinaryOp bin_op;
+  IdArray arr_acc;
 }
 /* declare types */
 %type <expr> expr
@@ -41,6 +47,7 @@ tiger::ASTNode * rootnode;
 %type <type_node> type
 %type <type_field> typefield
 %type <type_fields> typefields
+%type <arr_acc> array_acc
 
 
 
@@ -91,6 +98,7 @@ tiger::ASTNode * rootnode;
     VERTICAL
     COLONEQ
 
+%nonassoc OF_KW
 %nonassoc THEN_KW
 %nonassoc ELSE_KW
 %nonassoc FAKE
@@ -127,7 +135,7 @@ expr: IDENTIFIER LPAREN RPAREN { $$ = new exprs::FunctionCall($1,new ExprListNod
  | IDENTIFIER LPAREN exprlist RPAREN { $$ = new exprs::FunctionCall($1,$3); free($1); }
  | typeid LBRACE fieldlist RBRACE { $$ = new exprs::RecCreate($1,$3); }
  | typeid LBRACE RBRACE { /* fieldlist is optional */ $$ = new exprs::RecCreate($1,new FieldListNode()); }
- | typeid LBRACK expr RBRACK OF_KW expr %prec FAKE { $$ = new exprs::ArrCreate($1,$3,$6); }
+ | array_acc OF_KW expr %prec FAKE { $$ = new exprs::ArrCreate(new TypeIDNode($1.id),$1.arrexpr,$3); free($1.id); }
  | IF_KW expr THEN_KW expr { $$ = new exprs::IfThen($2, $4); }
  | IF_KW expr THEN_KW expr ELSE_KW expr { $$ = new exprs::IfThenElse($2, $4, $6); }
  | WHILE_KW expr DO_KW expr %prec FAKE { $$ = new exprs::WhileDo($2, $4); }
@@ -137,6 +145,9 @@ expr: IDENTIFIER LPAREN RPAREN { $$ = new exprs::FunctionCall($1,new ExprListNod
  | LET_KW declist IN_KW END_KW { /* withOUT optional exprseq */ $$ = new exprs::LetIn($2, new ExprSequenceNode()); }
  | lvalue { $$ = new exprs::LvalNode($1); }
  | lvalue COLONEQ expr %prec FAKE { $$ = new exprs::AssignNode($1, $3); }
+ ;
+
+array_acc: IDENTIFIER LBRACK expr RBRACK { $$ = IdArray {$1,$3}; }
  ;
 
 fieldlist: IDENTIFIER EQUAL expr {  $$ = new FieldListNode(); $$->append_to(new FieldNode($1,$3));  free($1); }
@@ -189,7 +200,8 @@ typeid: IDENTIFIER { $$ = new TypeIDNode($1); free($1); }
  ;
 
 lvalue: IDENTIFIER { $$ = new lvals::IdLval($1); free($1); }
-  | lvalue LBRACK expr RBRACK { $$ = new lvals::BracketAccess($1,$3); }
-  | lvalue PERIOD IDENTIFIER { $$ = new lvals::AttrAccess($1,$3); free($3); }
+ | array_acc { $$ = new lvals::BracketAccess(new lvals::IdLval($1.id),$1.arrexpr); free($1.id); }
+ | lvalue LBRACK expr RBRACK { $$ = new lvals::BracketAccess($1,$3); }
+ | lvalue PERIOD IDENTIFIER { $$ = new lvals::AttrAccess($1,$3); free($3); }
  ;
 %%

@@ -18,13 +18,11 @@ Upon examining the `tiger.output` file that `bison -d` produces, we found that a
 is confused about whether to shift at the first `expr` or to reduce at the last `expr` present in some other rule.  
 Solution pending.
 
-Later, when adding array indexing, there was another reduce/reduce conflict between array indexing (lvalue) and array creation (expr). This was not resolved, and remains a problem. Right now, programs of the style
+Later, when adding array indexing, there was another reduce/reduce conflict between array indexing (lvalue) and array creation (expr). For example,
 
-    x[5] := 6
+    x[5] := rec_arr[2] of rec { val = 42 }
 
-Gives a syntax error.
-
-There is also something funny happening with strings, so many string expressions also give errors.
+This problem was fixed by adding in a special rule just for array indexing, and then using that for both array creation and indexing. This changed the reduce/reduce rule to a shift/reduce rule, and examples compiled correctly. 
 
 ### Test design
 
@@ -32,4 +30,4 @@ To make testing easier, we copied various code examples from the tiger reference
 
 ### AST design
 
-The AST was designed to capture as much type structure as possible. So there is an expression, lvalue, etc class which all expressions, lvalues, etc, inherit from. This allows basic type checking in the AST, and also gives any recursive analysis run more information.
+The AST was designed to capture as much type structure as possible. So there is an expression, lvalue, etc class which all expressions, lvalues, etc, inherit from. This allows basic type checking in the AST, and also gives any recursive analysis the most specific type that is also completely general.
