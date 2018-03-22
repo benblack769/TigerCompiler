@@ -10,11 +10,6 @@ int yyparse();
 using namespace tiger;
 tiger::ASTNode * rootnode;
 
-struct IdArray{
-    char * id;
-    tiger::ExprNode* arrexpr;
-};
-
 %}
 
 %union {

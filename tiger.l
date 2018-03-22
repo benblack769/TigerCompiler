@@ -5,6 +5,8 @@
 #include "ast.hh"
 #include "tiger.tab.h"
 int depth = 0;
+
+
 %}
 
 %%

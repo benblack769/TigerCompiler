@@ -10,6 +10,7 @@
 /* interface to the lexer */
 void yyerror(char *s, ...);
 
+
 namespace tiger {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -684,3 +685,9 @@ namespace types{
 }
 
 } // namespace
+
+
+struct IdArray{
+    char * id;
+    tiger::ExprNode* arrexpr;
+};
