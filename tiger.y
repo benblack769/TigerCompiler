@@ -1,8 +1,14 @@
+%locations
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include "ast.hh"
+#include "bison_header_info.hh"
+#include "ast_interface.hh"
+#include "ast_specifics/decs_ast.hh"
+#include "ast_specifics/expr_ast.hh"
+#include "ast_specifics/lval_ast.hh"
+#include "ast_specifics/types_ast.hh"
 
 int yylex();
 int yyparse();
@@ -27,7 +33,6 @@ tiger::ASTNode * rootnode;
   tiger::TypeIDNode* type_id;
   int64_t int_value;
   char * str;
-  tiger::exprs::BinaryOp bin_op;
   IdArray arr_acc;
 }
 /* declare types */

@@ -1,5 +1,6 @@
 #include "catch.hpp"
-#include "ast.hh"
+#include "bison_header_info.hh"
+#include "ast_interface.hh"
 #include "tiger.tab.h"
 #include <algorithm>
 #include <iostream>
@@ -38,12 +39,12 @@ template<class NodeType>
 bool node_is_type(const ASTNode * node){
     return (dynamic_cast<NodeType*>(const_cast<ASTNode *>(node))) != nullptr;
 }
-
+/*
 TEST_CASE("Test node type checking", "[basic_case]") {
     using namespace exprs;
     REQUIRE(node_is_type<StringNode>(new StringNode("hithere")));
     REQUIRE(!node_is_type<StringNode>(new IntNode(12123)));
-}
+}*/
 
 TEST_CASE("Basic case", "[basic_case]") {
     //get_ast_node_from_string("x + y");
@@ -95,6 +96,8 @@ TEST_CASE("File testing") {
     REQUIRE(check_file("language_examples/loop.t"));
     REQUIRE(check_file("language_examples/record.t"));
     REQUIRE(check_file("language_examples/sequences.t"));
+    //REQUIRE(check_file("language_examples/merge_example.t"));
+    //REQUIRE(check_file("language_examples/two_queens_example.t"));
 }
 TEST_CASE("Operator testing") {
 

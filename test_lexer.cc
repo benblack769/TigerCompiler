@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "ast.hh"
+#include "bison_header_info.hh"
 #include "tiger.tab.h"
 #include <algorithm>
 #include <vector>

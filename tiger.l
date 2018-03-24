@@ -1,8 +1,9 @@
 %option noyywrap
+%option yylineno
 %option stack
 %x comment
 %{
-#include "ast.hh"
+#include "bison_header_info.hh"
 #include "tiger.tab.h"
 int depth = 0;
 
