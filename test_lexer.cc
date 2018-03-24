@@ -10,6 +10,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 //necessary info from lex and bison source files
 YYSTYPE yylval;
+YYLTYPE yylloc;
 
 struct yy_buffer_state;
 #define YY_BUFFER_STATE struct yy_buffer_state *

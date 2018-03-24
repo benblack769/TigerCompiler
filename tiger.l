@@ -6,6 +6,7 @@
 #include "bison_header_info.hh"
 #include "tiger.tab.h"
 int depth = 0;
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
 
 
 %}

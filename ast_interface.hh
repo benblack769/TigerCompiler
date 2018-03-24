@@ -7,15 +7,35 @@
 #include <cassert>
 #include <iostream>
 
+struct SourceLoc{
+    int start_line = -1;
+    int start_col = -1;
+    int end_line = -1;
+    int end_col = -1;
+};
+
+inline std::ostream & operator << (std::ostream & os, const SourceLoc & loc){
+    if(loc.start_line == loc.end_line){
+        return os << "line:" << loc.start_line;// << ", col: (" << loc.start_col << ", " << loc.end_col << ")";
+    }
+    else{
+        return os << "from line:" << loc.start_line // ", col:" << loc.start_col
+                        << " to " << loc.end_line;// << ", col:" << loc.end_col;
+    }
+}
+
 namespace tiger {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Base AST node class, to define the hierarchy.
 class ASTNode {
+protected:
+    SourceLoc loc;
  public:
   using ASTptr = const ASTNode*; // Can't use smart ptr in union :(
 
   ASTNode() = default;
+  virtual void set_source_loc(SourceLoc in_loc){ loc = in_loc; std::cout << loc << std::endl;}
   virtual ~ASTNode() = default;
   virtual void print(std::ostream & os) const = 0;
 };

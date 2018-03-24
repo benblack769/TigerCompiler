@@ -1,8 +1,6 @@
 #pragma once
 void yyerror(char *s, ...);
-struct ErrorInfo{
 
-};
 namespace tiger{
 class ASTNode;
 class ExprNode;
