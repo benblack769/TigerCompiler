@@ -124,6 +124,12 @@ TEST_CASE("String testing", "[string testing]") {
         auto tok_list = build_token_list(" \"hi \\\\\" 123 ");
         REQUIRE(tok_list[0] == STRING);
     }
+    SECTION("check two strings") {
+        auto tok_list = build_token_list(" \"hi \" 123 \" 123 \"");
+        auto expected = { STRING, INTEGER,  STRING };
+        REQUIRE(expected.size() == tok_list.size());
+        REQUIRE(std::equal(expected.begin(), expected.end(), tok_list.begin()));
+    }
     //not checking other escapes in this homework
     //full escape regex: \"([^\\]|(\\(a|b|f|n|r|t|v|\"|\\|([0-3][0-7][0-7])|(x[0-9a-fA-F][0-9a-fA-F]))))*\"
     /*SECTION("check other escapes positive") {
