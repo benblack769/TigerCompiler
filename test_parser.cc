@@ -96,8 +96,8 @@ TEST_CASE("File testing") {
     REQUIRE(check_file("language_examples/loop.t"));
     REQUIRE(check_file("language_examples/record.t"));
     REQUIRE(check_file("language_examples/sequences.t"));
-    //REQUIRE(check_file("language_examples/merge_example.t"));
-    //REQUIRE(check_file("language_examples/two_queens_example.t"));
+    REQUIRE(check_file("language_examples/merge_example.t"));
+    REQUIRE(check_file("language_examples/two_queens_example.t"));
 }
 TEST_CASE("Operator testing") {
 
