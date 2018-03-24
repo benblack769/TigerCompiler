@@ -1,3 +1,9 @@
 *.o
 test_lexer
 lex.yy.c
+*.cmp
+tiger.tab*
+test_parser
+test_lexer
+parse_and_print
+tiger.output
