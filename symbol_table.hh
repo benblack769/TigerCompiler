@@ -34,15 +34,16 @@ struct TypeExpr{
     }
 };
 struct TypeTable{
-    vector<typeid_ty, TypeExpr> typevals;
+    typeid_ty type_num = 0;
+    unordered_map<typeid_ty, TypeExpr> typevals;
     unordered_map<string, typeid_ty> types;
     TypeTable(){
         add_type("string", TypeExpr(BaseType::STRING));
         add_type("int", TypeExpr(BaseType::INT));
     }
     typeid_ty add_type(string tyid, const TypeExpr & ty_expr){
-        typeid_ty cur_type = typevals.size();
-        typevals.push_back(ty_expr);
+        typeid_ty cur_type = type_num;
+        type_num += 1;
         types[tyid] = cur_type;
         return cur_type;
     }
