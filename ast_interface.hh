@@ -53,6 +53,7 @@ class ExprNode: public ASTNode {
  public:
   ExprNode() = default;
   virtual ~ExprNode() = default;
+  virtual int expr_type(Envirornement & env) = 0;
   virtual void print(std::ostream & os) const override = 0;
 };
 
