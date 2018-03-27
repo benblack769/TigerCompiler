@@ -18,7 +18,7 @@ SourceLoc t_conv(YYLTYPE loc){
 }
 
 using namespace tiger;
-tiger::ASTNode * rootnode;
+tiger::ExprNode * rootnode;
 
 %}
 

@@ -1,8 +1,8 @@
 CXX=g++   # Can switch to g++ if desired
-CC=gcc   # Can switch to g++ if desired
+#CC=gcc   # Can switch to g++ if desired
 
 # CXX=g++-6
-CFLAGS=-g -O0 -Wall -pedantic
+#CFLAGS=-g -O0 -Wall -pedantic
 CXXFLAGS=-g -O0 -std=c++14  -I . #-Werror
 #CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -Wextra -Werror
 LDFLAGS=$(CXXFLAGS)
@@ -30,11 +30,23 @@ catch.o: catch.cc
 test_parser.o: test_parser.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ $^
 
-test_parser: tiger.tab.o lex.yy.o parse_err.o catch.o test_parser.o
+test_parser: tiger.tab.o lex.yy.o parse_err.o catch.o test_parser.o  dec_list_impl.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 test_lexer.o: test_lexer.cc
 	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ $^
+
+test_semantics.o: test_semantics.cc
+	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ $^
+
+semantic_check.o: semantic_check.cc
+	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ $^
+
+dec_list_impl.o: ast_specifics/dec_list_impl.cc
+	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ $^
+
+test_semantics: tiger.tab.o lex.yy.o parse_err.o catch.o dec_list_impl.o semantic_check.o
+	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 test_lexer: lex.yy.o test_lexer.o catch.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
@@ -42,7 +54,7 @@ test_lexer: lex.yy.o test_lexer.o catch.o
 parse_and_print.o: parse_and_print.cc
 	$(CXX) $(LDFLAGS) $(LIBS) -c -o $@ $^
 
-parse_and_print: parse_and_print.o tiger.tab.o lex.yy.o parse_err.o
+parse_and_print: parse_and_print.o tiger.tab.o lex.yy.o parse_err.o  dec_list_impl.o semantic_check.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 test: all

@@ -13,6 +13,9 @@ class BasicType : public TypeNode {
     virtual ~BasicType(){
         delete type;
     }
+    virtual UnresolvedType unresolved_type(){
+        return name_body(type->id_name());
+    }
     virtual void print(std::ostream & os) const override{
         os << *type;
     }
@@ -26,6 +29,9 @@ class ArrayType : public TypeNode {
 
     virtual ~ArrayType(){
         delete type;
+    }
+    virtual UnresolvedType unresolved_type(){
+        return array_body(type->id_name());
     }
     virtual void print(std::ostream & os) const override{
         os << " array of " << *type;
@@ -41,6 +47,9 @@ class TypeFeildType : public TypeNode {
 
     virtual ~TypeFeildType(){
         delete type_fields;
+    }
+    virtual UnresolvedType unresolved_type(){
+        return record_body(type_fields->get_record_fields());
     }
     virtual void print(std::ostream & os) const override{
         os << "{" << *type_fields << "}";

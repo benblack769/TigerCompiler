@@ -6,54 +6,22 @@
 #include <memory>
 #include <cassert>
 #include <iostream>
+#include "semantic_check.hh"
+#include "helper_files/unresolved_type_info.hh"
+#include "helper_files/list_helper.hh"
+#include "ast_node.hh"
+#include "symbol_table.hh"
 
-struct SourceLoc{
-    int start_line = -1;
-    int start_col = -1;
-    int end_line = -1;
-    int end_col = -1;
-};
-
-inline std::ostream & operator << (std::ostream & os, const SourceLoc & loc){
-    if(loc.start_line == loc.end_line){
-        return os << "line:" << loc.start_line;// << ", col: (" << loc.start_col << ", " << loc.end_col << ")";
-    }
-    else{
-        return os << "from line:" << loc.start_line // ", col:" << loc.start_col
-                        << " to " << loc.end_line;// << ", col:" << loc.end_col;
-    }
-}
 
 namespace tiger {
 
-///////////////////////////////////////////////////////////////////////////////
-// Base AST node class, to define the hierarchy.
-class ASTNode {
-protected:
-    SourceLoc loc;
- public:
-  using ASTptr = const ASTNode*; // Can't use smart ptr in union :(
-
-  ASTNode() = default;
-  virtual void set_source_loc(SourceLoc in_loc){ loc = in_loc; }
-  virtual ~ASTNode() = default;
-  virtual void print(std::ostream & os) const = 0;
-};
-
-inline std::ostream & operator << (std::ostream & os, const ASTNode & node){
-    node.print(os);
-    return os;
-}
-inline std::ostream & operator << (std::ostream & os, const ASTNode * node){
-    node->print(os);
-    return os;
-}
 
 class ExprNode: public ASTNode {
  public:
   ExprNode() = default;
   virtual ~ExprNode() = default;
-  virtual int expr_type(Envirornement & env) = 0;
+  virtual void check_type_scopes(TypeTable & env){}
+  //virtual int expr_type(Envirornement & env) = 0;
   virtual void print(std::ostream & os) const override = 0;
 };
 
@@ -64,10 +32,13 @@ class LvalueNode: public ASTNode {
   virtual void print(std::ostream & os) const override = 0;
 };
 
+enum class DeclType{VAR, FUNC, TYPE};
 class DeclarationNode: public ASTNode {
  public:
   DeclarationNode() = default;
   virtual ~DeclarationNode() = default;
+  virtual std::string name() = 0;
+  virtual DeclType type() = 0;
   virtual void print(std::ostream & os) const override = 0;
 };
 
@@ -75,27 +46,9 @@ class TypeNode: public ASTNode {
  public:
   TypeNode() = default;
   virtual ~TypeNode() = default;
+  virtual UnresolvedType unresolved_type() = 0;
   virtual void print(std::ostream & os) const override = 0;
 };
-
-//helpers for list nodes
-template<class item_ty>
-inline std::vector<ASTNode *> base_list(const std::vector<std::unique_ptr<item_ty>> & list){
-    std::vector<ASTNode *> res;
-    for(auto & val : list){
-        res.push_back(val.get());
-    }
-    return res;
-}
-
-inline void print_list(std::ostream & os, const std::vector<ASTNode *> & item_list, std::string sep){
-    for(size_t i = 0; i < item_list.size(); i++){
-        os << *item_list[i];
-        if(i != item_list.size()-1){
-            os << sep;
-        }
-    }
-}
 
 class ExprListNode: public ASTNode {
  public:
@@ -103,6 +56,11 @@ class ExprListNode: public ASTNode {
   virtual ~ExprListNode(){}
   virtual void append_to(ExprNode * expr){
       list.push_back(std::unique_ptr<ExprNode>(expr));
+  }
+  virtual void check_type_scopes(TypeTable & env){
+      for(auto & item : list){
+          item->check_type_scopes(env);
+      }
   }
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ", ");
@@ -124,6 +82,11 @@ class ExprSequenceNode: public ASTNode {
   virtual bool singleton(){
       return list.size() == 1;
   }
+  virtual void check_type_scopes(TypeTable & env){
+      for(auto & item : list){
+          item->check_type_scopes(env);
+      }
+  }
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ";\n");
   }
@@ -138,6 +101,9 @@ class FieldNode: public ASTNode{
   virtual ~FieldNode(){
       delete expr;
   }
+  virtual void check_type_scopes(TypeTable & env){
+      expr->check_type_scopes(env);
+  }
   virtual void print(std::ostream & os) const override{
       os << id << " = " << *expr;
   }
@@ -151,6 +117,14 @@ class TypeIDNode : public ASTNode {
   TypeIDNode(std::string in_id):
      my_id(in_id){}
   virtual ~TypeIDNode(){
+  }
+  virtual std::string id_name(){
+      return my_id;
+  }
+  virtual void in_scope(TypeTable & table){
+      if(!table.has_type(my_id)){
+          throw runtime_error("type out of scope!");
+      }
   }
   virtual void print(std::ostream & os) const override{
       os << my_id;
@@ -167,6 +141,9 @@ class TypeFeildNode: public ASTNode {
   virtual ~TypeFeildNode(){
       delete ty;
   }
+  pair<string, string> field_pair(){
+      return make_pair(id, ty->id_name());
+  }
   virtual void print(std::ostream & os) const override{
       os << id << " : " << *ty;
   }
@@ -182,31 +159,40 @@ class FieldListNode: public ASTNode {
   virtual void append_to(FieldNode * expr){
       list.push_back(std::unique_ptr<FieldNode>(expr));
   }
+  virtual void check_type_scopes(TypeTable & env){
+      for(auto & item : list){
+          item->check_type_scopes(env);
+      }
+  }
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ",");
   }
   std::vector<std::unique_ptr<FieldNode>> list;
 };
 
-
 class DeclarationListNode: public ASTNode {
  public:
    DeclarationListNode(){}
    virtual ~DeclarationListNode(){}
-   virtual void append_to(DeclarationNode * expr){
-       list.push_back(std::unique_ptr<DeclarationNode>(expr));
-   }
-   virtual void print(std::ostream & os) const override {
-       print_list(os, base_list(list), "\n");
-   }
+   virtual void append_to(DeclarationNode * expr);
+   virtual void print(std::ostream & os) const override ;
+   virtual void load_and_check_types(TypeTable & env);
    std::vector<std::unique_ptr<DeclarationNode>> list;
 };
+
 class TypeFeildsNode: public ASTNode {
  public:
    TypeFeildsNode(){}
    virtual ~TypeFeildsNode(){}
    virtual void append_to(TypeFeildNode * expr){
        list.push_back(std::unique_ptr<TypeFeildNode>(expr));
+   }
+   vector<pair<string,string>> get_record_fields(){
+       vector<pair<string,string>> res;
+       for(auto & val : list){
+           res.push_back(val->field_pair());
+       }
+       return res;
    }
    virtual void print(std::ostream & os) const override {
        print_list(os, base_list(list), ", ");

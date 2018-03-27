@@ -5,6 +5,8 @@ namespace tiger {
 
 
 namespace decls{
+
+
 class VarDecl: public DeclarationNode {
  public:
   VarDecl(std::string id, TypeIDNode * type_id, ExprNode * expr, bool has_type_decl):
@@ -16,6 +18,12 @@ class VarDecl: public DeclarationNode {
     virtual ~VarDecl(){
         delete _type_id;
         delete _expr;
+    }
+    std::string name(){
+        return _id;
+    }
+    DeclType type(){
+        return DeclType::VAR;
     }
     virtual void print(std::ostream & os) const override{
         os << " var " << _id;
@@ -44,6 +52,12 @@ class FuncDecl: public DeclarationNode {
         delete _type_id;
         delete _expr;
     }
+    std::string name(){
+        return _id;
+    }
+    DeclType type(){
+        return DeclType::FUNC;
+    }
     virtual void print(std::ostream & os) const override{
         os << " function " << _id << "(" << *_ty_fields << ")";
         if(_has_type_decl){
@@ -68,6 +82,13 @@ class TypeDecl: public DeclarationNode {
         delete _id;
         delete _type;
     }
+    std::string name(){
+        return _id->id_name();
+    }
+    DeclType type(){
+        return DeclType::TYPE;
+    }
+    UnresolvedType typenode(){ return _type->unresolved_type(); }
     virtual void print(std::ostream & os) const override{
         os << " type " << *_id << "=" << *_type;
     }

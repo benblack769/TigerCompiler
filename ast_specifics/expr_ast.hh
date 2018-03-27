@@ -61,6 +61,9 @@ class NegateNode : public ExprNode {
     virtual ~NegateNode(){
         delete child_;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        child_->check_type_scopes(env);
+    }
     virtual void print(std::ostream & os) const override{
         os << '-' << *child_;
     }
@@ -98,6 +101,10 @@ class BinaryNode : public ExprNode {
         delete left;
         delete right;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        left->check_type_scopes(env);
+        right->check_type_scopes(env);
+    }
     virtual void print(std::ostream & os) const override{
         os << "(" << *left << str_rep(op) << *right << ")";
     }
@@ -117,6 +124,9 @@ class AssignNode : public ExprNode {
         delete target;
         delete source;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        source->check_type_scopes(env);
+    }
     virtual void print(std::ostream & os) const override{
         os << *target << ":=" << *source;
     }
@@ -134,6 +144,9 @@ class FunctionCall : public ExprNode {
     virtual ~FunctionCall(){
         delete args;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        args->check_type_scopes(env);
+    }
     virtual void print(std::ostream & os) const override{
         os << func_name << "(" << *args << ")";
     }
@@ -149,6 +162,9 @@ class ExprSequenceEval : public ExprNode {
 
     virtual ~ExprSequenceEval(){
         delete exprs;
+    }
+    virtual void check_type_scopes(TypeTable & env){
+        exprs->check_type_scopes(env);
     }
     virtual void print(std::ostream & os) const override{
         if(exprs->singleton()){
@@ -171,6 +187,10 @@ class IfThen : public ExprNode {
         delete _cond;
         delete _res;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        _cond->check_type_scopes(env);
+        _res->check_type_scopes(env);
+    }
     virtual void print(std::ostream & os) const override{
         os << " if " << "(" << *_cond << ")" << " then " << "(" << *_res<< ")";
     }
@@ -190,6 +210,11 @@ class IfThenElse : public ExprNode {
         delete _res_1;
         delete _res_2;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        _cond->check_type_scopes(env);
+        _res_1->check_type_scopes(env);
+        _res_2->check_type_scopes(env);
+    }
     virtual void print(std::ostream & os) const override{
         os << " if " << "(" << *_cond << ")" << " then " << "(" << *_res_1<< ")" << " else " << "(" << *_res_2 << ")";
     }
@@ -207,6 +232,10 @@ class WhileDo : public ExprNode {
     virtual ~WhileDo(){
         delete _cond;
         delete _res;
+    }
+    virtual void check_type_scopes(TypeTable & env){
+        _cond->check_type_scopes(env);
+        _res->check_type_scopes(env);
     }
     virtual void print(std::ostream & os) const override{
         os << " while " << "(" << *_cond << ")" << " do " << "(" << *_res<< ")";
@@ -226,6 +255,11 @@ class ForToDo : public ExprNode {
         delete _initial;
         delete _end;
         delete _eval_expr;
+    }
+    virtual void check_type_scopes(TypeTable & env){
+        _initial->check_type_scopes(env);
+        _end->check_type_scopes(env);
+        _eval_expr->check_type_scopes(env);
     }
     virtual void print(std::ostream & os) const override{
         os << " for " << _var_id << ":=" << *_initial << " to " << *_end << " do " << *_eval_expr;
@@ -257,6 +291,10 @@ class ArrCreate : public ExprNode {
         delete _value_expr;
         delete _size_expr;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        _value_expr->check_type_scopes(env);
+        _size_expr->check_type_scopes(env);
+    }
     virtual void print(std::ostream & os) const override{
         os << *_type << "[" << *_size_expr << "]" << " of " << *_value_expr;
     }
@@ -276,6 +314,10 @@ class RecCreate : public ExprNode {
         delete _type;
         delete _fields;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        _type->in_scope(env);
+        _fields->check_type_scopes(env);
+    }
     virtual void print(std::ostream & os) const override{
         os << *_type << "{" << *_fields << "}";
     }
@@ -293,6 +335,11 @@ class LetIn : public ExprNode {
         delete _decl_list;
         delete _expr_sequ;
     }
+    virtual void check_type_scopes(TypeTable & env){
+        TypeTable new_env = env;
+        _decl_list->load_and_check_types(new_env);
+        _expr_sequ->check_type_scopes(new_env);
+    }
     virtual void print(std::ostream & os) const override{
         os << " let " << *_decl_list << " in " << *_expr_sequ << " end ";
     }
@@ -309,6 +356,10 @@ class TypeCreation : public ExprNode {
     virtual ~TypeCreation(){
         delete _type_id;
         delete _feild_list;
+    }
+    virtual void check_type_scopes(TypeTable & env){
+        _type_id->in_scope(env);
+        _feild_list->check_type_scopes(env);
     }
     virtual void print(std::ostream & os) const override{
         os << *_type_id << "{" << *_feild_list << "}";

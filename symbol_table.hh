@@ -1,19 +1,21 @@
 #pragma once
 #include <unordered_map>
+#include <unordered_set>
 #include <stdexcept>
+#include "helper_files/many_to_one.hh"
 using namespace std;
 
 enum class BaseType { INT, VOID, STRING, NIL, ARRAY, RECORD };
 
-using type_id = int;
-constexpr type_id null_id = -1;
+using typeid_ty = int;
+constexpr typeid_ty null_id = -1;
 
 struct TypeExpr{
     BaseType type;
     //arrays store name of type
-    type_id array_type;
+    typeid_ty array_type;
     //maps from name feild to type field (entry in type table)
-    unordered_map<string,type_id> record_type;
+    unordered_map<string,typeid_ty> record_type;
     TypeExpr(BaseType b_type){
         assert(b_type == BaseType::INT ||
                b_type == BaseType::STRING ||
@@ -21,42 +23,18 @@ struct TypeExpr{
                b_type == BaseType::NIL);
         type = b_type;
     }
-    TypeExpr(string array_ty_name){
+    TypeExpr(typeid_ty array_ty_id){
         type = BaseType::ARRAY;
-        array_type_name = array_ty_name;
+        array_type = array_ty_id;
     }
-    TypeExpr(vector<pair<string,typeid_ty>> record_entries){
-        record_type.assign(record_entries.begin(), record_entries.end());
+    TypeExpr(vector<pair<string,typeid_ty>> record_entries):
+            record_type(record_entries.begin(), record_entries.end()){
+        if(record_entries.size() != record_type.size()){
+            throw runtime_error("record labels must be unique");
+        }
         type = BaseType::RECORD;
     }
 };
-enum class UnTypes { NAME, ARRAY, RECORD };
-struct UnresolvedType{
-    UnTypes type;
-    //arrays store name of type
-    string array_type;
-    string name_type;
-    //maps from name feild to type field (entry in type table)
-    vector<pair<string,string>> record_type;
-};
-UnresolvedType array_body(string arr_name){
-    UnresolvedType res;
-    res.type = UnTypes::ARRAY;
-    res.array_type = arr_name;
-    return res;
-}
-UnresolvedType name_body(string name_name){
-    UnresolvedType res;
-    res.type = UnTypes::NAME;
-    res.name_type = arr_name;
-    return res;
-}
-UnresolvedType record_body(vector<pair<string,string>> record_labels){
-    UnresolvedType res;
-    res.type = UnTypes::RECORD;
-    res.record_type = record_labels;
-    return res;
-}
 inline TypeExpr string_type(){
     return TypeExpr(BaseType::STRING);
 }
@@ -69,23 +47,27 @@ inline TypeExpr nil_type(){
 inline TypeExpr void_type(){
     return TypeExpr(BaseType::VOID);
 }
-inline TypeExpr array_type(string base_type_name){
+inline TypeExpr array_type(typeid_ty base_type_name){
     return TypeExpr(base_type_name);
 }
-inline TypeExpr record_type(vector<pair<string,int>> record_entries){
+inline TypeExpr record_type(vector<pair<string,typeid_ty>> record_entries){
     return TypeExpr(record_entries);
 }
-inline TypeExpr resolve_type(UnresolvedType un){
-    assert(un.type == UnTypes::ARRAY || un.type == UnTypes::RECORD);
-    unordered_map<string,type_id> rec;
-    for(auto str_pair  : un.record_type){
-        string name = str_pair.first;
-        if(rec.count(name)){
-            throw runtime_error("record labels must be unique");
-        }
-        rec[name] = null_id;
+inline TypeExpr partially_resolve_type(UnresolvedType un){
+    if(un.type == UnTypes::ARRAY){
+        return array_type(null_id);
     }
-    return TypeExpr{un.type,null_id,rec};
+    else if(un.type == UnTypes::RECORD){
+        vector<pair<string,typeid_ty>> res;
+        for(auto str_pair  : un.record_type){
+            string name = str_pair.first;
+            res.push_back(make_pair(name,null_id));
+        }
+        return record_type(res);
+    }
+    else{
+        assert(false && "should only partially resolve records and arrays");
+    }
 }
 struct TypeTable{
     ManyToOne<string, TypeExpr> types;
@@ -95,6 +77,9 @@ struct TypeTable{
     }
     void add_type(string tyid, const TypeExpr & ty_expr){
         types.overwrite_with_value(tyid, ty_expr);
+    }
+    bool has_type(string tyid){
+        return types.has_key(tyid);
     }
     void add_type_set(vector<pair<string, UnresolvedType>> multu_rec_types){
         /*
@@ -119,7 +104,7 @@ struct TypeTable{
                 unresolved_names[un_ty.name_type] = name;
             }
             else{
-                types.overwrite_with_value(name, resolve_type(un_ty));
+                types.overwrite_with_value(name, partially_resolve_type(un_ty));
             }
         }
         //resolves name references
@@ -157,3 +142,19 @@ struct TypeTable{
         }
     }
 };
+/*
+struct TypeEnvStack{
+    vector<TypeTable> type_stack;
+    void begin_env(){
+        type_stack.push_back(type_stack.back());
+    }
+    void end_env(){
+        type_stack.pop_back();
+    }
+    void add_type_header(vector<pair<string, UnresolvedType>> multu_rec_types){
+        type_stack.back().types.add_type(multu_rec_types);
+    }
+    bool has_type(string tyid){
+        return type_stack.back()..has_type(tyid);
+    }
+};*/
