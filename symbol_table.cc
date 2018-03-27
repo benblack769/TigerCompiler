@@ -48,7 +48,6 @@ void TypeTable::add_type_set(vector<pair<string, UnresolvedType>> multu_rec_type
             unresolved_names[name] = un_ty.name_type;
         }
         else{
-            //cout << "written names: " << name << endl;
             types.overwrite_with_value(name, partially_resolve_type(un_ty));
         }
     }
@@ -56,13 +55,11 @@ void TypeTable::add_type_set(vector<pair<string, UnresolvedType>> multu_rec_type
     //n^2 algorithm guarenttes resolution unless there is a cycle
     for(int i = 0; i < unresolved_names.size()+1; i++){
         bool no_key = false;
-        //cout << "found" << endl;
         for(auto name_pair : unresolved_names){
             if(types.has_key(name_pair.second)){
                 types.overwrite_with_link(name_pair.first,name_pair.second);
             }
             else{
-                //cout << "name pair: " << name_pair.first << ", " << name_pair.second << endl;
                 no_key = true;
             }
         }
