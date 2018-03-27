@@ -13,7 +13,7 @@ void DeclarationListNode::print(std::ostream & os) const {
 }
 TypeDecl * to_type_decl(DeclarationNode * node){
     TypeDecl * decl = dynamic_cast<TypeDecl *>(node);
-    assert(decl == nullptr);
+    assert(decl != nullptr);
     return decl;
 }
 void DeclarationListNode::load_and_check_types(TypeTable & env){
@@ -21,7 +21,7 @@ void DeclarationListNode::load_and_check_types(TypeTable & env){
     for(size_t list_idx = 0; list_idx < list.size(); ){
         DeclType start_type = list[list_idx]->type();
         if(start_type == DeclType::VAR){
-
+            list_idx += 1;
         }
         else if(start_type == DeclType::TYPE ||
                 start_type == DeclType::FUNC){
@@ -40,6 +40,7 @@ void DeclarationListNode::load_and_check_types(TypeTable & env){
             else if(start_type == DeclType::FUNC){
 
             }
+            list_idx = list_end;
         }
         else{
             assert(false && "bad enum value");

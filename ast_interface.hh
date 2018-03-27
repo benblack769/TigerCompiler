@@ -122,6 +122,7 @@ class TypeIDNode : public ASTNode {
       return my_id;
   }
   virtual void in_scope(TypeTable & table){
+      cout << "reached spot" << endl;
       if(!table.has_type(my_id)){
           throw runtime_error("type out of scope!");
       }
