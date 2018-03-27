@@ -21,15 +21,18 @@ struct ManyToOne{
         types[key] = cur_type;
     }
     value_ty & get(key_ty key){
-        return typevals[types[key]];
+        return typevals.at(types.at(key));
     }
     bool has_key(key_ty k){
+        for(auto item : types){
+        //    cout << "item: " << item.first << endl;
+        }
         return types.count(k);
     }
     void overwrite_with_link(key_ty new_key, key_ty old_key){
-        types[new_key] = types[old_key];
+        types[new_key] = types.at(old_key);
     }
     id_ty key_id(key_ty k){
-        return types[k];
+        return types.at(k);
     }
 };
