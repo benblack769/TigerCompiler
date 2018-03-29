@@ -1,5 +1,6 @@
 /* this one shouldn't pass */
-let 
+/* Ben's comment: I think this one should also pass */
+let
     var a:int := 5
     var b:int := 6
     var a:int := 10

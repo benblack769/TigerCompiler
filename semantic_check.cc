@@ -8,7 +8,7 @@ SematicError semantic_checks(tiger::ExprNode * node){
         node->check_type_scopes(types);
     }
     catch(SemanticException & err){
-        return err.error();
+        return err.error_code();
     }
     return SematicError::NO_ERRORS;
 }

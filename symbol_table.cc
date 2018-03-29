@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include "symbol_table.hh"
+#include "semantic_check.hh"
 
 TypeExpr partially_resolve_type(UnresolvedType un){
     if(un.type == UnTypes::ARRAY){
@@ -35,7 +36,7 @@ void TypeTable::add_type_set(vector<pair<string, UnresolvedType>> multu_rec_type
     for(auto ty : multu_rec_types){
         string name = ty.first;
         if(added_type_names.count(name)){
-            throw runtime_error("two type names cannot be declared in the same mutual recurive block");
+            throw SemanticException(SematicError::TWO_NAMES_IN_MUTU_RECURSIVE_ENV);
         }
         added_type_names.insert(name);
     }
@@ -53,7 +54,7 @@ void TypeTable::add_type_set(vector<pair<string, UnresolvedType>> multu_rec_type
     }
     //resolves name    references
     //n^2 algorithm guarenttes resolution unless there is a cycle
-    for(int i = 0; i < unresolved_names.size()+1; i++){
+    for(size_t i = 0; i < unresolved_names.size()+1; i++){
         bool no_key = false;
         for(auto name_pair : unresolved_names){
             if(types.has_key(name_pair.second)){
@@ -64,7 +65,7 @@ void TypeTable::add_type_set(vector<pair<string, UnresolvedType>> multu_rec_type
             }
         }
         if(no_key && i == unresolved_names.size()){
-            throw runtime_error("cycle detected in type declaration");
+            throw SemanticException(SematicError::CYCLICLY_DEFINED_TYPES);
         }
     }
     //finishes resolution of records and arrays by putting in correct type information

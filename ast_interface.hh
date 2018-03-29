@@ -124,7 +124,7 @@ class TypeIDNode : public ASTNode {
   virtual void in_scope(TypeTable & table){
       cout << "reached spot" << endl;
       if(!table.has_type(my_id)){
-          throw runtime_error("type out of scope!");
+          throw SemanticException(SematicError::TYPE_NOT_DEFINED);
       }
   }
   virtual void print(std::ostream & os) const override{

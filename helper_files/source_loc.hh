@@ -1,6 +1,7 @@
 #pragma once
 #include <ostream>
 
+
 struct SourceLoc{
     int start_line = -1;
     int start_col = -1;

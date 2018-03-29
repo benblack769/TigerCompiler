@@ -1,5 +1,6 @@
 #pragma once
 #include "ast_interface.hh"
+#include <unordered_set>
 
 namespace tiger{
 
@@ -48,7 +49,13 @@ class TypeFeildType : public TypeNode {
     virtual ~TypeFeildType(){
         delete type_fields;
     }
-    virtual UnresolvedType unresolved_type(){
+    void check_double_keyed_names(){
+        if(!first_strs_unique(type_fields->get_record_fields())){
+            throw SemanticException(SematicError::NON_UNIQUE_RECORD_LABELS);
+        }
+    }
+    UnresolvedType unresolved_type(){
+        check_double_keyed_names();
         return record_body(type_fields->get_record_fields());
     }
     virtual void print(std::ostream & os) const override{

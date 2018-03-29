@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stdexcept>
+#include "helper_files/record_utils.hh"
 using namespace std;
 enum class BaseType { INT, VOID, STRING, NIL, ARRAY, RECORD };
 
@@ -28,9 +29,7 @@ struct TypeExpr{
     }
     TypeExpr(vector<pair<string,typeid_ty>> record_entries):
             record_type(record_entries.begin(), record_entries.end()){
-        if(record_entries.size() != record_type.size()){
-            throw runtime_error("record labels must be unique");
-        }
+        assert(first_strs_unique(record_entries));
         type = BaseType::RECORD;
     }
 };
