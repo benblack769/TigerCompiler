@@ -2,7 +2,6 @@
 #include <vector>
 #include <iostream>
 #include "helper_files/type_expr.hh"
-#include "helper_files/many_to_one.hh"
 #include "helper_files/unresolved_type_info.hh"
 #include "helper_files/func_header.hh"
 #include "semantic_check.hh"

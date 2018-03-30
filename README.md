@@ -8,6 +8,19 @@ Symbol table header as well as helper classes are in `symbol_table.hh`. These sy
 
 Type tables: Integer/String/Void/Nil can simply be represented with an Enum. But records and arrays cannot. Since record and array type expressions, not their string labels or structure are what make them unique, then they are represented as an integer label, called `value_id` in TypeExpr, which points to a location on a vector of such values on the type table.
 
+So it looks more or less like this:
+
+    BaseType = {INT,STR,ARRAY, ...}
+
+    TypeExpr:
+        BaseType
+        value_id
+
+    TypeTable:
+        str -> TypeExpr
+        value_id -> ArrayExpr
+        value_id -> RecordExpr
+
 Variables/functions are stored in the same table as each other, using a union-like structure to store them interchangeably.
 
 The table as a whole is an inefficient functional style, using quadratic time and space to store redundant entries on the stack. Mutually recursive types and functions greatly complicate API and logic, but not data structures.
