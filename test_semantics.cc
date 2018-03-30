@@ -22,6 +22,9 @@ void yy_delete_buffer(struct yy_buffer_state * );
 
 ExprNode * get_ast_node_from_file(std::string filename){
     FILE * file = fopen(filename.c_str(), "r");
+    if(!file){
+        cout << "failed to open file "<< filename << endl;
+    }
     YY_BUFFER_STATE buf_state = yy_create_buffer(file, 1);
     yy_switch_to_buffer(buf_state);
     yyparse();
@@ -57,7 +60,6 @@ TEST_CASE("Parse checks are also semantically correct") {
     REQUIRE(SematicError::TWO_NAMES_IN_MUTU_RECURSIVE_ENV == file_error("language_examples/multiply_defined_ids2.t"));
     REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/mutu_type_def.t"));
     REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/mutual_recursion_func1.t"));
-    REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/mutual_recursion_func2.t"));
     REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/nested_function1.t"));
     REQUIRE(SematicError::VARIABLE_NOT_DEFINED == file_error("language_examples/nested_function2.t"));
     REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/nil_record.t"));
