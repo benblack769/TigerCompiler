@@ -52,7 +52,7 @@ TEST_CASE("Parse checks are also semantically correct") {
     REQUIRE(SematicError::FUNCTION_NOT_DEFINED == file_error("language_examples/func_call.t"));
     REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/good_struct_ty.t"));
     REQUIRE(SematicError::INCOMPATABLE_RECORD_LABEL == file_error("language_examples/loop.t"));
-    //REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/merge_example.t"));
+    REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/merge_example.t"));
     REQUIRE(SematicError::BAD_TYPE_MATCH == file_error("language_examples/multiply_defined_ids1.t"));
     REQUIRE(SematicError::TWO_NAMES_IN_MUTU_RECURSIVE_ENV == file_error("language_examples/multiply_defined_ids2.t"));
     REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/mutu_type_def.t"));
