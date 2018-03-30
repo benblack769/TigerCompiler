@@ -1,3 +1,4 @@
+#pragma once
 #include "semantic_check.hh"
 #include "helper_files/type_expr.hh"
 

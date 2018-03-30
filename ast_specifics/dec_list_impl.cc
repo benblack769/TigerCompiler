@@ -21,6 +21,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
     for(size_t list_idx = 0; list_idx < list.size(); ){
         DeclType start_type = list[list_idx]->type();
         if(start_type == DeclType::VAR){
+            //processes variable decleration using old environment to evaluate variable descrition
             VarDecl * var = to_sub_class<VarDecl>(list[list_idx].get());
             TypeExpr evaled_expr = var->_expr->eval_and_check_type(env);
             TypeExpr res_expr;
@@ -36,12 +37,17 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
         }
         else if(start_type == DeclType::TYPE ||
                 start_type == DeclType::FUNC){
-           size_t list_end = list_idx+1;
+            //mutually recursive scopes for types and functions are defined to be:
+            //Sequential declarations of types or functions.
+            //so in declaration layed out like: (type, type, func, var, func, func)
+            //the first two types will be possibly mutually recursive, and so will the last two functions.
+            size_t list_end = list_idx+1;
             for(;list_end < list.size() &&
                  list[list_end]->type() == start_type;
                 list_end++);
 
             if(start_type == DeclType::TYPE){
+                //All type info is simply passed to the symbol_table for evaluation
                 vector<pair<string, UnresolvedType>> multu_type_info;
                 for(size_t idx = list_idx; idx < list_end; idx++){
                     TypeDecl * type = to_sub_class<TypeDecl>(list[idx].get());
@@ -50,6 +56,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
                 env.add_type_set(multu_type_info);
             }
             else if(start_type == DeclType::FUNC){
+                //processes function headers, and then their contents 
                 vector<pair<string, FuncHeader>> func_data;
                 for(size_t idx = list_idx; idx < list_end; idx++){
                     FuncDecl * func = to_sub_class<FuncDecl>(list[idx].get());
@@ -58,7 +65,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
                 }
                 env.add_function_set(func_data);
 
-                //checks types inside function definitions
+                //checks types inside function definitions, verifies that the expression is correct, and also checks the consistency of the return type
                 for(size_t idx = list_idx; idx < list_end; idx++){
                     FuncDecl * func = to_sub_class<FuncDecl>(list[idx].get());
                     //create new table for function arguments

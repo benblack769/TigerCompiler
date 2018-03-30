@@ -1,6 +1,7 @@
+#pragma once
+//Helper functions to work
 #include <vector>
 #include <unordered_set>
-
 
 template<typename val_ty>
 inline std::vector<std::string> first_of_pairs(const std::vector<std::pair<std::string, val_ty>> & vals){

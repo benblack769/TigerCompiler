@@ -13,7 +13,7 @@ constexpr typeid_ty null_id = -1;
 
 struct TypeExpr{
     BaseType type;
-    //arrays store name of type
+    //this points to a location in the TypeTable. Do not use in other contexts
     typeid_ty value_id;
     TypeExpr(){
         type = BaseType::UNRESOLVED;

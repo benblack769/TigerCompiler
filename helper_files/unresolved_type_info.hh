@@ -5,6 +5,9 @@
 
 using namespace std;
 
+//This struct is used to pass type infromation from the AST to
+//the Symbol Table.
+
 enum class UnTypes { NAME, ARRAY, RECORD };
 struct UnresolvedType{
     UnTypes type;

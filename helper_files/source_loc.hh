@@ -3,6 +3,7 @@
 
 
 struct SourceLoc{
+    //collumn information not generated or used currently
     int start_line = -1;
     int start_col = -1;
     int end_line = -1;

@@ -6,6 +6,7 @@
 SymbolTable::SymbolTable(){
     types.add_base_type("string", BaseType::STRING);
     types.add_base_type("int", BaseType::INT);
+    //define standard library functions
     vars["print"] = VarFuncItem(FuncEntry{void_type(),{string_type()}});
     vars["flush"] = VarFuncItem(FuncEntry{void_type(),{}});
     vars["getchar"] = VarFuncItem(FuncEntry{string_type(),{}});
