@@ -3,35 +3,58 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stdexcept>
+#include <cassert>
 #include "helper_files/record_utils.hh"
 using namespace std;
-enum class BaseType { INT, VOID, STRING, NIL, ARRAY, RECORD };
+enum class BaseType { UNRESOLVED, INT, VOID, STRING, NIL, ARRAY, RECORD };
 
-using typeid_ty = int;
+using typeid_ty = size_t;
 constexpr typeid_ty null_id = -1;
 
 struct TypeExpr{
     BaseType type;
     //arrays store name of type
-    typeid_ty array_type;
-    //maps from name feild to type field (entry in type table)
-    unordered_map<string,typeid_ty> record_type;
+    typeid_ty value_id;
+    TypeExpr(){
+        type = BaseType::UNRESOLVED;
+        value_id = null_id;
+    }
     TypeExpr(BaseType b_type){
         assert(b_type == BaseType::INT ||
                b_type == BaseType::STRING ||
                b_type == BaseType::VOID ||
                b_type == BaseType::NIL);
         type = b_type;
+        value_id = null_id;
     }
-    TypeExpr(typeid_ty array_ty_id){
-        type = BaseType::ARRAY;
-        array_type = array_ty_id;
+    TypeExpr(BaseType b_type, typeid_ty ty_id){
+        assert(b_type == BaseType::ARRAY ||
+               b_type == BaseType::RECORD);
+        type = b_type;
+        value_id = ty_id;
     }
-    TypeExpr(vector<pair<string,typeid_ty>> record_entries):
-            record_type(record_entries.begin(), record_entries.end()){
-        assert(first_strs_unique(record_entries));
-        type = BaseType::RECORD;
+    bool not_void(){
+        assert_unresolved();
+        return type != BaseType::VOID;
     }
+    bool is_convertible(TypeExpr other){
+        assert_unresolved();
+        other.assert_unresolved();
+        return (type == other.type && value_id == other.value_id) ||
+                (type == BaseType::NIL && other.type == BaseType::RECORD) ||
+                (type == BaseType::RECORD && other.type == BaseType::NIL);
+    }
+    void assert_unresolved(){
+        assert(type != BaseType::UNRESOLVED);
+    }
+    /*bool operator ==(TypeExpr other)const{
+        return (type == other.type
+                    && value_id == other.value_id)
+                || (type != BaseType::VOID
+                    && other.type != BaseType::VOID
+                    && (type == BaseType::NIL
+                        || other.type == BaseType::NIL);
+    }*/
 };
 inline TypeExpr string_type(){
     return TypeExpr(BaseType::STRING);
@@ -45,9 +68,9 @@ inline TypeExpr nil_type(){
 inline TypeExpr void_type(){
     return TypeExpr(BaseType::VOID);
 }
-inline TypeExpr array_type(typeid_ty base_type_name){
-    return TypeExpr(base_type_name);
+inline TypeExpr array_type(typeid_ty ty_id){
+    return TypeExpr(BaseType::ARRAY,ty_id);
 }
-inline TypeExpr record_type(vector<pair<string,typeid_ty>> record_entries){
-    return TypeExpr(record_entries);
+inline TypeExpr record_type(typeid_ty ty_id){
+    return TypeExpr(BaseType::RECORD,ty_id);
 }

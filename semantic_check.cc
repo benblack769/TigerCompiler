@@ -4,8 +4,8 @@
 
 SematicError semantic_checks(tiger::ExprNode * node){
     try{
-        TypeTable types;
-        node->check_type_scopes(types);
+        SymbolTable types;
+        node->eval_and_check_type(types);
     }
     catch(SemanticException & err){
         return err.error_code();

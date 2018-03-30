@@ -4,12 +4,33 @@
 #include <sstream>
 #include "helper_files/source_loc.hh"
 
-enum class SematicError{ NO_ERRORS, VAR_NOT_DEFINED, TYPE_NOT_DEFINED, CYCLICLY_DEFINED_TYPES, TWO_NAMES_IN_MUTU_RECURSIVE_ENV, NON_UNIQUE_RECORD_LABELS };
+enum class SematicError{
+    NO_ERRORS,
+    TYPE_NOT_DEFINED,
+    CYCLICLY_DEFINED_TYPES,
+    BAD_TYPE_MATCH,
+    TWO_NAMES_IN_MUTU_RECURSIVE_ENV,
+    NON_UNIQUE_RECORD_LABELS,
+    INCOMPATABLE_RECORD_LABEL,
+    FUNCTION_NOT_DEFINED,
+    VARIABLE_NOT_DEFINED,
+    USING_VAR_AS_FUNC,
+    USING_FUNC_AS_VAR,
+};
 
 inline std::string error_str(SematicError err){
     switch(err){
-        case SematicError::NO_ERRORS: return "valid semantics";
-        case SematicError::VAR_NOT_DEFINED: return "variable not defined";
+    case SematicError::NO_ERRORS: return "valid semantics";
+    case SematicError::TYPE_NOT_DEFINED: return "variable not defined";
+    case SematicError::CYCLICLY_DEFINED_TYPES: return "variable not defined";
+    case SematicError::BAD_TYPE_MATCH: return "variable not defined";
+    case SematicError::TWO_NAMES_IN_MUTU_RECURSIVE_ENV: return "variable not defined";
+    case SematicError::NON_UNIQUE_RECORD_LABELS: return "variable not defined";
+    case SematicError::FUNCTION_NOT_DEFINED: return "variable not defined";
+    case SematicError::VARIABLE_NOT_DEFINED: return "variable not defined";
+    case SematicError::USING_VAR_AS_FUNC: return "variable not defined";
+    case SematicError::USING_FUNC_AS_VAR: return "variable not defined";
+    case SematicError::INCOMPATABLE_RECORD_LABEL: return "variable not defined";
     }
     assert("error not defined");
     return "error not defined";

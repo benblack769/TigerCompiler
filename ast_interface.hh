@@ -10,6 +10,7 @@
 #include "helper_files/unresolved_type_info.hh"
 #include "helper_files/list_helper.hh"
 #include "ast_node.hh"
+#include "helper_files/type_assertion.hh"
 #include "symbol_table.hh"
 
 
@@ -20,7 +21,7 @@ class ExprNode: public ASTNode {
  public:
   ExprNode() = default;
   virtual ~ExprNode() = default;
-  virtual void check_type_scopes(TypeTable & env){}
+  virtual TypeExpr eval_and_check_type(SymbolTable & env) = 0;
   //virtual int expr_type(Envirornement & env) = 0;
   virtual void print(std::ostream & os) const override = 0;
 };
@@ -29,6 +30,7 @@ class LvalueNode: public ASTNode {
  public:
   LvalueNode() = default;
   virtual ~LvalueNode() = default;
+  virtual TypeExpr get_type(SymbolTable & env) = 0;
   virtual void print(std::ostream & os) const override = 0;
 };
 
@@ -57,10 +59,12 @@ class ExprListNode: public ASTNode {
   virtual void append_to(ExprNode * expr){
       list.push_back(std::unique_ptr<ExprNode>(expr));
   }
-  virtual void check_type_scopes(TypeTable & env){
+  virtual vector<TypeExpr> eval_and_check_type(SymbolTable & env){
+      vector<TypeExpr> arg_types;
       for(auto & item : list){
-          item->check_type_scopes(env);
+          arg_types.push_back(item->eval_and_check_type(env));
       }
+      return arg_types;
   }
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ", ");
@@ -82,10 +86,11 @@ class ExprSequenceNode: public ASTNode {
   virtual bool singleton(){
       return list.size() == 1;
   }
-  virtual void check_type_scopes(TypeTable & env){
+  virtual TypeExpr eval_and_check_type(SymbolTable & env){
       for(auto & item : list){
-          item->check_type_scopes(env);
+          item->eval_and_check_type(env);
       }
+      return list.size() == 0 ? void_type() : list.back()->eval_and_check_type(env);
   }
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ";\n");
@@ -101,8 +106,8 @@ class FieldNode: public ASTNode{
   virtual ~FieldNode(){
       delete expr;
   }
-  virtual void check_type_scopes(TypeTable & env){
-      expr->check_type_scopes(env);
+  virtual pair<string,TypeExpr> eval_and_check_type(SymbolTable & env){
+       return make_pair(id, expr->eval_and_check_type(env));
   }
   virtual void print(std::ostream & os) const override{
       os << id << " = " << *expr;
@@ -121,12 +126,15 @@ class TypeIDNode : public ASTNode {
   virtual std::string id_name(){
       return my_id;
   }
-  virtual void in_scope(TypeTable & table){
+  virtual TypeExpr eval_and_check_type(SymbolTable & env){
+      return env.get_checked_type(my_id);
+  }
+  /*virtual void in_scope(SymbolTable & table){
       cout << "reached spot" << endl;
       if(!table.has_type(my_id)){
           throw SemanticException(SematicError::TYPE_NOT_DEFINED);
       }
-  }
+  }*/
   virtual void print(std::ostream & os) const override{
       os << my_id;
   }
@@ -160,10 +168,12 @@ class FieldListNode: public ASTNode {
   virtual void append_to(FieldNode * expr){
       list.push_back(std::unique_ptr<FieldNode>(expr));
   }
-  virtual void check_type_scopes(TypeTable & env){
+  virtual vector<pair<string,TypeExpr>> eval_and_check_type_names(SymbolTable & env){
+      vector<pair<string,TypeExpr>> rec_types;
       for(auto & item : list){
-          item->check_type_scopes(env);
+          rec_types.push_back(item->eval_and_check_type(env));
       }
+      return rec_types;
   }
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ",");
@@ -177,7 +187,7 @@ class DeclarationListNode: public ASTNode {
    virtual ~DeclarationListNode(){}
    virtual void append_to(DeclarationNode * expr);
    virtual void print(std::ostream & os) const override ;
-   virtual void load_and_check_types(TypeTable & env);
+   virtual void load_and_check_types(SymbolTable & env);
    std::vector<std::unique_ptr<DeclarationNode>> list;
 };
 
@@ -188,7 +198,7 @@ class TypeFeildsNode: public ASTNode {
    virtual void append_to(TypeFeildNode * expr){
        list.push_back(std::unique_ptr<TypeFeildNode>(expr));
    }
-   vector<pair<string,string>> get_record_fields(){
+   vector<pair<string,string>> get_field_pairs(){
        vector<pair<string,string>> res;
        for(auto & val : list){
            res.push_back(val->field_pair());

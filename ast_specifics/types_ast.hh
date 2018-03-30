@@ -50,13 +50,13 @@ class TypeFeildType : public TypeNode {
         delete type_fields;
     }
     void check_double_keyed_names(){
-        if(!first_strs_unique(type_fields->get_record_fields())){
+        if(!first_strs_unique(type_fields->get_field_pairs())){
             throw SemanticException(SematicError::NON_UNIQUE_RECORD_LABELS);
         }
     }
     UnresolvedType unresolved_type(){
         check_double_keyed_names();
-        return record_body(type_fields->get_record_fields());
+        return record_body(type_fields->get_field_pairs());
     }
     virtual void print(std::ostream & os) const override{
         os << "{" << *type_fields << "}";

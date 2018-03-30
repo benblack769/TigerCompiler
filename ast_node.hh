@@ -13,6 +13,7 @@ protected:
 
   ASTNode() = default;
   virtual void set_source_loc(SourceLoc in_loc){ loc = in_loc; }
+  virtual SourceLoc get_source_loc(){return loc;}
   virtual ~ASTNode() = default;
   virtual void print(std::ostream & os) const = 0;
 };

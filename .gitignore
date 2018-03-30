@@ -7,3 +7,4 @@ test_parser
 test_lexer
 parse_and_print
 tiger.output
+*.user

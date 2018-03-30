@@ -11,6 +11,9 @@ public:
         mystring(in_str){}
 
     virtual ~StringNode() = default;
+    virtual TypeExpr eval_and_check_type(SymbolTable & ){
+        return string_type();
+    }
     virtual void print(std::ostream & os) const override{
         os << mystring;
     }
@@ -22,6 +25,9 @@ class NilNode: public ExprNode{
 public:
     NilNode(){}
     virtual ~NilNode() = default;
+    virtual TypeExpr eval_and_check_type(SymbolTable & ){
+        return nil_type();
+    }
     virtual void print(std::ostream & os) const override{
         os << "nil";
     }
@@ -33,6 +39,9 @@ public:
         my_int(in_int){}
 
     virtual ~IntNode() = default;
+    virtual TypeExpr eval_and_check_type(SymbolTable & ){
+        return int_type();
+    }
     virtual void print(std::ostream & os) const override{
         os << my_int;
     }
@@ -45,6 +54,9 @@ class LvalNode : public ExprNode {
   LvalNode(LvalueNode * in_node):
      lval(in_node){}
   virtual ~LvalNode() = default;
+  virtual TypeExpr eval_and_check_type(SymbolTable & env){
+      return lval->get_type(env);
+  }
 
   virtual void print(std::ostream & os) const override{
       os << *lval;
@@ -61,8 +73,10 @@ class NegateNode : public ExprNode {
     virtual ~NegateNode(){
         delete child_;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        child_->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        TypeExpr ch_ty = child_->eval_and_check_type(env);
+        assert_type_equality(ch_ty, int_type(), loc);
+        return ch_ty;
     }
     virtual void print(std::ostream & os) const override{
         os << '-' << *child_;
@@ -101,9 +115,12 @@ class BinaryNode : public ExprNode {
         delete left;
         delete right;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        left->check_type_scopes(env);
-        right->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        TypeExpr left_ty = left->eval_and_check_type(env);
+        TypeExpr right_ty = right->eval_and_check_type(env);
+        assert_type_equality(left_ty, int_type(), loc);
+        assert_type_equality(right_ty, int_type(), loc);
+        return left_ty;
     }
     virtual void print(std::ostream & os) const override{
         os << "(" << *left << str_rep(op) << *right << ")";
@@ -124,8 +141,9 @@ class AssignNode : public ExprNode {
         delete target;
         delete source;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        source->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        assert_type_equality(target->get_type(env), source->eval_and_check_type(env), loc);
+        return void_type();
     }
     virtual void print(std::ostream & os) const override{
         os << *target << ":=" << *source;
@@ -144,8 +162,11 @@ class FunctionCall : public ExprNode {
     virtual ~FunctionCall(){
         delete args;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        args->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        assert_err(env.has_var_symbol(func_name), SematicError::FUNCTION_NOT_DEFINED, loc);
+        assert_err(env.symbol_is_func(func_name), SematicError::USING_VAR_AS_FUNC, loc);
+        assert_err(env.verify_function_args(func_name, args->eval_and_check_type(env)), SematicError::BAD_TYPE_MATCH, loc);
+        return env.function_ret_type(func_name);
     }
     virtual void print(std::ostream & os) const override{
         os << func_name << "(" << *args << ")";
@@ -163,8 +184,8 @@ class ExprSequenceEval : public ExprNode {
     virtual ~ExprSequenceEval(){
         delete exprs;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        exprs->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        return exprs->eval_and_check_type(env);
     }
     virtual void print(std::ostream & os) const override{
         if(exprs->singleton()){
@@ -187,9 +208,10 @@ class IfThen : public ExprNode {
         delete _cond;
         delete _res;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        _cond->check_type_scopes(env);
-        _res->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        assert_type_equality(_cond->eval_and_check_type(env), int_type(), loc);
+        _res->eval_and_check_type(env);
+        return void_type();
     }
     virtual void print(std::ostream & os) const override{
         os << " if " << "(" << *_cond << ")" << " then " << "(" << *_res<< ")";
@@ -210,10 +232,11 @@ class IfThenElse : public ExprNode {
         delete _res_1;
         delete _res_2;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        _cond->check_type_scopes(env);
-        _res_1->check_type_scopes(env);
-        _res_2->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        assert_type_equality(_cond->eval_and_check_type(env), int_type(), loc);
+        TypeExpr ret_ty = _res_1->eval_and_check_type(env);
+        assert_type_equality(ret_ty,_res_2->eval_and_check_type(env), loc);
+        return ret_ty;
     }
     virtual void print(std::ostream & os) const override{
         os << " if " << "(" << *_cond << ")" << " then " << "(" << *_res_1<< ")" << " else " << "(" << *_res_2 << ")";
@@ -233,9 +256,10 @@ class WhileDo : public ExprNode {
         delete _cond;
         delete _res;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        _cond->check_type_scopes(env);
-        _res->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        assert_type_equality(_cond->eval_and_check_type(env), int_type(), loc);
+        _res->eval_and_check_type(env);
+        return void_type();
     }
     virtual void print(std::ostream & os) const override{
         os << " while " << "(" << *_cond << ")" << " do " << "(" << *_res<< ")";
@@ -256,10 +280,12 @@ class ForToDo : public ExprNode {
         delete _end;
         delete _eval_expr;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        _initial->check_type_scopes(env);
-        _end->check_type_scopes(env);
-        _eval_expr->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & old_env){
+        SymbolTable new_env = old_env;
+        new_env.add_variable(_var_id,int_type());
+        assert_type_equality(_initial->eval_and_check_type(old_env), int_type(), loc);
+        assert_type_equality(_end->eval_and_check_type(old_env), int_type(), loc);
+        return void_type();
     }
     virtual void print(std::ostream & os) const override{
         os << " for " << _var_id << ":=" << *_initial << " to " << *_end << " do " << *_eval_expr;
@@ -275,6 +301,10 @@ class Break: public ExprNode{
 public:
     Break(){}
     virtual ~Break() = default;
+
+    virtual TypeExpr eval_and_check_type(SymbolTable & ){
+        return void_type();
+    }
     virtual void print(std::ostream & os) const override{
         os << " break ";
     }
@@ -291,9 +321,13 @@ class ArrCreate : public ExprNode {
         delete _value_expr;
         delete _size_expr;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        _value_expr->check_type_scopes(env);
-        _size_expr->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        TypeExpr arr_type = _type->eval_and_check_type(env);
+
+        assert_err(arr_type.type == BaseType::ARRAY, SematicError::BAD_TYPE_MATCH, loc);
+        assert_type_equality(_size_expr->eval_and_check_type(env), int_type(), loc);
+        assert_type_equality(_value_expr->eval_and_check_type(env), env.array_subtype(arr_type), loc);
+        return arr_type;
     }
     virtual void print(std::ostream & os) const override{
         os << *_type << "[" << *_size_expr << "]" << " of " << *_value_expr;
@@ -314,9 +348,16 @@ class RecCreate : public ExprNode {
         delete _type;
         delete _fields;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        _type->in_scope(env);
-        _fields->check_type_scopes(env);
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        TypeExpr rec_ty = _type->eval_and_check_type(env);
+        assert_err(rec_ty.type == BaseType::RECORD, SematicError::BAD_TYPE_MATCH, loc);
+        vector<pair<string,TypeExpr>> rec_arg_tys = _fields->eval_and_check_type_names(env);
+        assert_err(first_strs_unique(rec_arg_tys),SematicError::NON_UNIQUE_RECORD_LABELS, loc);
+        for(auto str_pair : rec_arg_tys){
+            assert_err(env.record_subexpr_exists(str_pair.second, str_pair.first), SematicError::INCOMPATABLE_RECORD_LABEL, loc);
+            assert_type_equality(str_pair.second, env.get_record_subexpr(str_pair.second, str_pair.first), loc);
+        }
+        return rec_ty;
     }
     virtual void print(std::ostream & os) const override{
         os << *_type << "{" << *_fields << "}";
@@ -335,10 +376,10 @@ class LetIn : public ExprNode {
         delete _decl_list;
         delete _expr_sequ;
     }
-    virtual void check_type_scopes(TypeTable & env){
-        TypeTable new_env = env;
+    virtual TypeExpr eval_and_check_type(SymbolTable & env){
+        SymbolTable new_env = env;
         _decl_list->load_and_check_types(new_env);
-        _expr_sequ->check_type_scopes(new_env);
+        return _expr_sequ->eval_and_check_type(new_env);
     }
     virtual void print(std::ostream & os) const override{
         os << " let " << *_decl_list << " in " << *_expr_sequ << " end ";
@@ -348,26 +389,6 @@ private:
     ExprSequenceNode * _expr_sequ;
 };
 
-class TypeCreation : public ExprNode {
- public:
-    TypeCreation(TypeIDNode * type_id, FieldListNode * feild_list):
-        _type_id(type_id),
-        _feild_list(feild_list){}
-    virtual ~TypeCreation(){
-        delete _type_id;
-        delete _feild_list;
-    }
-    virtual void check_type_scopes(TypeTable & env){
-        _type_id->in_scope(env);
-        _feild_list->check_type_scopes(env);
-    }
-    virtual void print(std::ostream & os) const override{
-        os << *_type_id << "{" << *_feild_list << "}";
-    }
-private:
-    TypeIDNode * _type_id;
-    FieldListNode * _feild_list;
-};
 }
 
 }

@@ -22,6 +22,12 @@ class VarDecl: public DeclarationNode {
     std::string name(){
         return _id;
     }
+    bool has_type(){
+        return _has_type_decl;
+    }
+    std::string type_name(){
+        return _type_id->id_name();
+    }
     DeclType type(){
         return DeclType::VAR;
     }
@@ -32,7 +38,6 @@ class VarDecl: public DeclarationNode {
         }
         os <<  " := " << *_expr;
     }
- protected:
      std::string _id;
      TypeIDNode * _type_id;
      ExprNode * _expr;
@@ -58,6 +63,15 @@ class FuncDecl: public DeclarationNode {
     DeclType type(){
         return DeclType::FUNC;
     }
+    bool has_type(){
+        return _has_type_decl;
+    }
+    vector<pair<string, string>> arg_types(){
+        return _ty_fields->get_field_pairs();
+    }
+    string ret_type(){
+        return _type_id->id_name();
+    }
     virtual void print(std::ostream & os) const override{
         os << " function " << _id << "(" << *_ty_fields << ")";
         if(_has_type_decl){
@@ -65,7 +79,7 @@ class FuncDecl: public DeclarationNode {
         }
         os <<  " = " << *_expr;
     }
- protected:
+ //protected:
      std::string _id;
      TypeFeildsNode * _ty_fields;
      TypeIDNode * _type_id;
