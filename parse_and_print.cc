@@ -12,7 +12,7 @@ int yyparse();
 int main(){
     yyparse();
 
-    std::cout << *rootnode << std::endl << std::endl;
+    //std::cout << *rootnode << std::endl << std::endl;
     SemanticException exc = semantic_checks(rootnode);
     std::cout << exc.what() << std::endl;
 }
