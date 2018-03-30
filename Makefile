@@ -8,7 +8,7 @@ WARNINGS=-Wall -Wextra
 #CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -Wextra -Werror
 LDFLAGS=$(CXXFLAGS)
 
-all: test_parser test_lexer parse_and_print
+all: test_parser test_lexer parse_and_print test_semantics
 
 lex.yy.c: tiger.l
 	flex $^
@@ -49,7 +49,7 @@ dec_list_impl.o: ast_specifics/dec_list_impl.cc
 symbol_table.o: symbol_table.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-test_semantics: tiger.tab.o lex.yy.o parse_err.o catch.o dec_list_impl.o semantic_check.o symbol_table.o
+test_semantics: tiger.tab.o lex.yy.o parse_err.o catch.o dec_list_impl.o semantic_check.o symbol_table.o test_semantics.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 test_lexer: lex.yy.o test_lexer.o catch.o

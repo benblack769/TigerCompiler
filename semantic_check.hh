@@ -20,17 +20,17 @@ enum class SematicError{
 
 inline std::string error_str(SematicError err){
     switch(err){
-    case SematicError::NO_ERRORS: return "valid semantics";
-    case SematicError::TYPE_NOT_DEFINED: return "variable not defined";
-    case SematicError::CYCLICLY_DEFINED_TYPES: return "variable not defined";
-    case SematicError::BAD_TYPE_MATCH: return "variable not defined";
-    case SematicError::TWO_NAMES_IN_MUTU_RECURSIVE_ENV: return "variable not defined";
-    case SematicError::NON_UNIQUE_RECORD_LABELS: return "variable not defined";
-    case SematicError::FUNCTION_NOT_DEFINED: return "variable not defined";
-    case SematicError::VARIABLE_NOT_DEFINED: return "variable not defined";
-    case SematicError::USING_VAR_AS_FUNC: return "variable not defined";
-    case SematicError::USING_FUNC_AS_VAR: return "variable not defined";
-    case SematicError::INCOMPATABLE_RECORD_LABEL: return "variable not defined";
+    case SematicError::NO_ERRORS: return "NO_ERRORS";
+    case SematicError::TYPE_NOT_DEFINED: return "TYPE_NOT_DEFINED";
+    case SematicError::CYCLICLY_DEFINED_TYPES: return "CYCLICLY_DEFINED_TYPES";
+    case SematicError::BAD_TYPE_MATCH: return "BAD_TYPE_MATCH";
+    case SematicError::TWO_NAMES_IN_MUTU_RECURSIVE_ENV: return "TWO_NAMES_IN_MUTU_RECURSIVE_ENV";
+    case SematicError::NON_UNIQUE_RECORD_LABELS: return "NON_UNIQUE_RECORD_LABELS";
+    case SematicError::FUNCTION_NOT_DEFINED: return "FUNCTION_NOT_DEFINED";
+    case SematicError::VARIABLE_NOT_DEFINED: return "VARIABLE_NOT_DEFINED";
+    case SematicError::USING_VAR_AS_FUNC: return "USING_VAR_AS_FUNC";
+    case SematicError::USING_FUNC_AS_VAR: return "USING_FUNC_AS_VAR";
+    case SematicError::INCOMPATABLE_RECORD_LABEL: return "INCOMPATABLE_RECORD_LABEL";
     }
     assert("error not defined");
     return "error not defined";
@@ -39,7 +39,6 @@ inline std::string error_str(SematicError err){
 namespace tiger{
 class ExprNode;
 }
-SematicError semantic_checks(tiger::ExprNode * node);
 
 class SemanticException : public std::exception{
 public:
@@ -61,3 +60,5 @@ protected:
     SourceLoc err_location;
     std::string err_str;
 };
+
+SemanticException semantic_checks(tiger::ExprNode * node);

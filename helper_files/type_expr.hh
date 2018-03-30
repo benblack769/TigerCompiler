@@ -47,14 +47,6 @@ struct TypeExpr{
     void assert_unresolved(){
         assert(type != BaseType::UNRESOLVED);
     }
-    /*bool operator ==(TypeExpr other)const{
-        return (type == other.type
-                    && value_id == other.value_id)
-                || (type != BaseType::VOID
-                    && other.type != BaseType::VOID
-                    && (type == BaseType::NIL
-                        || other.type == BaseType::NIL);
-    }*/
 };
 inline TypeExpr string_type(){
     return TypeExpr(BaseType::STRING);

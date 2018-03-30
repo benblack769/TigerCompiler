@@ -13,5 +13,6 @@ int main(){
     yyparse();
 
     std::cout << *rootnode << std::endl << std::endl;
-    std::cout << "error number: " << static_cast<int>(semantic_checks(rootnode)) << std::endl;
+    SemanticException exc = semantic_checks(rootnode);
+    std::cout << exc.what() << std::endl;
 }

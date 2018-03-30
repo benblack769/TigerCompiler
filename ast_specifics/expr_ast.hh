@@ -323,7 +323,6 @@ class ArrCreate : public ExprNode {
     }
     virtual TypeExpr eval_and_check_type(SymbolTable & env){
         TypeExpr arr_type = _type->eval_and_check_type(env);
-
         assert_err(arr_type.type == BaseType::ARRAY, SematicError::BAD_TYPE_MATCH, loc);
         assert_type_equality(_size_expr->eval_and_check_type(env), int_type(), loc);
         assert_type_equality(_value_expr->eval_and_check_type(env), env.array_subtype(arr_type), loc);
@@ -354,8 +353,8 @@ class RecCreate : public ExprNode {
         vector<pair<string,TypeExpr>> rec_arg_tys = _fields->eval_and_check_type_names(env);
         assert_err(first_strs_unique(rec_arg_tys),SematicError::NON_UNIQUE_RECORD_LABELS, loc);
         for(auto str_pair : rec_arg_tys){
-            assert_err(env.record_subexpr_exists(str_pair.second, str_pair.first), SematicError::INCOMPATABLE_RECORD_LABEL, loc);
-            assert_type_equality(str_pair.second, env.get_record_subexpr(str_pair.second, str_pair.first), loc);
+            assert_err(env.record_subexpr_exists(rec_ty, str_pair.first), SematicError::INCOMPATABLE_RECORD_LABEL, loc);
+            assert_type_equality(str_pair.second, env.get_record_subexpr(rec_ty, str_pair.first), loc);
         }
         return rec_ty;
     }

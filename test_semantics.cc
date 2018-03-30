@@ -38,17 +38,17 @@ SematicError file_error(string filename){
         So it automatically uses the generated AST node to compile another ASTNode, which should be  exactly the same as the original one.
     */
     ExprNode * node = get_ast_node_from_file(filename);
-    SematicError err = semantic_checks(node);
+    SematicError err = semantic_checks(node).error_code();
     return err;
 }
-TEST_CASE("File testing") {
+TEST_CASE("Parse checks are also semantically correct") {
     //cout << get_ast_node_from_string("(\"hi there\\n\")");
     //cout << get_ast_node_from_string("let var v := 4 in end");
-    REQUIRE(file_error("language_examples/arr.t"));
-    REQUIRE(file_error("language_examples/func_call.t"));
-    REQUIRE(file_error("language_examples/loop.t"));
-    REQUIRE(file_error("language_examples/record.t"));
-    REQUIRE(file_error("language_examples/sequences.t"));
-    REQUIRE(file_error("language_examples/merge_example.t"));
-    REQUIRE(file_error("language_examples/two_queens_example.t"));
+    REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/arr.t"));
+    //REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/func_call.t"));
+    REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/loop.t"));
+    REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/record.t"));
+    REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/sequences.t"));
+    REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/merge_example.t"));
+    REQUIRE(SematicError::NO_ERRORS == file_error("language_examples/two_queens_example.t"));
 }

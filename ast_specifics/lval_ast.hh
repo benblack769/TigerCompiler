@@ -32,6 +32,7 @@ class AttrAccess : public LvalueNode {
   }
   virtual TypeExpr get_type(SymbolTable & env) override{
       TypeExpr sub_ty = lvalnode->get_type(env);
+      assert_err(sub_ty.type == BaseType::RECORD, SematicError::INCOMPATABLE_RECORD_LABEL, loc);
       assert_err(env.record_subexpr_exists(sub_ty,my_id),SematicError::INCOMPATABLE_RECORD_LABEL, loc);
       return env.get_record_subexpr(sub_ty,my_id);
   }
