@@ -67,7 +67,9 @@ class FuncDecl: public DeclarationNode {
         return _has_type_decl;
     }
     vector<pair<string, string>> arg_types(){
-        return _ty_fields->get_field_pairs();
+        vector<pair<string, string>> func_args = _ty_fields->get_field_pairs();
+        assert_err(first_strs_unique(func_args),SematicError::NON_UNIQUE_FUNCTION_ARGS, loc);
+        return func_args;
     }
     string ret_type(){
         return _type_id->id_name();

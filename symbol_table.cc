@@ -6,6 +6,16 @@
 SymbolTable::SymbolTable(){
     types.add_base_type("string", BaseType::STRING);
     types.add_base_type("int", BaseType::INT);
+    vars["print"] = VarFuncItem(FuncEntry{void_type(),{string_type()}});
+    vars["flush"] = VarFuncItem(FuncEntry{void_type(),{}});
+    vars["getchar"] = VarFuncItem(FuncEntry{string_type(),{}});
+    vars["ord"] = VarFuncItem(FuncEntry{int_type(),{string_type()}});
+    vars["chr"] = VarFuncItem(FuncEntry{string_type(),{int_type()}});
+    vars["size"] = VarFuncItem(FuncEntry{int_type(),{string_type()}});
+    vars["substring"] = VarFuncItem(FuncEntry{string_type(),{string_type(),int_type(),int_type()}});
+    vars["concat"] = VarFuncItem(FuncEntry{string_type(),{string_type(),string_type()}});
+    vars["not"] = VarFuncItem(FuncEntry{int_type(),{int_type()}});
+    vars["exit"] = VarFuncItem(FuncEntry{void_type(),{int_type()}});
 }
 void SymbolTable::add_type_set(vector<pair<string, UnresolvedType>> multu_rec_types){
     /*

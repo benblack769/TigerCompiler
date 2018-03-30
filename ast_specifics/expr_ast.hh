@@ -118,9 +118,15 @@ class BinaryNode : public ExprNode {
     virtual TypeExpr eval_and_check_type(SymbolTable & env){
         TypeExpr left_ty = left->eval_and_check_type(env);
         TypeExpr right_ty = right->eval_and_check_type(env);
-        assert_type_equality(left_ty, int_type(), loc);
-        assert_type_equality(right_ty, int_type(), loc);
-        return left_ty;
+        assert_type_equality(left_ty, right_ty, loc);
+        if(op == BinaryOp::EQUAL){
+            assert_err(right_ty.is_convertible(right_ty), SematicError::BAD_TYPE_MATCH, loc);
+            return int_type();
+        }
+        else{
+            assert_type_equality(left_ty, int_type(), loc);
+            return int_type();
+        }
     }
     virtual void print(std::ostream & os) const override{
         os << "(" << *left << str_rep(op) << *right << ")";

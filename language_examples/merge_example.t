@@ -1,11 +1,16 @@
 let type any = {any : int}
-    var buffer := getchar()
+    var buffer : string := getchar()
 function readint(any: any) : int =
     let var i := 0
         function isdigit(s : string) : int =
             ord(buffer)>=ord("0") & ord(buffer)<=ord("9")
     in
-        while buffer=" " | buffer="\n" do buffer := getchar();
+        while
+        buffer=" "
+        |
+         buffer="\n"
+        do
+        buffer := getchar();
             any.any := isdigit(buffer);
             while isdigit(buffer)
                 do (i := i*10+ord(buffer)-ord("0");

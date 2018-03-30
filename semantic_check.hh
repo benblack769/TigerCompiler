@@ -11,8 +11,10 @@ enum class SematicError{
     BAD_TYPE_MATCH,
     TWO_NAMES_IN_MUTU_RECURSIVE_ENV,
     NON_UNIQUE_RECORD_LABELS,
+    NON_UNIQUE_FUNCTION_ARGS,
     INCOMPATABLE_RECORD_LABEL,
     FUNCTION_NOT_DEFINED,
+    WRONG_NUM_FUNC_ARGS,
     VARIABLE_NOT_DEFINED,
     USING_VAR_AS_FUNC,
     USING_FUNC_AS_VAR,
@@ -26,7 +28,9 @@ inline std::string error_str(SematicError err){
     case SematicError::BAD_TYPE_MATCH: return "BAD_TYPE_MATCH";
     case SematicError::TWO_NAMES_IN_MUTU_RECURSIVE_ENV: return "TWO_NAMES_IN_MUTU_RECURSIVE_ENV";
     case SematicError::NON_UNIQUE_RECORD_LABELS: return "NON_UNIQUE_RECORD_LABELS";
+    case SematicError::NON_UNIQUE_FUNCTION_ARGS: return "NON_UNIQUE_FUNCTION_ARGS";
     case SematicError::FUNCTION_NOT_DEFINED: return "FUNCTION_NOT_DEFINED";
+    case SematicError::WRONG_NUM_FUNC_ARGS: return "WRONG_NUM_FUNC_ARGS";
     case SematicError::VARIABLE_NOT_DEFINED: return "VARIABLE_NOT_DEFINED";
     case SematicError::USING_VAR_AS_FUNC: return "USING_VAR_AS_FUNC";
     case SematicError::USING_FUNC_AS_VAR: return "USING_FUNC_AS_VAR";

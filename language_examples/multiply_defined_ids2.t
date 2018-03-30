@@ -1,9 +1,8 @@
 /* this one shouldn't pass */
 /* Ben's comment: I think this one should also pass */
 let
-    var a:int := 5
-    var b:int := 6
-    var a:int := 10
+    type a = int
+    type a = string
 in
-    a + b
+ 3
 end

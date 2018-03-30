@@ -131,12 +131,10 @@ public:
         return types.array_values.at(arr_expr.value_id);
     }
     bool record_subexpr_exists(TypeExpr record_expr, string rec_name){
-        assert(record_expr.type == BaseType::RECORD);
         auto & act_types = types.record_values.at(record_expr.value_id);
         return act_types.count(rec_name);
     }
     TypeExpr get_record_subexpr(TypeExpr record_expr, string rec_name){
-        assert(record_expr.type == BaseType::RECORD);
         auto & act_types = types.record_values.at(record_expr.value_id);
         return act_types.at(rec_name);
     }

@@ -11,9 +11,9 @@ class IdLval : public LvalueNode {
   virtual ~IdLval(){
   }
   virtual TypeExpr get_type(SymbolTable & env)override{
-    return env.var_type(my_id);
+      assert_err(env.symbol_is_var(my_id), SematicError::VARIABLE_NOT_DEFINED, loc);
+      return env.var_type(my_id);
   }
-
   virtual void print(std::ostream & os) const override{
       os << my_id;
   }
