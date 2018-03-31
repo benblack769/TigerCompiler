@@ -55,8 +55,10 @@ class BracketAccess : public LvalueNode {
       delete _expr;
   }
   virtual TypeExpr get_type(SymbolTable & env)override{
+      TypeExpr sub_ty = _lval->get_type(env);
+      assert_err(sub_ty.type == BaseType::ARRAY, SematicError::INCOMPATABLE_RECORD_LABEL, loc);
       assert_type_equality(_expr->eval_and_check_type(env),int_type(),loc);
-      return env.array_subtype(_lval->get_type(env));
+      return env.array_subtype(sub_ty);
   }
   virtual void print(std::ostream & os) const override{
       os << *_lval << "[" << *_expr << "]";

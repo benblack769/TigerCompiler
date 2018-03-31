@@ -5,6 +5,7 @@
 #include "semantic_check.hh"
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <cstdio>
 #include <fstream>
 #include <sstream>
@@ -76,4 +77,52 @@ TEST_CASE("Parse checks are also semantically correct") {
     REQUIRE(SematicError::BAD_TYPE_MATCH == file_error("language_examples/type_mismatch5.t"));
     REQUIRE(SematicError::BAD_TYPE_MATCH == file_error("language_examples/type_missmatch6.t"));
     REQUIRE(SematicError::BAD_TYPE_MATCH == file_error("language_examples/type_mistmatch1.t"));
+}
+TEST_CASE("Alex and Matt's test semantics for appel's testfiles","[semantics]") {
+
+    // the keys are the numbers of the files that should error and the values are
+    // the line numbers of those errors
+    std::map<int, int> errFiles = {
+        { 9, 3},
+        {10, 2},
+        {11, 2},
+        {13, 3},
+        {14, 12},
+        {15, 3},
+        {16, 7},
+        {17, 5},
+        {18, 5},
+        {19, 8},
+        {20, 3},
+        {21, 5},
+        {22, 7},
+        {23, 7},
+        {24, 5},
+        {25, 5},
+        {26, 3},
+        {28, 7},
+        {29, 7},
+        {31, 3},
+        {32, 6},
+        {33, 3},
+        {34, 5},
+        {35, 5},
+        {36, 5},
+        {40, 3},
+        {45, 5}
+    };
+
+    for (int i = 1; i <= 48; i++) {
+        std::string file_str = "testcases/test" + std::to_string(i) + ".tig";
+        if (errFiles.find(i) == errFiles.end()){
+            SECTION("semantics for test" + std::to_string(i) + ".tig") {
+                REQUIRE(file_error(file_str) == SematicError::NO_ERRORS);
+            }
+        } else {
+            SECTION("make sure test" + std::to_string(i) + ".tig errors") {
+                REQUIRE(file_error(file_str) != SematicError::NO_ERRORS);
+            }
+
+        }
+    }
 }

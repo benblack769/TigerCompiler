@@ -136,6 +136,7 @@ expr: IDENTIFIER LPAREN RPAREN { $$ = new exprs::FunctionCall($1,new ExprListNod
  | expr ASTERISK expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::MUL); $$->set_source_loc(t_conv(@$)); }
  | expr FSLASH expr { $$ = new exprs::BinaryNode($1,$3,exprs::BinaryOp::EQUAL); $$->set_source_loc(t_conv(@$)); }
  | LPAREN exprseq RPAREN { $$ = new exprs::ExprSequenceEval($2);  $$->set_source_loc(t_conv(@$)); }
+ | LPAREN RPAREN { $$ = new exprs::ExprSequenceEval(new ExprSequenceNode());  $$->set_source_loc(t_conv(@$)); }
  | IDENTIFIER LPAREN exprlist RPAREN { $$ = new exprs::FunctionCall($1,$3); free($1); $$->set_source_loc(t_conv(@$)); }
  | typeid LBRACE fieldlist RBRACE { $$ = new exprs::RecCreate($1,$3); $$->set_source_loc(t_conv(@$)); }
  | typeid LBRACE RBRACE { /* fieldlist is optional */ $$ = new exprs::RecCreate($1,new FieldListNode()); $$->set_source_loc(t_conv(@$)); }
