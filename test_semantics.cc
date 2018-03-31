@@ -108,7 +108,10 @@ TEST_CASE("Alex and Matt's test semantics for appel's testfiles","[semantics]") 
         {34, 5},
         {35, 5},
         {36, 5},
+        {38, 5},
+        {39, 5},
         {40, 3},
+        {43, 5},
         {45, 5}
     };
 
