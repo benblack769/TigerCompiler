@@ -30,3 +30,15 @@ The table as a whole is an inefficient functional style, using quadratic time an
 All the test cases code are in the `language_examples` folder. The appropriate error is documented in `test_semantics.cc`. To get location info run `parse_and_print` executable. Not all errors have associated location information, especially stuff to do with recursive types. These errors simply say they are on line -1. Unit tests things like types matching function arguments, scope in various places, mutually recursive types, recursive functions, etc.
 
 Notably, the tests include the complex examples from the back of the tiger book.
+
+### Non-passing tests
+
+After adding in the tests from the book, now there are several non-passing tests, all dealing with either void or nil expressions.
+
+These tests are:
+
+* 10 (enforcing void while bodies)
+* 15 (enforcing void if then bodies)
+* 40 (enforcing void procedure returns)
+* 45 (disallowing initializing nil vars not constrained by record type)
+* 46 (using <> comparison on records)
