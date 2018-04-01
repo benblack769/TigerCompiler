@@ -1,10 +1,18 @@
+# files with no extensions (usually executables)
+*
+!/**/
+!*.*
+!Makefile
+
 *.o
-test_lexer
 lex.yy.c
 *.cmp
 tiger.tab*
-test_parser
-test_lexer
-parse_and_print
 tiger.output
 *.user
+
+# Precompiled Headers
+*.gch
+
+# vim swap files
+.*.swp
