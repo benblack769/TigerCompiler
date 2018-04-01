@@ -1,5 +1,5 @@
 ## ReadMe
-### Ben Black, Brandon Finley
+### Ben Black, Brandon Finley, Matt Atteberry, Alex Grant
 
 
 ### Symbol tables
