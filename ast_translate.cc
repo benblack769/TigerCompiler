@@ -7,6 +7,6 @@
 
 namespace tiger{
 
-IR_TREE_CLASS_NAME exprs::BinaryNode::translate() const{}
+IRTptr exprs::BinaryNode::translate() const{}
 
 } //namespace
