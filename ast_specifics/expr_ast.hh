@@ -17,7 +17,7 @@ public:
     virtual void print(std::ostream & os) const override{
         os << mystring;
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 protected:
     std::string mystring;
 };
@@ -32,7 +32,7 @@ public:
     virtual void print(std::ostream & os) const override{
         os << "nil";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 };
 
 class IntNode: public ExprNode{
@@ -47,7 +47,7 @@ public:
     virtual void print(std::ostream & os) const override{
         os << my_int;
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 protected:
     int64_t my_int;
 };
@@ -64,7 +64,7 @@ class LvalNode : public ExprNode {
   virtual void print(std::ostream & os) const override{
       os << *lval;
   }
-  virtual IR_TREE_CLASS_NAME translate() const override;
+  virtual IRTptr translate() const override;
  private:
   LvalueNode * lval;
 };
@@ -85,7 +85,7 @@ class NegateNode : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << '-' << *child_;
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     ExprNode * child_;
 };
@@ -136,7 +136,7 @@ class BinaryNode : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << "(" << *left << str_rep(op) << *right << ")";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     ExprNode * left;
     ExprNode * right;
@@ -160,7 +160,7 @@ class AssignNode : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << *target << ":=" << *source;
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     LvalueNode * target;
     ExprNode * source;
@@ -184,7 +184,7 @@ class FunctionCall : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << func_name << "(" << *args << ")";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     std::string func_name;
     ExprListNode * args;
@@ -209,7 +209,7 @@ class ExprSequenceEval : public ExprNode {
             os << "(" << *exprs << ")";
         }
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     ExprSequenceNode * exprs;
 };
@@ -231,7 +231,7 @@ class IfThen : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << " if " << "(" << *_cond << ")" << " then " << "(" << *_res<< ")";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     ExprNode * _cond;
     ExprNode * _res;
@@ -257,7 +257,7 @@ class IfThenElse : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << " if " << "(" << *_cond << ")" << " then " << "(" << *_res_1<< ")" << " else " << "(" << *_res_2 << ")";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     ExprNode * _cond;
     ExprNode * _res_1;
@@ -281,7 +281,7 @@ class WhileDo : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << " while " << "(" << *_cond << ")" << " do " << "(" << *_res<< ")";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     ExprNode * _cond;
     ExprNode * _res;
@@ -308,7 +308,7 @@ class ForToDo : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << " for " << _var_id << ":=" << *_initial << " to " << *_end << " do " << *_eval_expr;
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     std::string _var_id;
     ExprNode * _initial;
@@ -327,7 +327,7 @@ public:
     virtual void print(std::ostream & os) const override{
         os << " break ";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 };
 
 class ArrCreate : public ExprNode {
@@ -351,7 +351,7 @@ class ArrCreate : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << *_type << "[" << *_size_expr << "]" << " of " << *_value_expr;
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     TypeIDNode * _type;
     ExprNode * _value_expr;
@@ -382,7 +382,7 @@ class RecCreate : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << *_type << "{" << *_fields << "}";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     TypeIDNode * _type;
     FieldListNode * _fields;
@@ -405,7 +405,7 @@ class LetIn : public ExprNode {
     virtual void print(std::ostream & os) const override{
         os << " let " << *_decl_list << " in " << *_expr_sequ << " end ";
     }
-    virtual IR_TREE_CLASS_NAME translate() const override;
+    virtual IRTptr translate() const override;
 private:
     DeclarationListNode * _decl_list;
     ExprSequenceNode * _expr_sequ;

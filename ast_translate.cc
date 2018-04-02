@@ -5,12 +5,8 @@
 #include "ast_specifics/lval_ast.hh"
 #include "ast_specifics/types_ast.hh"
 
-class T_exp {};
-
 namespace tiger{
 
-void exprs::BinaryNode::translate() const{
-
-}
+IR_TREE_CLASS_NAME exprs::BinaryNode::translate() const{}
 
 } //namespace

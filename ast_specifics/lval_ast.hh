@@ -17,7 +17,7 @@ class IdLval : public LvalueNode {
   virtual void print(std::ostream & os) const override{
       os << my_id;
   }
-  virtual IR_TREE_CLASS_NAME translate() const override;
+  virtual IRTptr translate() const override;
  private:
   std::string my_id;
 };
@@ -40,7 +40,7 @@ class AttrAccess : public LvalueNode {
   virtual void print(std::ostream & os) const override{
       os << *lvalnode << "." << my_id;
   }
-  virtual IR_TREE_CLASS_NAME translate() const override;
+  virtual IRTptr translate() const override;
  private:
   LvalueNode * lvalnode;
   std::string my_id;
@@ -65,7 +65,7 @@ class BracketAccess : public LvalueNode {
   virtual void print(std::ostream & os) const override{
       os << *_lval << "[" << *_expr << "]";
   }
-  virtual IR_TREE_CLASS_NAME translate() const override;
+  virtual IRTptr translate() const override;
  private:
   LvalueNode * _lval;
   ExprNode * _expr;
