@@ -4,13 +4,13 @@
 
 ### AST design
 
-The AST nodes are organized to match the parse tree as closely as reasonable. This makes it easy to reason about the AST, but gives it additional verbosity and depth.
+The AST nodes are organized to match the parse tree as closely as reasonable. This makes it easy to reason about the AST, but gives it relatively high verbosity and depth.
 
 All nodes inherit from ASTNode in `ast_node.hh`. This class only has an abstract `print` method, and stores location information.
 
 The base classes, in `ast_interface.hh` are the classes which are referenced in other classes. They match the base types of the parse tree, for example expr, lvalue and declaration list.
 
-The different types of expressions, lvalues, type expressions, etc, are in different files in the `ast_specifics` folder. Ideally, the only time these files should be included is when creating the tree (in this case, tiger.y).
+The different types of expressions, lvalues, type expressions, etc, are in different files in the `ast_specifics` folder. For example, AST nodes for Let and Assign are in `ast_specifics/expr_ast_.hh`. Ideally, the only time these files should be included is when creating the tree (in this case, tiger.y). 
 
 Finally, the DeclarationList has additionally complex logic for recursive types, so it has its own implementation file, `ast_specifics/dec_list_impl.cc`. Since this logic needs the actual types of the declarations, there is some dynamic casting to the derived classes of TypeExpr.
 
