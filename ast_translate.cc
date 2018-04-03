@@ -33,9 +33,11 @@ using word_t = int; //may need to change this for larger words
 // Build up a tree of ESEQ and MOVE nodes to
 // move all of the characters to the correct places
 IRTptr exprs::StringNode::translate() const{
+    // this will hold the location of the start of the string
+    // probably will be set to the stack pointer in the future
+    word_t strStart = 0;
     // this is the variable that will be used to count up each word in the string
-    // probably will be set to the stack pointer
-    word_t strP = 0;
+    word_t strP = strStart;
 
     // this will store each of our memory calls before we make it into a tree
     std::vector<shared_ptr<IR_MOVE>> strExps = {};
@@ -68,9 +70,15 @@ IRTptr exprs::StringNode::translate() const{
         auto cNode = std::make_shared<IR_MOVE>(new IR_MEM(new IR_CONST(strP)), new IR_CONST(currWord));
         strExps.push_back(cNode);
     }
+    // build up a tree of ESEQs where the whole tree will return the location of the beginning
+    // of the string. 
+    // in other words, the terminal right leaf of the tree will contain the location
+    IR_TREE_CLASS_NAME* rNode = new IR_CONST(strStart);
+    for (int i = strExps.size(); i >= 0; i--){
+        rNode = new IR_ESEQ(strExps[i].get(), rNode);
+    }
     
-
-    return nullptr;
+    return std::shared_ptr<IR_TREE_CLASS_NAME>(rNode);
 }
 
 IRTptr exprs::NilNode::translate() const{return nullptr;}
