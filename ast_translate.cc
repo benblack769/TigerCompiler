@@ -63,7 +63,7 @@ IRTptr exprs::StringNode::translate() const{
             currWord = 0; 
             charInWord = 0;
         }
-        currWord << 8; //shift word one byte
+        currWord = currWord << 8; //shift word one byte
     }
     // finish up our last word
     if (currWord != 0) {
