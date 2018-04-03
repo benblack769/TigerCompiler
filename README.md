@@ -12,7 +12,7 @@ The base classes, in `ast_interface.hh` are the classes which are referenced in 
 
 The different types of expressions, lvalues, type expressions, etc, are in different files in the `ast_specifics` folder. Ideally, the only time these files should be included is when creating the tree (in this case, tiger.y).
 
-Finally, the DeclarationList has additionally complex logic for recursive types, so it has its own implementation file, `ast_specifics/dec_list_impl.cc`. Since this logic needs the actual types of the declarations, there is some dynamic casting to the derived classes of Declaration.
+Finally, the DeclarationList has additionally complex logic for recursive types, so it has its own implementation file, `ast_specifics/dec_list_impl.cc`. Since this logic needs the actual types of the declarations, there is some dynamic casting to the derived classes of TypeExpr.
 
 ### Symbol tables
 
