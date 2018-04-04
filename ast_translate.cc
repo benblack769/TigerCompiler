@@ -7,57 +7,37 @@
 
 namespace tiger{
 
-// Will be changed
-class IR_ESEQ: public IR_TREE_CLASS_NAME {
-  public:
-    IR_ESEQ(IR_TREE_CLASS_NAME*, IR_TREE_CLASS_NAME*){};
-};
-class IR_MOVE: public IR_TREE_CLASS_NAME {
-  public:
-    IR_MOVE(IR_TREE_CLASS_NAME*, IR_TREE_CLASS_NAME*){};
-};
-class IR_MEM: public IR_TREE_CLASS_NAME {
-  public:
-    IR_MEM(IR_TREE_CLASS_NAME*){};
-};
-class IR_CONST: public IR_TREE_CLASS_NAME {
-  public:
-    IR_CONST(int){};
-};
-
 // will probably get this from another file in the future
-int wordSize = 4;
-using word_t = int; //may need to change this for larger words
-
+const int wordSize = 4;
 
 // Build up a tree of ESEQ and MOVE nodes to
 // move all of the characters to the correct places
 IRTptr exprs::StringNode::translate() const{
     // this will hold the location of the start of the string
     // probably will be set to the stack pointer in the future
-    word_t strStart = 0;
+    ir::const_t strStart = 0;
     // this is the variable that will be used to count up each word in the string
-    word_t strP = strStart;
+    ir::const_t strP = strStart;
 
     // this will store each of our memory calls before we make it into a tree
-    std::vector<shared_ptr<IR_MOVE>> strExps = {};
+    std::vector<shared_ptr<ir::Move>> strExps = {};
     
     // the first word in the string will be it's length
-    word_t length = mystring.length();
-    auto lNode = std::make_shared<IR_MOVE>(new IR_MEM(new IR_CONST(strP)), new IR_CONST(length));
+    ir::const_t length = mystring.length();
+    auto lNode = std::make_shared<ir::Move>(new ir::Mem(new ir::Const(strP)), new ir::Const(length));
     strExps.push_back(lNode);
     strP++;
     
     // we can fit four characters in a word, so currWord will count how we're doing
     // we use shifting to fit them all 
-    word_t currWord = 0;
+    ir::const_t currWord = 0;
     int charInWord = 0;
     for (int i = 0; i < length; i++) {
-        currWord += static_cast<word_t>(mystring[i]);
+        currWord += static_cast<ir::const_t>(mystring[i]);
         charInWord++;
         // once a word is filled with chars, we start a new word
         if (charInWord >= wordSize){
-            auto cNode = std::make_shared<IR_MOVE>(new IR_MEM(new IR_CONST(strP)), new IR_CONST(currWord));
+            auto cNode = std::make_shared<ir::Move>(std::make_shared<ir::Mem>(std::make_shared<ir::Const>(strP)), std::make_shared<ir::Const>(currWord));
             strExps.push_back(cNode);
             strP++;
             currWord = 0; 
@@ -67,18 +47,19 @@ IRTptr exprs::StringNode::translate() const{
     }
     // finish up our last word
     if (currWord != 0) {
-        auto cNode = std::make_shared<IR_MOVE>(new IR_MEM(new IR_CONST(strP)), new IR_CONST(currWord));
+        auto cNode = std::make_shared<ir::Move>(std::make_shared<ir::Mem>(std::make_shared<ir::Const>(strP)), std::make_shared<ir::Const>(currWord));
         strExps.push_back(cNode);
     }
     // build up a tree of ESEQs where the whole tree will return the location of the beginning
     // of the string. 
     // in other words, the terminal right leaf of the tree will contain the location
-    IR_TREE_CLASS_NAME* rNode = new IR_CONST(strStart);
+    IRTptr rNode = std::make_shared<ir::Const>(strStart);
     for (int i = strExps.size(); i >= 0; i--){
-        rNode = new IR_ESEQ(strExps[i].get(), rNode);
+        IRTptr oldRNode = rNode;
+        rNode.reset(new ir::Eseq(strExps[i], oldRNode));
     }
     
-    return std::shared_ptr<IR_TREE_CLASS_NAME>(rNode);
+    return rNode;
 }
 
 IRTptr exprs::NilNode::translate() const{return nullptr;}
