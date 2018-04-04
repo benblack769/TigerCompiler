@@ -17,7 +17,7 @@ class IRTNode {
     IRTNode() = default;
     virtual ~IRTNode() = default;
     virtual std::string toStr() const = 0;
-}
+};
 
 inline std::ostream & operator << (std::ostream & os, const IRTNode & node){
     os << node.toStr() << std::endl;
@@ -31,22 +31,26 @@ inline std::ostream & operator << (std::ostream & os, const IRTNode * node){
 class Eseq: public IRTNode {
   public:
     Eseq(IRTptr, IRTptr){};
-    virtual std::string toStr() const {};
+    virtual ~Eseq() = default;
+    virtual std::string toStr() const {return "";};
 };
 class Move: public IRTNode {
   public:
     Move(IRTptr, IRTptr){};
-    virtual std::string toStr() const {};
+    virtual ~Move() = default;
+    virtual std::string toStr() const {return "";};
 };
 class Mem: public IRTNode {
   public:
     Mem(IRTptr){};
-    virtual std::string toStr() const {};
+    virtual ~Mem() = default;
+    virtual std::string toStr() const {return "";};
 };
 class Const: public IRTNode {
   public:
     Const(const_t){};
-    virtual std::string toStr() const {};
+    virtual ~Const() = default;
+    virtual std::string toStr() const {return "";};
 };
 
 

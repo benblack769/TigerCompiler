@@ -24,7 +24,7 @@ IRTptr exprs::StringNode::translate() const{
     
     // the first word in the string will be it's length
     ir::const_t length = mystring.length();
-    auto lNode = std::make_shared<ir::Move>(new ir::Mem(new ir::Const(strP)), new ir::Const(length));
+    auto lNode = std::make_shared<ir::Move>(std::make_shared<ir::Mem>(std::make_shared<ir::Const>(strP)), std::make_shared<ir::Const>(length));
     strExps.push_back(lNode);
     strP++;
     
@@ -53,7 +53,7 @@ IRTptr exprs::StringNode::translate() const{
     // build up a tree of ESEQs where the whole tree will return the location of the beginning
     // of the string. 
     // in other words, the terminal right leaf of the tree will contain the location
-    IRTptr rNode = std::make_shared<ir::Const>(strStart);
+    std::shared_ptr<ir::IRTNode> rNode = std::make_shared<ir::Const>(strStart);
     for (int i = strExps.size(); i >= 0; i--){
         IRTptr oldRNode = rNode;
         rNode.reset(new ir::Eseq(strExps[i], oldRNode));
