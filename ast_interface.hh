@@ -12,11 +12,12 @@
 #include "ast_node.hh"
 #include "helper_files/type_assertion.hh"
 #include "symbol_table.hh"
+#include "irt.hh"
 
-class IR_TREE_CLASS_NAME {};
-using IRTptr = const shared_ptr<IR_TREE_CLASS_NAME>;
 
 namespace tiger {
+
+using IRTptr = ir::IRTNode::IRTptr;
 
 class ExprNode: public ASTNode {
  public:
