@@ -8,7 +8,7 @@ WARNINGS=-Wall -Wextra
 #CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -Wextra -Werror
 LDFLAGS=$(CXXFLAGS)
 
-all: test_parser test_lexer parse_and_print test_semantics
+all: test_parser test_lexer parse_and_print test_semantics test_translate
 
 lex.yy.c: tiger.l
 	flex $^
@@ -62,6 +62,15 @@ parse_and_print: parse_and_print.o tiger.tab.o lex.yy.o parse_err.o  dec_list_im
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 ast_translate.o: ast_translate.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
+
+test_translate.o: test_translate.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
+
+test_translate: tiger.tab.o lex.yy.o parse_err.o catch.o dec_list_impl.o ast_translate.o test_translate.o buffman.o symbol_table.o
+	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
+
+buffman.o: buffman.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
 test: all
