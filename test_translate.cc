@@ -12,7 +12,7 @@ namespace tiger {
 TEST_CASE("example semantic check","[translate]") {
     auto b = buffman::Buffman("\"a string\"");
     REQUIRE(yyparse() == 0);
-    rootnode->translate();
+    cout << rootnode->translate();
 }
 
 } // namespace
