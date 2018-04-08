@@ -45,7 +45,7 @@ class exp: public IRTNode {
 };
 
 // like an expList but with pointers
-using expPtrList = std::vector<exp::expPtr>;
+using expPtrList = std::vector<std::shared_ptr<exp>>;
 
 namespace {
     // helper functions so that our toStrings look almost the same
@@ -114,7 +114,9 @@ class Temp: public exp {
 };
 
 enum class op_k: int                {PLUS, MINUS, MUL, DIV, AND,  OR, XOR, LSHIFT, RSHIFT, ARSHIFT};
+namespace {
 std::vector<std::string> op_names = { "+",   "-", "*", "/", "&", "|", "^",   "<<",   ">>","ARSHIFT"};
+}
 
 class BinOp: public exp {
   public:
@@ -144,7 +146,7 @@ class Mem: public exp {
 // evauates exp_ and returns the value at that loaction
 class Call: public exp {
   public:
-    Call(expPtr f, expPtrList l): func_(f), args_(l){};
+    Call(expPtr f, expPtrList l): func_(f), args_{l} {};
     virtual ~Call() = default;
     virtual std::string toStr(std::string spacing) const {
         std::string argsStr = spacing + ws + "args:\n";        
