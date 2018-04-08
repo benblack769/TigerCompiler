@@ -54,9 +54,9 @@ IRTptr exprs::StringNode::translate() const{
     // of the string. 
     // in other words, the terminal right leaf of the tree will contain the location
     std::shared_ptr<ir::IRTNode> rNode = std::make_shared<ir::Const>(strStart);
-    for (int i = strExps.size(); i >= 0; i--){
+    for (int i = strExps.size()-1; i >= 0; i--){
         IRTptr oldRNode = rNode;
-        rNode.reset(new ir::Eseq(strExps[i], oldRNode));
+        rNode = std::make_shared<ir::Eseq>(strExps[i], oldRNode);
     }
     
     return rNode;
