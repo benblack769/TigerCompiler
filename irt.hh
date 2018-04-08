@@ -3,12 +3,15 @@
  */
 #pragma once
 #include <iostream>
+#include <vector>
 
 namespace tiger {
 namespace ir {
 
 using const_t = int; //type that Const node will take
 const std::string ws = "  "; // whitespace for toStr
+using label_t = std::string; // may need to get this from the temp class
+using temp_t = std::string; // may need to get this from the temp class
 
 
 // Base IRT node class, to define the hierarchy.
@@ -40,6 +43,9 @@ class exp: public IRTNode {
     virtual ~exp() = default;
     virtual std::string toStr(std::string spacing) const = 0;
 };
+
+// like an expList but with pointers
+using expPtrList = std::vector<exp::expPtr>;
 
 namespace {
     // helper functions so that our toStrings look almost the same
@@ -83,19 +89,74 @@ class Const: public exp {
     const const_t val_;
 };
 
-// symbolic constant n
-/*
+// symbolic constant n corresponding to an asembly language label
 class Name: public exp {
   public:
-    Name(const_t val): val_(val) {};
-    virtual ~Const() = default;
+    Name(label_t val): val_(val) {};
+    virtual ~Name() = default;
     virtual std::string toStr(std::string spacing) const {
-        return spacing + "Const: " + std::to_string(val_);
+        return spacing + "Name: " + val_;
     };
   private:
-    const const_t val_;
+    const label_t val_;
 };
-*/
+
+// Temportary, like a register but we have infinite of them
+class Temp: public exp {
+  public:
+    Temp(temp_t val): val_(val) {};
+    virtual ~Temp() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return spacing + "Temp: " + val_;
+    };
+  private:
+    const temp_t val_;
+};
+
+enum class op_k: int                {PLUS, MINUS, MUL, DIV, AND,  OR, XOR, LSHIFT, RSHIFT, ARSHIFT};
+std::vector<std::string> op_names = { "+",   "-", "*", "/", "&", "|", "^",   "<<",   ">>","ARSHIFT"};
+
+class BinOp: public exp {
+  public:
+    BinOp(op_k o, expPtr l, expPtr r): op_(o), l_(l), r_(r) {};
+    virtual ~BinOp() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return twoChildToStr(spacing, "BinOp " + op_names.at(static_cast<int>(op_)), l_, r_);
+    };
+  private:
+    op_k op_;
+    expPtr l_;
+    expPtr r_;
+};
+
+// evauates exp_ and returns the value at that loaction
+class Mem: public exp {
+  public:
+    Mem(expPtr e): exp_(e){};
+    virtual ~Mem() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return oneChildToStr(spacing, "Mem", exp_);
+    }
+  private:
+    expPtr exp_;
+};
+
+// evauates exp_ and returns the value at that loaction
+class Call: public exp {
+  public:
+    Call(expPtr f, expPtrList l): func_(f), args_(l){};
+    virtual ~Call() = default;
+    virtual std::string toStr(std::string spacing) const {
+        std::string argsStr = spacing + ws + "args:\n";        
+        for (auto arg : args_){
+            argsStr += arg->toStr(spacing + ws + ws);
+        }
+        return oneChildToStr(spacing, "Call", func_) + argsStr;
+    }
+  private:
+    expPtr func_;
+    expPtrList args_;
+};
 
 // Sequence of two nodes
 // stm_ gets evaluated for side effects
@@ -128,17 +189,6 @@ class Move: public stm {
 
 };
 
-// evauates exp_ and returns the value at that loaction
-class Mem: public IRTNode {
-  public:
-    Mem(IRTptr exp): exp_(exp){};
-    virtual ~Mem() = default;
-    virtual std::string toStr(std::string spacing) const {
-        return oneChildToStr(spacing, "Mem", exp_);
-    }
-  private:
-    IRTptr exp_;
-};
 
 
 
