@@ -124,7 +124,7 @@ class BinaryNode : public ExprNode {
         TypeExpr left_ty = left->eval_and_check_type(env);
         TypeExpr right_ty = right->eval_and_check_type(env);
         assert_type_equality(left_ty, right_ty, loc);
-        if(op == BinaryOp::EQUAL){
+        if(op == BinaryOp::EQUAL || op == BinaryOp::LESSGREATER){
             assert_err(right_ty.is_convertible(right_ty), SematicError::BAD_TYPE_MATCH, loc);
             return int_type();
         }
