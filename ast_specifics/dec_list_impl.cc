@@ -56,7 +56,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
                 env.add_type_set(multu_type_info);
             }
             else if(start_type == DeclType::FUNC){
-                //processes function headers, and then their contents 
+                //processes function headers, and then their contents
                 vector<pair<string, FuncHeader>> func_data;
                 for(size_t idx = list_idx; idx < list_end; idx++){
                     FuncDecl * func = to_sub_class<FuncDecl>(list[idx].get());
@@ -70,6 +70,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
                     FuncDecl * func = to_sub_class<FuncDecl>(list[idx].get());
                     //create new table for function arguments
                     SymbolTable new_env = env;
+                    new_env.inc_func_nesting_level();
                     for(auto var_pair : func->arg_types()){
                         new_env.add_variable(var_pair.first,new_env.get_checked_type(var_pair.second));
                     }

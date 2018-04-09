@@ -65,6 +65,7 @@ protected:
 
 struct VarEntry{
     TypeExpr type;
+    F_access access;
 };
 struct FuncEntry{
     TypeExpr ret_type;
@@ -76,13 +77,15 @@ public:
     VarFuncItem(){
         _type = VarOrFunc::BAD;
     }
-    VarFuncItem(VarEntry in_var){
+    VarFuncItem(VarEntry in_var, int in_level){
         _type = VarOrFunc::VAR;
         var_data = in_var;
+        level = in_level;
     }
-    VarFuncItem(FuncEntry in_func){
+    VarFuncItem(FuncEntry in_func, int in_level){
         _type = VarOrFunc::FUNC;
         func_data = in_func;
+        level = in_level;
     }
     VarOrFunc type(){
         return _type;
@@ -99,11 +102,15 @@ protected:
     VarOrFunc _type;
     FuncEntry func_data;
     VarEntry var_data;
+    int level;
 };
 class SymbolTable{
 protected:
 public:
     SymbolTable();
+    void inc_func_nesting_level(){
+        current_level++;
+    }
     bool has_type(string tyid){
         return types.has_type(tyid);
     }
@@ -165,5 +172,6 @@ public:
     }
 protected:
     TypeTable types;
+    int current_level = 0;
     unordered_map<string, VarFuncItem> vars;
 };

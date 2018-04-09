@@ -21,15 +21,15 @@ IRTptr exprs::StringNode::translate() const{
 
     // this will store each of our memory calls before we make it into a tree
     std::vector<shared_ptr<ir::Move>> strExps = {};
-    
+
     // the first word in the string will be it's length
     ir::const_t length = mystring.length();
     auto lNode = std::make_shared<ir::Move>(std::make_shared<ir::Mem>(std::make_shared<ir::Const>(strP)), std::make_shared<ir::Const>(length));
     strExps.push_back(lNode);
     strP++;
-    
+
     // we can fit four characters in a word, so currWord will count how we're doing
-    // we use shifting to fit them all 
+    // we use shifting to fit them all
     ir::const_t currWord = 0;
     int charInWord = 0;
     for (int i = 0; i < length; i++) {
@@ -40,7 +40,7 @@ IRTptr exprs::StringNode::translate() const{
             auto cNode = std::make_shared<ir::Move>(std::make_shared<ir::Mem>(std::make_shared<ir::Const>(strP)), std::make_shared<ir::Const>(currWord));
             strExps.push_back(cNode);
             strP++;
-            currWord = 0; 
+            currWord = 0;
             charInWord = 0;
         }
         currWord = currWord << 8; //shift word one byte
@@ -51,16 +51,66 @@ IRTptr exprs::StringNode::translate() const{
         strExps.push_back(cNode);
     }
     // build up a tree of ESEQs where the whole tree will return the location of the beginning
-    // of the string. 
+    // of the string.
     // in other words, the terminal right leaf of the tree will contain the location
     std::shared_ptr<ir::IRTNode> rNode = std::make_shared<ir::Const>(strStart);
     for (int i = strExps.size()-1; i >= 0; i--){
         IRTptr oldRNode = rNode;
         rNode = std::make_shared<ir::Eseq>(strExps[i], oldRNode);
     }
-    
+
     return rNode;
 }
+
+//conditional evaluation helper function (used for boolean operations like | as well as if statements)
+/*T_expr compile_conditional(RelOp, left, right, then_expr, else_expr){
+	result = Temp_temp()
+
+	then = new_label()
+	else = new_label()
+	end = new_label()
+
+	stmts = {
+		T_Cjump(op,left,right,then,else),
+		T_Label(then),
+		T_Move(T_Temp(result), then_expr),
+		T_Label(else),
+		T_Move(T_Temp(result), else_expr),
+		T_Label(end),
+	}
+	T_Eseq(stmts, T_Temp(result))
+}*/
+//variable_access
+/*F_access get_static_link(int level){
+    return F_formals(get_frame_at_level(level)).back();
+}
+T_expr get_variable(F_access acc, int level){
+    int cur_level = get_current_level();
+
+    assert(level <= cur_level);
+    if(level == cur_level){
+        return F_Exp(acc,FP());
+    }
+    if(level == cur_level - 1){
+        F_access static_link_acc = get_static_link(level);
+        T_expr link_expr = F_Exp(static_link_acc, FP());
+        return F_Exp(frame_acc,link_expr);
+    }
+}
+T_expr get_function_static_link(int func_level){
+    int cur_level = get_current_level();
+
+    assert(func_level + 1 <= cur_level);
+    if(func_level + 1 == cur_level){
+        return FP();
+    }
+    else if(func_level == cur_level){
+        return F_Exp(get_static_link(func_level),FP());
+    }
+    else if(true){
+        //
+    }
+}/*
 
 IRTptr exprs::NilNode::translate() const{return nullptr;}
 IRTptr exprs::IntNode::translate() const{return nullptr;}
