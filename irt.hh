@@ -12,6 +12,7 @@ using const_t = int; //type that Const node will take
 const std::string ws = "  "; // whitespace for toStr
 using label_t = std::string; // may need to get this from the temp class
 using temp_t = std::string; // may need to get this from the temp class
+using labelList = std::vector<label_t>;
 
 
 // Base IRT node class, to define the hierarchy.
@@ -188,11 +189,94 @@ class Move: public stm {
   private:
     expPtr dest_;
     expPtr src_;
-
 };
 
+// evaluate exp_ and discard the result
+class Exp: public stm {
+  public:
+    Exp(expPtr e): exp_(e)
+        {};
+    virtual ~Exp() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return oneChildToStr(spacing, "Exp: ", exp_);
+    };
+  private:
+    expPtr exp_;
+};
 
+// jump to address exp_. labs_ contains all of the locations
+// exp_ could be
+class Jump: public stm {
+  public:
+    Jump(expPtr e, labelList labs): exp_(e), labs_(labs)
+        {};
+    virtual ~Jump() = default;
+    virtual std::string toStr(std::string spacing) const {
+        std::string labsStr = spacing + ws + "labs:\n";        
+        for (auto label : labs_){
+            labsStr += spacing + ws + ws + label;
+        }
+        return oneChildToStr(spacing, "Jump", exp_) + labsStr;
+    }
+  private:
+    expPtr exp_;
+    labelList labs_;
+};
 
+enum class rel_op_k: int                { EQ,  NE, LT, GT,  LE,  GE, ULT, ULE, UGT, UGE};
+namespace {
+std::vector<std::string> rel_op_names = {"=","!=","<",">","<=",">=", 
+                                         "unsigned <", "unsigned <=", "unsigned >", "unsigned >="};
+}
+// evaluate left_ and right_ and compare with op_. If true, go to trueLab_
+// if false jump to falseLab_
+class CJump: public stm {
+  public:
+    CJump(rel_op_k o, expPtr e1, expPtr e2, label_t t, label_t f): 
+        op_(o), left_(e1), right_(e2), trueLab_(t), falseLab_(f) {};
+    virtual ~CJump() = default;
+    virtual std::string toStr(std::string spacing) const {
+        
+        return spacing + "CJump op: " + rel_op_names.at(static_cast<int>(op_)) + "\n" +
+            spacing + "CJump left:\n" + left_->toStr(spacing + ws) +
+            spacing + "CJump right:\n" + right_->toStr(spacing + ws) +
+            spacing + "CJump true label: " + trueLab_ +
+            spacing + "CJump false label: " + falseLab_;
+    };
+  private:
+    rel_op_k op_;
+    expPtr left_;
+    expPtr right_;
+    label_t trueLab_;
+    label_t falseLab_;
+};
+
+// evaluates stm1_ then stm2_
+class Seq: public stm {
+  public:
+    Seq(stmPtr s1, stmPtr s2): stm1_(s1), stm2_(s2)
+        {};
+    virtual ~Seq() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return twoChildToStr(spacing, "Seq", stm1_, stm2_);
+    };
+  private:
+    stmPtr stm1_;
+    stmPtr stm2_;
+};
+
+// define name_ to be the current machine code address
+class Label: public stm {
+  public:
+    Label(label_t n): name_(n)
+        {};
+    virtual ~Label() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return spacing + "Label: " + name_;
+    };
+  private:
+    label_t name_;
+};
 
 } // ir namespace
 } // tiger
