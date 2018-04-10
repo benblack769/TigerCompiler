@@ -5,6 +5,7 @@
 #include "helper_files/unresolved_type_info.hh"
 #include "helper_files/func_header.hh"
 #include "semantic_check.hh"
+#include "frame.hh"
 using namespace std;
 
 class SymbolTable;
@@ -66,10 +67,12 @@ protected:
 struct VarEntry{
     TypeExpr type;
     F_access access;
+    int level;
 };
 struct FuncEntry{
     TypeExpr ret_type;
     vector<TypeExpr> arg_types;
+    int level;
 };
 enum class VarOrFunc{BAD,VAR,FUNC};
 class VarFuncItem{
@@ -77,15 +80,13 @@ public:
     VarFuncItem(){
         _type = VarOrFunc::BAD;
     }
-    VarFuncItem(VarEntry in_var, int in_level){
+    VarFuncItem(VarEntry in_var){
         _type = VarOrFunc::VAR;
         var_data = in_var;
-        level = in_level;
     }
-    VarFuncItem(FuncEntry in_func, int in_level){
+    VarFuncItem(FuncEntry in_func){
         _type = VarOrFunc::FUNC;
         func_data = in_func;
-        level = in_level;
     }
     VarOrFunc type(){
         return _type;
@@ -102,15 +103,11 @@ protected:
     VarOrFunc _type;
     FuncEntry func_data;
     VarEntry var_data;
-    int level;
 };
 class SymbolTable{
 protected:
 public:
     SymbolTable();
-    void inc_func_nesting_level(){
-        current_level++;
-    }
     bool has_type(string tyid){
         return types.has_type(tyid);
     }
@@ -124,8 +121,8 @@ public:
         return has_var_symbol(var_id) && vars.at(var_id).type() == VarOrFunc::FUNC;
     }
     void add_type_set(vector<pair<string, UnresolvedType>> multu_rec_types);
-    void add_function_set(vector<pair<string, FuncHeader>> multu_rec_funcs);
-    void add_variable(string name, TypeExpr type);
+    void add_function_set(vector<pair<string, FuncHeader>> multu_rec_funcs, int func_depth_level);
+    void add_variable(string name, TypeExpr type, int func_depth_level, F_access frame_access);
     bool verify_function_args(string func_name, vector<TypeExpr> arg_types){
         assert(symbol_is_func(func_name));
         vector<TypeExpr> & expected_types = vars[func_name].func().arg_types;
@@ -164,6 +161,10 @@ public:
         assert(symbol_is_var(varid));
         return vars.at(varid).var().type;
     }
+    VarEntry var_data(string varid){
+        assert(symbol_is_var(varid));
+        return vars.at(varid).var();
+    }
     TypeExpr get_checked_type(string tyid){
         if(!has_type(tyid)){
             throw SemanticException(SematicError::TYPE_NOT_DEFINED);
@@ -172,6 +173,5 @@ public:
     }
 protected:
     TypeTable types;
-    int current_level = 0;
     unordered_map<string, VarFuncItem> vars;
 };

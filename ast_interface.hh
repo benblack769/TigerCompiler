@@ -13,6 +13,7 @@
 #include "helper_files/type_assertion.hh"
 #include "symbol_table.hh"
 #include "irt.hh"
+#include "frame_stack.hh"
 
 
 namespace tiger {
@@ -26,7 +27,7 @@ class ExprNode: public ASTNode {
   virtual TypeExpr eval_and_check_type(SymbolTable & env) = 0;
   //virtual int expr_type(Envirornement & env) = 0;
   virtual void print(std::ostream & os) const override = 0;
-  virtual IRTptr translate() const = 0;
+  virtual IRTptr translate(SymbolTable & env) const = 0;
 };
 
 class LvalueNode: public ASTNode {
@@ -35,7 +36,7 @@ class LvalueNode: public ASTNode {
   virtual ~LvalueNode() = default;
   virtual TypeExpr get_type(SymbolTable & env) = 0;
   virtual void print(std::ostream & os) const override = 0;
-  virtual IRTptr translate() const = 0;
+  virtual IRTptr translate(SymbolTable & env) const = 0;
 };
 
 enum class DeclType{VAR, FUNC, TYPE};
@@ -46,7 +47,7 @@ class DeclarationNode: public ASTNode {
   virtual std::string name() = 0;
   virtual DeclType type() = 0;
   virtual void print(std::ostream & os) const override = 0;
-  virtual IRTptr translate() const = 0;
+  virtual IRTptr translate(SymbolTable & env) const = 0;
 };
 
 class TypeNode: public ASTNode {
@@ -55,7 +56,7 @@ class TypeNode: public ASTNode {
   virtual ~TypeNode() = default;
   virtual UnresolvedType unresolved_type() = 0;
   virtual void print(std::ostream & os) const override = 0;
-  virtual IRTptr translate() const = 0;
+  virtual IRTptr translate(SymbolTable & env) const = 0;
 };
 
 class ExprListNode: public ASTNode {
@@ -75,7 +76,7 @@ class ExprListNode: public ASTNode {
   virtual void print(std::ostream & os) const override {
       print_list(os, base_list(list), ", ");
   }
-  virtual IRTptr translate() const;
+  virtual IRTptr translate(SymbolTable & env) const;
 protected:
   std::vector<std::unique_ptr<ExprNode>> list;
 };
@@ -103,7 +104,7 @@ class ExprSequenceNode: public ASTNode {
       print_list(os, base_list(list), ";\n");
   }
   std::vector<std::unique_ptr<ExprNode>> list;
-  virtual IRTptr translate() const;
+  virtual IRTptr translate(SymbolTable & env) const;
 };
 
 class FieldNode: public ASTNode{
@@ -120,7 +121,7 @@ class FieldNode: public ASTNode{
   virtual void print(std::ostream & os) const override{
       os << id << " = " << *expr;
   }
-  virtual IRTptr translate() const;
+  virtual IRTptr translate(SymbolTable & env) const;
 protected:
     std::string id;
     ExprNode * expr;
@@ -147,7 +148,7 @@ class TypeIDNode : public ASTNode {
   virtual void print(std::ostream & os) const override{
       os << my_id;
   }
-  virtual IRTptr translate() const;
+  virtual IRTptr translate(SymbolTable & env) const;
  private:
   std::string my_id;
 };
@@ -166,7 +167,7 @@ class TypeFeildNode: public ASTNode {
   virtual void print(std::ostream & os) const override{
       os << id << " : " << *ty;
   }
-  virtual IRTptr translate() const;
+  virtual IRTptr translate(SymbolTable & env) const;
 protected:
     std::string id;
     TypeIDNode * ty;
@@ -190,7 +191,7 @@ class FieldListNode: public ASTNode {
       print_list(os, base_list(list), ",");
   }
   std::vector<std::unique_ptr<FieldNode>> list;
-  virtual IRTptr translate() const;
+  virtual IRTptr translate(SymbolTable & env) const;
 };
 
 class DeclarationListNode: public ASTNode {
@@ -201,7 +202,7 @@ class DeclarationListNode: public ASTNode {
    virtual void print(std::ostream & os) const override ;
    virtual void load_and_check_types(SymbolTable & env);
    std::vector<std::unique_ptr<DeclarationNode>> list;
-   virtual IRTptr translate() const;
+   virtual IRTptr translate(SymbolTable & env) const;
 };
 
 class TypeFeildsNode: public ASTNode {
@@ -222,7 +223,7 @@ class TypeFeildsNode: public ASTNode {
        print_list(os, base_list(list), ", ");
    }
    std::vector<std::unique_ptr<TypeFeildNode>> list;
-   virtual IRTptr translate() const;
+   virtual IRTptr translate(SymbolTable & env) const;
 };
 
 } //namespace tiger

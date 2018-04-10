@@ -9,16 +9,16 @@ SymbolTable::SymbolTable(){
     types.add_base_type("string", BaseType::STRING);
     types.add_base_type("int", BaseType::INT);
     //define standard library functions
-    vars["print"] = VarFuncItem(FuncEntry{void_type(),{string_type()}},base_level);
-    vars["flush"] = VarFuncItem(FuncEntry{void_type(),{}},base_level);
-    vars["getchar"] = VarFuncItem(FuncEntry{string_type(),{}},base_level);
-    vars["ord"] = VarFuncItem(FuncEntry{int_type(),{string_type()}},base_level);
-    vars["chr"] = VarFuncItem(FuncEntry{string_type(),{int_type()}},base_level);
-    vars["size"] = VarFuncItem(FuncEntry{int_type(),{string_type()}},base_level);
-    vars["substring"] = VarFuncItem(FuncEntry{string_type(),{string_type(),int_type(),int_type()}},base_level);
-    vars["concat"] = VarFuncItem(FuncEntry{string_type(),{string_type(),string_type()}},base_level);
-    vars["not"] = VarFuncItem(FuncEntry{int_type(),{int_type()}},base_level);
-    vars["exit"] = VarFuncItem(FuncEntry{void_type(),{int_type()}},base_level);
+    vars["print"] = VarFuncItem(FuncEntry{void_type(),{string_type()},base_level});
+    vars["flush"] = VarFuncItem(FuncEntry{void_type(),{},base_level});
+    vars["getchar"] = VarFuncItem(FuncEntry{string_type(),{},base_level});
+    vars["ord"] = VarFuncItem(FuncEntry{int_type(),{string_type()},base_level});
+    vars["chr"] = VarFuncItem(FuncEntry{string_type(),{int_type()},base_level});
+    vars["size"] = VarFuncItem(FuncEntry{int_type(),{string_type()},base_level});
+    vars["substring"] = VarFuncItem(FuncEntry{string_type(),{string_type(),int_type(),int_type()},base_level});
+    vars["concat"] = VarFuncItem(FuncEntry{string_type(),{string_type(),string_type()},base_level});
+    vars["not"] = VarFuncItem(FuncEntry{int_type(),{int_type()},base_level});
+    vars["exit"] = VarFuncItem(FuncEntry{void_type(),{int_type()},base_level});
 }
 void SymbolTable::add_type_set(vector<pair<string, UnresolvedType>> multu_rec_types){
     /*
@@ -89,7 +89,7 @@ void SymbolTable::add_type_set(vector<pair<string, UnresolvedType>> multu_rec_ty
     }
 }
 
-void SymbolTable::add_function_set(vector<pair<string, FuncHeader>> multu_rec_funcs){
+void SymbolTable::add_function_set(vector<pair<string, FuncHeader>> multu_rec_funcs,int func_depth_level){
     if(!first_strs_unique(multu_rec_funcs)){
         throw SemanticException(SematicError::TWO_NAMES_IN_MUTU_RECURSIVE_ENV);
     }
@@ -103,9 +103,10 @@ void SymbolTable::add_function_set(vector<pair<string, FuncHeader>> multu_rec_fu
         for(string ty_names : typeinfo.arg_type_names){
             func_res.arg_types.push_back(get_checked_type(ty_names));
         }
-        vars[fname] = VarFuncItem(func_res,current_level);
+        func_res.level = func_depth_level;
+        vars[fname] = VarFuncItem(func_res);
     }
 }
-void SymbolTable::add_variable(string name, TypeExpr type){
-    vars[name] = VarFuncItem(VarEntry{type},current_level);
+void SymbolTable::add_variable(string name, TypeExpr type,int level, F_access frame_access){
+    vars[name] = VarFuncItem(VarEntry{type,frame_access,level});
 }

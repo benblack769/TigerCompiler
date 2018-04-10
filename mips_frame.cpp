@@ -1,5 +1,6 @@
 #include <stdlib.h>
-#include <temp.hh>
+#include "temp.hh"
+#include "frame.hh"
 
 struct F_frame_{
 	Temp_label name;
