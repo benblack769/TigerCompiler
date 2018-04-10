@@ -47,6 +47,7 @@ class exp: public IRTNode {
 
 // like an expList but with pointers
 using expPtrList = std::vector<std::shared_ptr<exp>>;
+using stmPtrList = std::vector<std::shared_ptr<stm>>;
 
 namespace {
     // helper functions so that our toStrings look almost the same
@@ -62,6 +63,21 @@ namespace {
     using expPtr = exp::expPtr;
     using stmPtr = stm::stmPtr;
 }
+using IRTptr = IRTNode::IRTptr;
+template<class expr_ty>
+inline expPtr to_expPtr(const expr_ty & expr){
+    return std::shared_ptr<exp>(new expr_ty(expr));
+}
+template<class stm_ty>
+inline stmPtr to_stmPtr(const stm_ty & stmt){
+    return std::shared_ptr<stm>(new stm_ty(stmt));
+}
+inline expPtr cast_to_exprPtr(IRTptr ptr){
+    expPtr res = dynamic_pointer_cast<exp>(ptr);
+    assert(bool(res));
+    return res;
+}
+
 
 // printing stuff
 inline std::ostream & operator << (std::ostream & os, const IRTNode & node){
@@ -208,6 +224,17 @@ class Exp: public stm {
 // exp_ could be
 class Jump: public stm {
   public:
+    Jump(label_t label): lab_(label)
+        {};
+    virtual ~Jump() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return spacing + "Jump: " + lab_.toString();
+    }
+  private:
+    label_t lab_;
+};
+/*class Jump: public stm {
+  public:
     Jump(expPtr e, labelList labs): exp_(e), labs_(labs)
         {};
     virtual ~Jump() = default;
@@ -221,7 +248,7 @@ class Jump: public stm {
   private:
     expPtr exp_;
     labelList labs_;
-};
+};*/
 
 enum class rel_op_k: int                { EQ,  NE, LT, GT,  LE,  GE, ULT, ULE, UGT, UGE};
 namespace {
@@ -277,6 +304,7 @@ class Label: public stm {
   private:
     label_t name_;
 };
+
 
 } // ir namespace
 
