@@ -70,7 +70,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
                     FuncDecl * func = to_sub_class<FuncDecl>(list[idx].get());
                     //create new table for function arguments
                     SymbolTable new_env = env;
-                    full_frame.new_frame(F_newFrame(newlabel(),F_formalsList(func->number_args())));
+                    full_frame.new_frame(F_newFrame(newlabel(),F_formals_all_true(func->number_args())));
                     for(auto var_pair : func->arg_types()){
                         new_env.add_variable(var_pair.first,new_env.get_checked_type(var_pair.second),full_frame.current_level(),F_allocLocal(full_frame.current_frame(),true));
                     }

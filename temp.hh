@@ -14,9 +14,10 @@ class Temp_temp {
 		Temp_temp();
         //Temp_temp(/**/);
 		~Temp_temp();
+        std::string toString()const{return specialName;}
 	private:
 		int num;
-		const std::string &specialName;
+        const std::string specialName;
 		static int count;
 
 };
@@ -40,7 +41,7 @@ class Temp_label {
 // methods on Temp_label:
 Temp_label newlabel();
 	// call constructor
-Temp_label namedlabel(string);
+Temp_label namedlabel(std::string);
 	// call constructor
 
 class Temp_tempList{

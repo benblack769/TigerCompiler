@@ -13,6 +13,9 @@ public:
     void pop_frame(){
         frames.pop_back();
     }
+    F_frame frame_at_level(int level){
+        return frames.at(level-1);
+    }
     int current_level(){
         return frames.size();
     }

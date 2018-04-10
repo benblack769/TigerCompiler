@@ -4,20 +4,21 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include "temp.hh"
 
 namespace ir {
 
 using const_t = int; //type that Const node will take
 const std::string ws = "  "; // whitespace for toStr
-using label_t = std::string; // may need to get this from the temp class
-using temp_t = std::string; // may need to get this from the temp class
+using label_t = Temp_label; // may need to get this from the temp class
+using temp_t = Temp_temp; // may need to get this from the temp class
 using labelList = std::vector<label_t>;
 
 
 // Base IRT node class, to define the hierarchy.
 class IRTNode {
   public:
-    using IRTptr = const shared_ptr<IRTNode>;
+    using IRTptr = std::shared_ptr<IRTNode>;
     
     IRTNode() = default;
     virtual ~IRTNode() = default;
@@ -27,7 +28,7 @@ class IRTNode {
 // class for things that dont return a value
 class stm: public IRTNode {
   public:
-    using stmPtr = const shared_ptr<stm>;
+    using stmPtr = std::shared_ptr<stm>;
     
     stm() = default;
     virtual ~stm() = default;
@@ -37,7 +38,7 @@ class stm: public IRTNode {
 // class for things that do return a value
 class exp: public IRTNode {
   public:
-    using expPtr = const shared_ptr<exp>;
+    using expPtr = std::shared_ptr<exp>;
     
     exp() = default;
     virtual ~exp() = default;
@@ -95,7 +96,7 @@ class Name: public exp {
     Name(label_t val): val_(val) {};
     virtual ~Name() = default;
     virtual std::string toStr(std::string spacing) const {
-        return spacing + "Name: " + val_;
+        return spacing + "Name: " + val_.toString();
     };
   private:
     const label_t val_;
@@ -107,7 +108,7 @@ class Temp: public exp {
     Temp(temp_t val): val_(val) {};
     virtual ~Temp() = default;
     virtual std::string toStr(std::string spacing) const {
-        return spacing + "Temp: " + val_;
+        return spacing + "Temp: " + val_.toString();
     };
   private:
     const temp_t val_;
@@ -213,7 +214,7 @@ class Jump: public stm {
     virtual std::string toStr(std::string spacing) const {
         std::string labsStr = spacing + ws + "labs:\n";        
         for (auto label : labs_){
-            labsStr += spacing + ws + ws + label;
+            labsStr += spacing + ws + ws + label.toString();
         }
         return oneChildToStr(spacing, "Jump", exp_) + labsStr;
     }
@@ -239,8 +240,8 @@ class CJump: public stm {
         return spacing + "CJump op: " + rel_op_names.at(static_cast<int>(op_)) + "\n" +
             spacing + "CJump left:\n" + left_->toStr(spacing + ws) +
             spacing + "CJump right:\n" + right_->toStr(spacing + ws) +
-            spacing + "CJump true label: " + trueLab_ +
-            spacing + "CJump false label: " + falseLab_;
+            spacing + "CJump true label: " + trueLab_.toString() +
+            spacing + "CJump false label: " + falseLab_.toString();
     };
   private:
     rel_op_k op_;
@@ -271,7 +272,7 @@ class Label: public stm {
         {};
     virtual ~Label() = default;
     virtual std::string toStr(std::string spacing) const {
-        return spacing + "Label: " + name_;
+        return spacing + "Label: " + name_.toString();
     };
   private:
     label_t name_;
