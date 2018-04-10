@@ -42,7 +42,7 @@ class VarDecl: public DeclarationNode {
      TypeIDNode * _type_id;
      ExprNode * _expr;
      bool _has_type_decl;
-  virtual IRTptr translate() const override;
+  virtual IRTptr translate(SymbolTable & env) const override;
 };
 class FuncDecl: public DeclarationNode {
  public:
@@ -85,7 +85,7 @@ class FuncDecl: public DeclarationNode {
         }
         os <<  " = " << *_expr;
     }
-    virtual IRTptr translate() const override;
+    virtual IRTptr translate(SymbolTable & env) const override;
  //protected:
      std::string _id;
      TypeFeildsNode * _ty_fields;
@@ -113,7 +113,7 @@ class TypeDecl: public DeclarationNode {
     virtual void print(std::ostream & os) const override{
         os << " type " << *_id << "=" << *_type;
     }
-  virtual IRTptr translate() const override;
+  virtual IRTptr translate(SymbolTable & env) const override;
  protected:
      TypeIDNode * _id;
      TypeNode * _type;

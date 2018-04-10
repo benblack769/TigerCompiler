@@ -161,6 +161,10 @@ public:
         assert(symbol_is_var(varid));
         return vars.at(varid).var().type;
     }
+    VarEntry var_data(string varid){
+        assert(symbol_is_var(varid));
+        return vars.at(varid).var();
+    }
     TypeExpr get_checked_type(string tyid){
         if(!has_type(tyid)){
             throw SemanticException(SematicError::TYPE_NOT_DEFINED);
