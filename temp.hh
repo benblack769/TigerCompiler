@@ -3,13 +3,16 @@
 // Noodles around with Temps and Labels.
 // data representations inspired by ktok07b6 @ github
 
+#pragma once
 #include <string>
 #include <vector>
 
+class _TempMap;
+using Temp_map = _TempMap*;
 class Temp_temp {
 	public:
 		Temp_temp();
-		Temp_temp(/**/);
+        //Temp_temp(/**/);
 		~Temp_temp();
 	private:
 		int num;

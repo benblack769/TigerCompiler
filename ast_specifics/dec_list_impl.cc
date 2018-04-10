@@ -32,7 +32,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
             else{
                 res_expr = evaled_expr;
             }
-            env.add_variable(var->name(),res_expr);
+            env.add_variable(var->name(),res_expr,full_frame.current_level(), F_allocLocal(full_frame.current_frame(),true));
             list_idx += 1;
         }
         else if(start_type == DeclType::TYPE ||
@@ -63,21 +63,22 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
                     FuncHeader header = {func->has_type(), func->has_type() ? func->ret_type() : "??", second_of_pairs(func->arg_types())};
                     func_data.push_back(make_pair(func->name(), header));
                 }
-                env.add_function_set(func_data);
+                env.add_function_set(func_data,full_frame.current_level());
 
                 //checks types inside function definitions, verifies that the expression is correct, and also checks the consistency of the return type
                 for(size_t idx = list_idx; idx < list_end; idx++){
                     FuncDecl * func = to_sub_class<FuncDecl>(list[idx].get());
                     //create new table for function arguments
                     SymbolTable new_env = env;
-                    new_env.inc_func_nesting_level();
+                    full_frame.new_frame(F_newFrame(newlabel(),F_formalsList(func->number_args())));
                     for(auto var_pair : func->arg_types()){
-                        new_env.add_variable(var_pair.first,new_env.get_checked_type(var_pair.second));
+                        new_env.add_variable(var_pair.first,new_env.get_checked_type(var_pair.second),full_frame.current_level(),F_allocLocal(full_frame.current_frame(),true));
                     }
                     TypeExpr func_ret_ty = func->_expr->eval_and_check_type(new_env);
                     if(func->has_type()){
                         assert_type_equality(func_ret_ty,env.get_checked_type(func->ret_type()),func->get_source_loc());
                     }
+                    full_frame.pop_frame();
                 }
             }
             list_idx = list_end;
