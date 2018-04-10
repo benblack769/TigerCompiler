@@ -22,11 +22,14 @@ using F_formalsList = std::vector<bool>;
 using F_access = std::shared_ptr<F_access_>;
 
 using F_accessList = std::vector<F_access>;
+inline F_formalsList F_formals_all_true(int number_of_formals){
+    return F_formalsList(number_of_formals,true);
+}
 F_frame F_newFrame(Temp_label name, F_formalsList formals);
 F_access F_allocLocal(F_frame f, bool escape);
 F_accessList F_formals(F_frame f);
 
-string F_getlabel(F_frame frame);
+std::string F_getlabel(F_frame frame);
 
 //========Temps interface=================
 
@@ -41,12 +44,12 @@ Temp_temp F_RA(void);
 Temp_temp F_RV(void);
 
 //Misc T_exps
-ir::expPtr F_externalCall(string s, ir::expPtrList args);
+ir::expPtr F_externalCall(std::string s, ir::expPtrList args);
 //T_stm F_procEntryExit1(F_frame frame, T_stm stm);
 
 //========fragement interface for strings and function(procedures)
 using  F_frag = std::shared_ptr<F_frag_>;
-F_frag F_StringFrag(Temp_label label, string str);
+F_frag F_StringFrag(Temp_label label, std::string str);
 F_frag F_ProcFrag(ir::stmPtr body, F_frame frame);
 
 //F_frag F_string (Temp_label lab, string str);

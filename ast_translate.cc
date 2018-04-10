@@ -67,23 +67,22 @@ IRTptr TypeFeildsNode::translate() const{return nullptr;}
 	T_Eseq(stmts, T_Temp(result))
 }*/
 //variable_access
-/*F_access get_static_link(int level){
-    return F_formals(get_frame_at_level(level)).back();
+F_access get_static_link(int level){
+    return F_formals(full_frame.frame_at_level(level)).back();
 }
-T_expr translate_variable(F_access acc, int level){
-    int cur_level = get_current_level();
+ir::expPtr translate_variable(F_access acc, int level){
+    int cur_level = full_frame.current_level();
 
     assert(level <= cur_level);
-    if(level == cur_level){
-        return F_Exp(acc,FP());
+    ir::expPtr cur_link_expr = make_shared<ir::Temp>(F_FP());
+    for(int l = cur_level; l > level; l--){
+        F_access static_link_acc = get_static_link(l);
+        ir::expPtr new_link_expr = F_Exp(static_link_acc, make_shared<ir::Temp>(F_FP()));
+        cur_link_expr.swap(new_link_expr);
     }
-    if(level == cur_level - 1){
-        F_access static_link_acc = get_static_link(level);
-        T_expr link_expr = F_Exp(static_link_acc, FP());
-        return F_Exp(frame_acc,link_expr);
-    }
+    return F_Exp(acc,cur_link_expr);
 }
-T_expr get_function_static_link(int func_level){
+/*T_expr get_function_static_link(int func_level){
     int cur_level = get_current_level();
 
     assert(func_level + 1 <= cur_level);
