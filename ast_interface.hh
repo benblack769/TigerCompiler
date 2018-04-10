@@ -13,6 +13,7 @@
 #include "helper_files/type_assertion.hh"
 #include "symbol_table.hh"
 #include "irt.hh"
+#include "frame_stack.hh"
 
 
 namespace tiger {

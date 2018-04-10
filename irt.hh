@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 
-namespace tiger {
 namespace ir {
 
 using const_t = int; //type that Const node will take
@@ -279,5 +278,4 @@ class Label: public stm {
 };
 
 } // ir namespace
-} // tiger
 

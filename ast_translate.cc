@@ -5,6 +5,8 @@
 #include "ast_specifics/decs_ast.hh"
 #include "ast_specifics/types_ast.hh"
 
+FrameStack full_frame;
+
 namespace tiger{
 
 IRTptr exprs::StringNode::translate() const{return nullptr;}
@@ -68,7 +70,7 @@ IRTptr TypeFeildsNode::translate() const{return nullptr;}
 /*F_access get_static_link(int level){
     return F_formals(get_frame_at_level(level)).back();
 }
-T_expr get_variable(F_access acc, int level){
+T_expr translate_variable(F_access acc, int level){
     int cur_level = get_current_level();
 
     assert(level <= cur_level);
@@ -94,6 +96,6 @@ T_expr get_function_static_link(int func_level){
     else if(true){
         //
     }
-}/*
+}*/
 
 } //namespace

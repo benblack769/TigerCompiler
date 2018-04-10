@@ -67,6 +67,9 @@ class FuncDecl: public DeclarationNode {
     bool has_type(){
         return _has_type_decl;
     }
+    int number_args(){
+        return _ty_fields->get_field_pairs().size();
+    }
     vector<pair<string, string>> arg_types(){
         vector<pair<string, string>> func_args = _ty_fields->get_field_pairs();
         assert_err(first_strs_unique(func_args),SematicError::NON_UNIQUE_FUNCTION_ARGS, loc);
