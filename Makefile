@@ -31,7 +31,7 @@ catch.o: catch.cc
 test_parser.o: test_parser.cc
 	$(CXX) $(CXXFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-test_parser: tiger.tab.o lex.yy.o parse_err.o catch.o test_parser.o  dec_list_impl.o  symbol_table.o ast_translate.o
+test_parser: tiger.tab.o lex.yy.o parse_err.o catch.o test_parser.o  dec_list_impl.o  symbol_table.o ast_translate.o temp.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 test_lexer.o: test_lexer.cc
@@ -47,6 +47,9 @@ dec_list_impl.o: ast_specifics/dec_list_impl.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
 symbol_table.o: symbol_table.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
+
+temp.o: temp.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
 test_semantics: tiger.tab.o lex.yy.o parse_err.o catch.o dec_list_impl.o semantic_check.o symbol_table.o test_semantics.o ast_translate.o
