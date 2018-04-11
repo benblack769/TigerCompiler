@@ -4,10 +4,10 @@
 
 class FrameStack{
 public:
-    void new_frame(F_frame frame){
+    void new_frame(Frame frame){
         frames.push_back(frame);
     }
-    F_frame current_frame(){
+    Frame current_frame(){
         return frames.back();
     }
     void pop_frame(){
@@ -20,6 +20,6 @@ public:
         return frames.size();
     }
 protected:
-    std::vector<F_frame> frames;
+    std::vector<Frame> frames;
 };
 extern FrameStack full_frame;

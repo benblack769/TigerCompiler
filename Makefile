@@ -25,13 +25,16 @@ lex.yy.o: lex.yy.c
 parse_err.o:  parse_err.cpp
 	$(CXX) $(CXXFLAGS) $(WARNINGS) -c -o $@  $^
 
+mips_frame.o: mips_frame.cpp
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
+
 catch.o: catch.cc
 	$(CXX) $(CXXFLAGS) $(LIBS) -c -o $@ $^
 
 test_parser.o: test_parser.cc
 	$(CXX) $(CXXFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-test_parser: tiger.tab.o lex.yy.o parse_err.o catch.o test_parser.o  dec_list_impl.o  symbol_table.o ast_translate.o
+test_parser: tiger.tab.o lex.yy.o parse_err.o catch.o test_parser.o  mips_frame.o dec_list_impl.o  symbol_table.o ast_translate.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 test_lexer.o: test_lexer.cc
@@ -49,8 +52,14 @@ dec_list_impl.o: ast_specifics/dec_list_impl.cc
 symbol_table.o: symbol_table.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-test_semantics: tiger.tab.o lex.yy.o parse_err.o catch.o dec_list_impl.o semantic_check.o symbol_table.o test_semantics.o ast_translate.o
+temp.o: temp.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
+
+test_semantics: tiger.tab.o lex.yy.o parse_err.o catch.o mips_frame.o dec_list_impl.o semantic_check.o symbol_table.o test_semantics.o ast_translate.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
+
+temp.o: temp.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
 test_lexer: lex.yy.o test_lexer.o catch.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
@@ -58,7 +67,7 @@ test_lexer: lex.yy.o test_lexer.o catch.o
 parse_and_print.o: parse_and_print.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-parse_and_print: parse_and_print.o tiger.tab.o lex.yy.o parse_err.o  dec_list_impl.o semantic_check.o symbol_table.o ast_translate.o
+parse_and_print: parse_and_print.o tiger.tab.o lex.yy.o parse_err.o mips_frame.o dec_list_impl.o semantic_check.o symbol_table.o ast_translate.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 ast_translate.o: ast_translate.cc
@@ -67,7 +76,7 @@ ast_translate.o: ast_translate.cc
 test_translate.o: test_translate.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-test_translate: tiger.tab.o lex.yy.o parse_err.o catch.o dec_list_impl.o ast_translate.o test_translate.o buffman.o symbol_table.o
+test_translate: tiger.tab.o lex.yy.o parse_err.o catch.o mips_frame.o dec_list_impl.o ast_translate.o test_translate.o buffman.o symbol_table.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 buffman.o: buffman.cc

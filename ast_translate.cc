@@ -1,5 +1,6 @@
 #include <vector>
 #include "frame.hh"
+#include "temp.hh"
 #include "ast_interface.hh"
 #include "ast_specifics/expr_ast.hh"
 #include "ast_specifics/lval_ast.hh"

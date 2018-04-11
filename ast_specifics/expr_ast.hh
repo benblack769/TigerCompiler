@@ -300,7 +300,7 @@ class ForToDo : public ExprNode {
     }
     virtual TypeExpr eval_and_check_type(SymbolTable & old_env){
         SymbolTable new_env = old_env;
-        new_env.add_variable(_var_id,int_type(),full_frame.current_level(), F_allocLocal(full_frame.current_frame(),true));
+        new_env.add_variable(_var_id,int_type(),full_frame.current_level(), full_frame.current_frame()->allocLocal(true));
         assert_type_equality(_initial->eval_and_check_type(old_env), int_type(), loc);
         assert_type_equality(_end->eval_and_check_type(old_env), int_type(), loc);
         return void_type();
