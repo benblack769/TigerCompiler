@@ -52,8 +52,14 @@ dec_list_impl.o: ast_specifics/dec_list_impl.cc
 symbol_table.o: symbol_table.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
+temp.o: temp.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
+
 test_semantics: tiger.tab.o lex.yy.o parse_err.o catch.o mips_frame.o dec_list_impl.o semantic_check.o symbol_table.o test_semantics.o ast_translate.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
+
+temp.o: temp.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
 test_lexer: lex.yy.o test_lexer.o catch.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^

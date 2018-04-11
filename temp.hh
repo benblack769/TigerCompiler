@@ -8,10 +8,10 @@
 #include <vector>
 
 class _TempMap;
-using Temp_map = _TempMap*;
+using Temp_map = _TempMap*; //what's up with this
 class Temp_temp {
 	public:
-		Temp_temp(){};
+		Temp_temp();
         //Temp_temp(/**/);
 		~Temp_temp(){};
         std::string toString()const{return specialName;}
@@ -23,30 +23,30 @@ class Temp_temp {
 };
 
 // methods on Temp_temp:
-Temp_temp newtemp(){};
+Temp_temp newtemp();
 	// call constructor
 
 /*	//////////////	*/
 
 class Temp_label {
 	public:
-		Temp_label(const std::string &name){};
-		~Temp_label(){};
-		const std::string toString() const{};
+		Temp_label(const std::string &name);
+		~Temp_label();
+		const std::string toString() const;
 	private:
 		std::string name;
 		int count;
 };
 
 // methods on Temp_label:
-Temp_label newlabel(){};
+Temp_label newlabel();
 	// call constructor
-Temp_label namedlabel(std::string){};
+Temp_label namedlabel(std::string);
 	// call constructor
 
 class Temp_tempList{
 	public:
-
+		// Todo
 	private:
 		std::vector<Temp_temp*> tempList;
 };
