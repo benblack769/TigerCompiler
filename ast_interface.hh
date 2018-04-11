@@ -88,10 +88,10 @@ class ExprSequenceNode: public ASTNode {
   virtual void append_to(ExprNode * expr){
       list.push_back(std::unique_ptr<ExprNode>(expr));
   }
-  virtual bool empty(){
+  virtual bool empty() const{
       return list.size() == 0;
   }
-  virtual bool singleton(){
+  virtual bool singleton() const{
       return list.size() == 1;
   }
   virtual TypeExpr eval_and_check_type(SymbolTable & env){
