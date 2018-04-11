@@ -8,47 +8,97 @@ andrew w. appel. Will be implemented in mipsframe.cpp*/
 #include <string>
 #include "temp.hh"
 #include "irt.hh"
+#include <stdlib.h>
 //machine dependent word size
-extern const int F_wordSize;
+extern const int wordSize;
 
-class F_frame_;
-class F_access_;
-class F_frag_;
-//Frame struct
-using F_frame = std::shared_ptr<F_frame_>;
-using F_access = std::shared_ptr<F_access_>;
-//accesses/formals interface
-using F_formalsList = std::vector<bool>;
-using F_access = std::shared_ptr<F_access_>;
+using formalsList = std::vector<bool>;
 
-using F_accessList = std::vector<F_access>;
-F_frame F_newFrame(Temp_label name, F_formalsList formals);
-F_access F_allocLocal(F_frame f, bool escape);
-F_accessList F_formals(F_frame f);
+class Access_{
+public:
+    Access_() = default;
+    ~Access_() = default;
+    virtual std::string toString();
+    virtual ir::exp* F_Exp(ir::exp* fp);
+};
 
-string F_getlabel(F_frame frame);
+using Access = std::shared_ptr<Access_>;
+using AccessList = std::vector<Access>;
 
-//========Temps interface=================
+class InFrame: public Access_{
+public:
+    InFrame(int offset);
+    ~InFrame() = default;
+private:
+    int offset;
+};
 
-extern Temp_map F_tempMap;
-Temp_tempList F_registers(void);
-ir::expPtr F_Exp(F_access acc, ir::expPtr framePtr);
-Temp_label F_name(F_frame f);
-Temp_temp F_FP(void);
-Temp_temp F_SP(void);
-Temp_temp F_ZERO(void);
-Temp_temp F_RA(void);
-Temp_temp F_RV(void);
+class InReg: public Access_{
+public:
+    InReg(ir::Temp* t);
+    ~InReg() = default;
+private:
+    ir::Temp* temp;
+};
 
-//Misc T_exps
-ir::expPtr F_externalCall(string s, ir::expPtrList args);
-//T_stm F_procEntryExit1(F_frame frame, T_stm stm);
+class Frame_{
+public:
+    Frame_(ir::label_t name, formalsList formals);
+    ~Frame_() = default;
+    Access allocLocal(bool escape);
+    AccessList formals();
+    std::string getlabel();
+    //ir::expPtr externalCall(string s, ir::expPtrList args);
+    //ir::stm procEntryExit1(ir::stm stm);
+	//Temp_tempList getRegisters();
+	ir::temp_t getFP();
+	//temp_t getSP();
+	//temp_t getZERO();
+	//temp_t getRA();
+	//temp_t getRV();
+private:
+	ir::label_t f_name;
+	formalsList f_formals;
+	//Temp_tempList registers;
+	ir::temp_t FP;
+	//temp_t SP;
+	//temp_t ZERO;
+	//temp_t RA;
+	//temp_t RV;
 
-//========fragement interface for strings and function(procedures)
-using  F_frag = std::shared_ptr<F_frag_>;
-F_frag F_StringFrag(Temp_label label, string str);
-F_frag F_ProcFrag(ir::stmPtr body, F_frame frame);
+};
 
-//F_frag F_string (Temp_label lab, string str);
-//F_frag F_newProcFrag(T_stem body, F_frame frame);
-using F_fragList = std::vector<F_frag>;
+using Frame = std::shared_ptr<Frame_>;
+Frame newFrame(ir::label_t name, formalsList formals);
+
+
+class Frag_{
+public:
+    Frag_() = default;
+    ~Frag_() = default;
+};
+
+using Frag = std::shared_ptr<Frag_>;
+using FragList = std::vector<Frag>;
+/*
+Frag newStringFrag(ir::label_t label, std::string str);
+Frag newProcFrag(ir::stm body, Frame frame);
+
+class StringFrag_: public Frag_{
+public:
+    StringFrag_(ir::label_t label, std::string str);
+    ~StringFrag_() = default;
+private:
+    ir::label_t label;
+    std::string str;
+};
+
+class ProcFrag_: public Frag_{
+public:
+    ProcFrag_(ir::stm body, Frame frame);
+    ~ProcFrag_() = default;
+private:
+    ir::stm body;
+    Frame frame;
+};
+*/

@@ -66,7 +66,7 @@ protected:
 
 struct VarEntry{
     TypeExpr type;
-    F_access access;
+    Access access;
     int level;
 };
 struct FuncEntry{
@@ -122,7 +122,7 @@ public:
     }
     void add_type_set(vector<pair<string, UnresolvedType>> multu_rec_types);
     void add_function_set(vector<pair<string, FuncHeader>> multu_rec_funcs, int func_depth_level);
-    void add_variable(string name, TypeExpr type, int func_depth_level, F_access frame_access);
+    void add_variable(string name, TypeExpr type, int func_depth_level, Access frame_access);
     bool verify_function_args(string func_name, vector<TypeExpr> arg_types){
         assert(symbol_is_func(func_name));
         vector<TypeExpr> & expected_types = vars[func_name].func().arg_types;
