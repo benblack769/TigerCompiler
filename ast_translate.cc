@@ -94,7 +94,10 @@ IRTptr exprs::BinaryNode::translate(SymbolTable & env) const{
 }
 IRTptr exprs::AssignNode::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::FunctionCall::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::ExprSequenceEval::translate(SymbolTable & env) const{return nullptr;}
+// since this class wraps ExprSequenceNode, so will this function
+IRTptr exprs::ExprSequenceEval::translate(SymbolTable & env) const{
+    return exprs->translate(env); 
+}
 IRTptr exprs::IfThen::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::IfThenElse::translate(SymbolTable & env) const{
     return compile_conditional(rel_op_k::EQ,
@@ -141,7 +144,37 @@ IRTptr types::ArrayType::translate(SymbolTable & env) const{return nullptr;}
 IRTptr types::TypeFeildType::translate(SymbolTable & env) const{return nullptr;}
 
 IRTptr ExprListNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr ExprSequenceNode::translate(SymbolTable & env) const{return nullptr;}
+/*
+ If the last value in this sequence returns a value, this function will return
+ An Eseq, otherwise it will return a Seq
+ */
+IRTptr ExprSequenceNode::translate(SymbolTable & env) const{
+    if(empty()){
+        return nullptr; 
+    }
+    if(singleton()){
+        return list.at(0)->translate(env);
+    }
+    auto rNode = list.at(list.size()-1)->translate(env);
+    for(int i = list.size()-2; i >= 0; i--){
+        auto lNode = list.at(i)->translate(env);
+        if(auto expNode = dynamic_pointer_cast<ir::exp>(lNode)){
+            lNode = std::make_shared<ir::Exp>(expNode); //Exp is a stm, unlike exp
+        }
+        // at this point, we know lNode is a stm
+        auto stmNode = dynamic_pointer_cast<ir::stm>(lNode);
+        // the left of an Eseq or Seq is always an stm, but the right of
+        // a Eseq must be an exp, and for Seq an stm
+        if(auto expNode = dynamic_pointer_cast<ir::exp>(rNode)){
+            rNode = std::make_shared<ir::Eseq>(stmNode, expNode);
+        }
+        else if(auto stmNode2 = dynamic_pointer_cast<ir::stm>(rNode)){
+            rNode = std::make_shared<ir::Seq>(stmNode, stmNode2);
+        } else {
+            throw "Got a pointer to neither an exp or stm type node. Probably a nullptr";
+        }
+    } 
+}
 IRTptr FieldNode::translate(SymbolTable & env) const{return nullptr;}
 IRTptr TypeIDNode::translate(SymbolTable & env) const{return nullptr;}
 IRTptr TypeFeildNode::translate(SymbolTable & env) const{return nullptr;}
