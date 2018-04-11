@@ -7,8 +7,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 SET (BASE_SRC
         symbol_table.cc
         semantic_check.cc
-        catch.cc
         ast_specifics/dec_list_impl.cc
+        ast_translate.cc
         semantic_check.cc)
 
 

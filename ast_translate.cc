@@ -5,99 +5,163 @@
 #include "ast_specifics/decs_ast.hh"
 #include "ast_specifics/types_ast.hh"
 
-namespace tiger{
+FrameStack full_frame;
 
-// will probably get this from another file in the future
-const int wordSize = 4;
+using namespace tiger;
+using namespace ir;
 
-// Build up a tree of ESEQ and MOVE nodes to
-// move all of the characters to the correct places
-IRTptr exprs::StringNode::translate() const{
-    // this will hold the location of the start of the string
-    // probably will be set to the stack pointer in the future
-    ir::const_t strStart = 0;
-    // this is the variable that will be used to count up each word in the string
-    ir::const_t strP = strStart;
+IRTptr exprs::StringNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::NilNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::IntNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::LvalNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::NegateNode::translate(SymbolTable & env) const{return nullptr;}
 
-    // this will store each of our memory calls before we make it into a tree
-    std::vector<shared_ptr<ir::Move>> strExps = {};
-    
-    // the first word in the string will be it's length
-    ir::const_t length = mystring.length();
-    auto lNode = std::make_shared<ir::Move>(std::make_shared<ir::Mem>(std::make_shared<ir::Const>(strP)), std::make_shared<ir::Const>(length));
-    strExps.push_back(lNode);
-    strP++;
-    
-    // we can fit four characters in a word, so currWord will count how we're doing
-    // we use shifting to fit them all 
-    ir::const_t currWord = 0;
-    int charInWord = 0;
-    for (int i = 0; i < length; i++) {
-        currWord += static_cast<ir::const_t>(mystring[i]);
-        charInWord++;
-        // once a word is filled with chars, we start a new word
-        if (charInWord >= wordSize){
-            auto cNode = std::make_shared<ir::Move>(std::make_shared<ir::Mem>(std::make_shared<ir::Const>(strP)), std::make_shared<ir::Const>(currWord));
-            strExps.push_back(cNode);
-            strP++;
-            currWord = 0; 
-            charInWord = 0;
-        }
-        currWord = currWord << 8; //shift word one byte
+expPtr to_expr_seq(stmPtrList list,expPtr expr){
+    expPtr res_expr = expr;
+    for(stmPtr st : list){
+        res_expr = to_expPtr(Eseq(st,res_expr));
     }
-    // finish up our last word
-    if (currWord != 0) {
-        auto cNode = std::make_shared<ir::Move>(std::make_shared<ir::Mem>(std::make_shared<ir::Const>(strP)), std::make_shared<ir::Const>(currWord));
-        strExps.push_back(cNode);
-    }
-    // build up a tree of ESEQs where the whole tree will return the location of the beginning
-    // of the string. 
-    // in other words, the terminal right leaf of the tree will contain the location
-    std::shared_ptr<ir::IRTNode> rNode = std::make_shared<ir::Const>(strStart);
-    for (int i = strExps.size()-1; i >= 0; i--){
-        IRTptr oldRNode = rNode;
-        rNode = std::make_shared<ir::Eseq>(strExps[i], oldRNode);
-    }
-    
-    return rNode;
+    return res_expr;
 }
+ir::expPtr compile_conditional(rel_op_k oper, ir::expPtr left, ir::expPtr right, ir::expPtr then_expr, ir::expPtr else_expr){
+    Temp_temp result = newtemp();
 
-IRTptr exprs::NilNode::translate() const{return nullptr;}
-IRTptr exprs::IntNode::translate() const{return nullptr;}
-IRTptr exprs::LvalNode::translate() const{return nullptr;}
-IRTptr exprs::NegateNode::translate() const{return nullptr;}
-IRTptr exprs::BinaryNode::translate() const{return nullptr;}
-IRTptr exprs::AssignNode::translate() const{return nullptr;}
-IRTptr exprs::FunctionCall::translate() const{return nullptr;}
-IRTptr exprs::ExprSequenceEval::translate() const{return nullptr;}
-IRTptr exprs::IfThen::translate() const{return nullptr;}
-IRTptr exprs::IfThenElse::translate() const{return nullptr;}
-IRTptr exprs::WhileDo::translate() const{return nullptr;}
-IRTptr exprs::ForToDo::translate() const{return nullptr;}
-IRTptr exprs::Break::translate() const{return nullptr;}
-IRTptr exprs::ArrCreate::translate() const{return nullptr;}
-IRTptr exprs::RecCreate::translate() const{return nullptr;}
-IRTptr exprs::LetIn::translate() const{return nullptr;}
+    Temp_label then_l = newlabel();
+    Temp_label else_l = newlabel();
+    Temp_label end_l = newlabel();
 
-IRTptr lvals::IdLval::translate() const{return nullptr;}
-IRTptr lvals::AttrAccess::translate() const{return nullptr;}
-IRTptr lvals::BracketAccess::translate() const{return nullptr;}
+    stmPtrList stmts = {
+        to_stmPtr(CJump(oper,left,right,then_l,else_l)),
+        to_stmPtr(Label(then_l)),
+        to_stmPtr(Move(to_expPtr(Temp(result)), then_expr)),
+        to_stmPtr(Jump(end_l)),
+        to_stmPtr(Label(else_l)),
+        to_stmPtr(Move(to_expPtr(Temp(result)), else_expr)),
+        to_stmPtr(Label(end_l)),
+    };
+    return to_expr_seq(stmts, to_expPtr(Temp(result)));
+}
+rel_op_k to_rel_op(exprs::BinaryOp op){
+    using namespace  exprs;
+    switch(op){
+    case BinaryOp::EQUAL: return rel_op_k::EQ;
+    case BinaryOp::LESS: return rel_op_k::LT;
+    case BinaryOp::LESSEQ: return rel_op_k::LE;
+    case BinaryOp::GREATER: return rel_op_k::GT;
+    case BinaryOp::GREATEREQ: return rel_op_k::GE;
+    case BinaryOp::LESSGREATER: return rel_op_k::NE;
+    default:
+        assert(false && "bad binop to to_rel_op");
+    }
+    return rel_op_k::EQ;
+}
+IRTptr exprs::BinaryNode::translate(SymbolTable & env) const{
+    if(op == BinaryOp::ADD
+            || op == BinaryOp::SUB
+            || op == BinaryOp::MUL
+            || op == BinaryOp::DIV){
 
-IRTptr decls::VarDecl::translate() const{return nullptr;}
-IRTptr decls::FuncDecl::translate() const{return nullptr;}
-IRTptr decls::TypeDecl::translate() const{return nullptr;}
+    }
+    else if(op == BinaryOp::AND ||
+            op == BinaryOp::OR){
+        expPtr left_e = cast_to_exprPtr(left->translate(env));
+        expPtr right_e = cast_to_exprPtr(right->translate(env));
+        expPtr one_e = to_expPtr(Const(1));
+        expPtr zero_e = to_expPtr(Const(0));
+        if(op == BinaryOp::OR){
+            return compile_conditional(rel_op_k::EQ,
+                                       left_e,
+                                       one_e,
+                                       one_e,
+                                       right_e);
+        }
+        else{
+            return compile_conditional(rel_op_k::EQ,
+                                       left_e,
+                                       zero_e,
+                                       zero_e,
+                                       right_e);
+        }
+    }
+    else{
+        return compile_conditional(to_rel_op(op),
+                                   cast_to_exprPtr(left->translate(env)),
+                                   cast_to_exprPtr(right->translate(env)),
+                                   to_expPtr(Const(1)),
+                                   to_expPtr(Const(0)));
+    }
+}
+IRTptr exprs::AssignNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::FunctionCall::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::ExprSequenceEval::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::IfThen::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::IfThenElse::translate(SymbolTable & env) const{
+    return compile_conditional(rel_op_k::EQ,
+                               to_expPtr(Const(0)),
+                               cast_to_exprPtr(_cond->translate(env)),
+                               cast_to_exprPtr(_res_1->translate(env)),
+                               cast_to_exprPtr(_res_2->translate(env)));
+}
+IRTptr exprs::WhileDo::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::ForToDo::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::Break::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::ArrCreate::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::RecCreate::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::LetIn::translate(SymbolTable & env) const{return nullptr;}
 
-IRTptr types::BasicType::translate() const{return nullptr;}
-IRTptr types::ArrayType::translate() const{return nullptr;}
-IRTptr types::TypeFeildType::translate() const{return nullptr;}
+F_access get_static_link(int level){
+    return F_formals(full_frame.frame_at_level(level)).back();
+}
+ir::expPtr translate_variable(F_access acc, int level){
+    int cur_level = full_frame.current_level();
 
-IRTptr ExprListNode::translate() const{return nullptr;}
-IRTptr ExprSequenceNode::translate() const{return nullptr;}
-IRTptr FieldNode::translate() const{return nullptr;}
-IRTptr TypeIDNode::translate() const{return nullptr;}
-IRTptr TypeFeildNode::translate() const{return nullptr;}
-IRTptr FieldListNode::translate() const{return nullptr;}
-IRTptr DeclarationListNode::translate() const{return nullptr;}
-IRTptr TypeFeildsNode::translate() const{return nullptr;}
+    assert(level <= cur_level);
+    ir::expPtr cur_link_expr = to_expPtr(ir::Temp(F_FP()));
+    for(int l = cur_level; l > level; l--){
+        F_access static_link_acc = get_static_link(l);
+        ir::expPtr new_link_expr = F_Exp(static_link_acc, cur_link_expr);
+        cur_link_expr = new_link_expr;
+    }
+    return F_Exp(acc,cur_link_expr);
+}
+IRTptr lvals::IdLval::translate(SymbolTable & env) const{
+    VarEntry var_data = env.var_data(my_id);
+    return translate_variable(var_data.access, var_data.level);
+}
+IRTptr lvals::AttrAccess::translate(SymbolTable & env) const{return nullptr;}
+IRTptr lvals::BracketAccess::translate(SymbolTable & env) const{return nullptr;}
 
-} //namespace
+IRTptr decls::VarDecl::translate(SymbolTable & env) const{return nullptr;}
+IRTptr decls::FuncDecl::translate(SymbolTable & env) const{return nullptr;}
+IRTptr decls::TypeDecl::translate(SymbolTable & env) const{return nullptr;}
+
+IRTptr types::BasicType::translate(SymbolTable & env) const{return nullptr;}
+IRTptr types::ArrayType::translate(SymbolTable & env) const{return nullptr;}
+IRTptr types::TypeFeildType::translate(SymbolTable & env) const{return nullptr;}
+
+IRTptr ExprListNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr ExprSequenceNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr FieldNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr TypeIDNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr TypeFeildNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr FieldListNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr DeclarationListNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr TypeFeildsNode::translate(SymbolTable & env) const{return nullptr;}
+
+//conditional evaluation helper function (used for boolean operations like | as well as if statements)
+
+//function access
+/*T_expr get_function_static_link(int func_level){
+    int cur_level = get_current_level();
+
+    assert(func_level + 1 <= cur_level);
+    if(func_level + 1 == cur_level){
+        return FP();
+    }
+    else if(func_level == cur_level){
+        return F_Exp(get_static_link(func_level),FP());
+    }
+    else if(true){
+        //
+    }
+}*/

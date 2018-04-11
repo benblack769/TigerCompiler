@@ -5,6 +5,7 @@
 #include "helper_files/unresolved_type_info.hh"
 #include "helper_files/func_header.hh"
 #include "semantic_check.hh"
+#include "frame.hh"
 using namespace std;
 
 class SymbolTable;
@@ -65,10 +66,13 @@ protected:
 
 struct VarEntry{
     TypeExpr type;
+    F_access access;
+    int level;
 };
 struct FuncEntry{
     TypeExpr ret_type;
     vector<TypeExpr> arg_types;
+    int level;
 };
 enum class VarOrFunc{BAD,VAR,FUNC};
 class VarFuncItem{
@@ -117,8 +121,8 @@ public:
         return has_var_symbol(var_id) && vars.at(var_id).type() == VarOrFunc::FUNC;
     }
     void add_type_set(vector<pair<string, UnresolvedType>> multu_rec_types);
-    void add_function_set(vector<pair<string, FuncHeader>> multu_rec_funcs);
-    void add_variable(string name, TypeExpr type);
+    void add_function_set(vector<pair<string, FuncHeader>> multu_rec_funcs, int func_depth_level);
+    void add_variable(string name, TypeExpr type, int func_depth_level, F_access frame_access);
     bool verify_function_args(string func_name, vector<TypeExpr> arg_types){
         assert(symbol_is_func(func_name));
         vector<TypeExpr> & expected_types = vars[func_name].func().arg_types;
@@ -156,6 +160,10 @@ public:
     TypeExpr var_type(string varid){
         assert(symbol_is_var(varid));
         return vars.at(varid).var().type;
+    }
+    VarEntry var_data(string varid){
+        assert(symbol_is_var(varid));
+        return vars.at(varid).var();
     }
     TypeExpr get_checked_type(string tyid){
         if(!has_type(tyid)){
