@@ -93,7 +93,7 @@ test: all
 	./test_parser
 
 clean:
-	rm -f *.o test_parser tiger.tab.* lex.yy.c test_lexer parse_and_print
+	rm -f *.o test_parser tiger.tab.* lex.yy.c test_lexer parse_and_print test_semantics test_translate
 
 clean_c:
 	rm -f tiger.tab.c parse_and_print.o
