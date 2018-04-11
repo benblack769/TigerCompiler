@@ -76,6 +76,12 @@ test_translate: tiger.tab.o lex.yy.o parse_err.o catch.o mips_frame.o dec_list_i
 buffman.o: buffman.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
+tc.o: tc.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
+
+tc: tiger.tab.o lex.yy.o parse_err.o tc.o dec_list_impl.o ast_translate.o buffman.o symbol_table.o
+	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
+
 test: all
 	./test_lexer
 	./test_parser

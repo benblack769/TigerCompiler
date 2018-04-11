@@ -4,20 +4,23 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <assert.h>
+#include <memory>
+#include "temp.hh"
 
 namespace ir {
 
 using const_t = int; //type that Const node will take
 const std::string ws = "  "; // whitespace for toStr
-using label_t = std::string; // may need to get this from the temp class
-using temp_t = std::string; // may need to get this from the temp class
+using label_t = Temp_label; // may need to get this from the temp class
+using temp_t = Temp_temp; // may need to get this from the temp class
 using labelList = std::vector<label_t>;
 
 
 // Base IRT node class, to define the hierarchy.
 class IRTNode {
   public:
-    using IRTptr = const shared_ptr<IRTNode>;
+    using IRTptr = std::shared_ptr<IRTNode>;
     
     IRTNode() = default;
     virtual ~IRTNode() = default;
@@ -27,7 +30,7 @@ class IRTNode {
 // class for things that dont return a value
 class stm: public IRTNode {
   public:
-    using stmPtr = const shared_ptr<stm>;
+    using stmPtr = std::shared_ptr<stm>;
     
     stm() = default;
     virtual ~stm() = default;
@@ -37,7 +40,7 @@ class stm: public IRTNode {
 // class for things that do return a value
 class exp: public IRTNode {
   public:
-    using expPtr = const shared_ptr<exp>;
+    using expPtr = std::shared_ptr<exp>;
     
     exp() = default;
     virtual ~exp() = default;
@@ -46,6 +49,7 @@ class exp: public IRTNode {
 
 // like an expList but with pointers
 using expPtrList = std::vector<std::shared_ptr<exp>>;
+using stmPtrList = std::vector<std::shared_ptr<stm>>;
 
 namespace {
     // helper functions so that our toStrings look almost the same
@@ -61,6 +65,21 @@ namespace {
     using expPtr = exp::expPtr;
     using stmPtr = stm::stmPtr;
 }
+using IRTptr = IRTNode::IRTptr;
+template<class expr_ty>
+inline expPtr to_expPtr(const expr_ty & expr){
+    return std::shared_ptr<exp>(new expr_ty(expr));
+}
+template<class stm_ty>
+inline stmPtr to_stmPtr(const stm_ty & stmt){
+    return std::shared_ptr<stm>(new stm_ty(stmt));
+}
+inline expPtr cast_to_exprPtr(IRTptr ptr){
+    expPtr res = std::dynamic_pointer_cast<exp>(ptr);
+    assert(bool(res));
+    return res;
+}
+
 
 // printing stuff
 inline std::ostream & operator << (std::ostream & os, const IRTNode & node){
@@ -95,7 +114,7 @@ class Name: public exp {
     Name(label_t val): val_(val) {};
     virtual ~Name() = default;
     virtual std::string toStr(std::string spacing) const {
-        return spacing + "Name: " + val_;
+        return spacing + "Name: " + val_.toString();
     };
   private:
     const label_t val_;
@@ -107,7 +126,7 @@ class Temp: public exp {
     Temp(temp_t val): val_(val) {};
     virtual ~Temp() = default;
     virtual std::string toStr(std::string spacing) const {
-        return spacing + "Temp: " + val_;
+        return spacing + "Temp: " + val_.toString();
     };
   private:
     const temp_t val_;
@@ -207,20 +226,31 @@ class Exp: public stm {
 // exp_ could be
 class Jump: public stm {
   public:
+    Jump(label_t label): lab_(label)
+        {};
+    virtual ~Jump() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return spacing + "Jump: " + lab_.toString();
+    }
+  private:
+    label_t lab_;
+};
+/*class Jump: public stm {
+  public:
     Jump(expPtr e, labelList labs): exp_(e), labs_(labs)
         {};
     virtual ~Jump() = default;
     virtual std::string toStr(std::string spacing) const {
         std::string labsStr = spacing + ws + "labs:\n";        
         for (auto label : labs_){
-            labsStr += spacing + ws + ws + label;
+            labsStr += spacing + ws + ws + label.toString();
         }
         return oneChildToStr(spacing, "Jump", exp_) + labsStr;
     }
   private:
     expPtr exp_;
     labelList labs_;
-};
+};*/
 
 enum class rel_op_k: int                { EQ,  NE, LT, GT,  LE,  GE, ULT, ULE, UGT, UGE};
 namespace {
@@ -239,8 +269,8 @@ class CJump: public stm {
         return spacing + "CJump op: " + rel_op_names.at(static_cast<int>(op_)) + "\n" +
             spacing + "CJump left:\n" + left_->toStr(spacing + ws) +
             spacing + "CJump right:\n" + right_->toStr(spacing + ws) +
-            spacing + "CJump true label: " + trueLab_ +
-            spacing + "CJump false label: " + falseLab_;
+            spacing + "CJump true label: " + trueLab_.toString() +
+            spacing + "CJump false label: " + falseLab_.toString();
     };
   private:
     rel_op_k op_;
@@ -271,11 +301,12 @@ class Label: public stm {
         {};
     virtual ~Label() = default;
     virtual std::string toStr(std::string spacing) const {
-        return spacing + "Label: " + name_;
+        return spacing + "Label: " + name_.toString();
     };
   private:
     label_t name_;
 };
+
 
 } // ir namespace
 

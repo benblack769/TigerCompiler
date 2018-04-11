@@ -1,7 +1,8 @@
+#include <stdlib.h>
 #include "frame.hh"
 
-Frame newFrame(ir::label_t name, formalsList formals){
-	Frame retFrame (new Frame_(name,formals));
+Frame newFrame(ir::label_t name, formalsList forms){
+	Frame retFrame (new Frame_(name,forms));
 	return retFrame;
 }
 

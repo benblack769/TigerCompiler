@@ -43,7 +43,7 @@ private:
 
 class Frame_{
 public:
-    Frame_(ir::label_t name, formalsList formals);
+    Frame_(ir::label_t name, formalsList forms);
     ~Frame_() = default;
     Access allocLocal(bool escape);
     AccessList formals();
