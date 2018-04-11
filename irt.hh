@@ -4,6 +4,8 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <assert.h>
+#include <memory>
 #include "temp.hh"
 
 namespace ir {
@@ -73,7 +75,7 @@ inline stmPtr to_stmPtr(const stm_ty & stmt){
     return std::shared_ptr<stm>(new stm_ty(stmt));
 }
 inline expPtr cast_to_exprPtr(IRTptr ptr){
-    expPtr res = dynamic_pointer_cast<exp>(ptr);
+    expPtr res = std::dynamic_pointer_cast<exp>(ptr);
     assert(bool(res));
     return res;
 }
