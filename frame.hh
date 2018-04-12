@@ -16,34 +16,23 @@ using formalsList = std::vector<bool>;
 
 class Access_{
 public:
-    Access_() = default;
+    Access_(bool esc,int offset_);
+    Access_(bool esc,ir::temp_t temp_);
     ~Access_() = default;
-    virtual std::string toString();
-    virtual ir::exp* F_Exp(ir::exp* fp);
+    ir::expPtr exp(ir::temp_t fp);
+    ir::expPtr expStaticLink(ir::expPtr ptr);
+private:
+    bool escapes;
+    int offset;
+    ir::temp_t temp;
 };
 
 using Access = std::shared_ptr<Access_>;
 using AccessList = std::vector<Access>;
 
-class InFrame: public Access_{
-public:
-    InFrame(int offset);
-    ~InFrame() = default;
-private:
-    int offset;
-};
-
-class InReg: public Access_{
-public:
-    InReg(ir::Temp* t);
-    ~InReg() = default;
-private:
-    ir::Temp* temp;
-};
-
 class Frame_{
 public:
-    Frame_(ir::label_t name, formalsList forms);
+    Frame_(ir::label_t name_, formalsList forms);
     ~Frame_() = default;
     Access allocLocal(bool escape);
     AccessList formals();
@@ -57,8 +46,10 @@ public:
 	//temp_t getRA();
 	//temp_t getRV();
 private:
-	ir::label_t f_name;
-	formalsList f_formals;
+	ir::label_t name;
+	formalsList fList;
+	int frameOffset = 0;
+	const int wordSize = 4;
 	//Temp_tempList registers;
 	ir::temp_t FP;
 	//temp_t SP;

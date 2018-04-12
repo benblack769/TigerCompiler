@@ -6,15 +6,33 @@ Frame newFrame(ir::label_t name, formalsList forms){
 	return retFrame;
 }
 
-Frame_::Frame_(ir::label_t name, formalsList formals){
-	f_name = name;
-	f_formals = formals;
+Frame_::Frame_(ir::label_t name_, formalsList forms){
+	name = name_;
+	fList = forms;
+	FP = newtemp();
 }
 //pg 139 for more info
 Access Frame_::allocLocal(bool escape){
-	Access retAccess (new InFrame(0));
-	return retAccess;
+	if(escape){
+		Access retAccess (new Access_(escape,frameOffset));
+		frameOffset += wordSize;
+		return retAccess;
+	}else{
+		Access retAccess (new Access_(escape,newtemp()));
+		return retAccess;
+	}
 };
+
+Access_::Access_(bool esc,int offset_){
+	escapes = esc;
+	offset = offset_;
+}
+
+Access_::Access_(bool esc,ir::temp_t temp_){
+	escapes = esc;
+	temp = temp_;
+}
+
 AccessList Frame_::formals(){
 	AccessList retAccessList {};
 	return retAccessList;
@@ -26,7 +44,7 @@ std::string Frame_::getlabel(){
 };
 
 ir::temp_t Frame_::getFP(){
-	return nullptr;
+	return FP;
 };
 /*
 Temp_map Frame_::F_tempMap(){
@@ -48,18 +66,29 @@ Temp_temp Frame_::getRA(){
 Temp_temp Frame_::getRV(){
 	return nullptr;
 };
-ir::expPtr Frame_::externalCall(string s, ir::expPtrList args){
+ir::exp Frame_::externalCall(string s, ir::expPtrList args){
 	return nullptr;
 };
 */
 
-InFrame::InFrame(int offset_){
-	offset = offset_;
+ir::expPtr Access_::exp(ir::temp_t fp){
+	if(escapes){
+		auto tempFP = to_expPtr(ir::Temp(fp));
+		auto tempOffset = to_expPtr(ir::Const(offset));
+		auto tempBinOp = to_expPtr(ir::BinOp(ir::op_k::PLUS,tempFP,tempOffset));
+		return to_expPtr(ir::Mem(tempBinOp));
+	}else{
+		return to_expPtr(ir::Temp(temp));
+	}
 }
 
-InReg::InReg(ir::Temp* t){
-	temp = t;
+ir::expPtr Access_::expStaticLink(ir::expPtr ptr){
+	auto tempOffset = to_expPtr(ir::Const(offset));
+	auto tempBinOp = to_expPtr(ir::BinOp(ir::op_k::PLUS,ptr,tempOffset));
+	return to_expPtr(ir::Mem(tempBinOp));
+
 }
+
 /*
 Frag newStringFrag(Temp_label label, std::string str){
 	Frag retStrFrag (new StringFrag_(label,str));

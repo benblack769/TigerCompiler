@@ -111,20 +111,20 @@ IRTptr exprs::ArrCreate::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::RecCreate::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::LetIn::translate(SymbolTable & env) const{return nullptr;}
 
-F_access get_static_link(int level){
-    return F_formals(full_frame.frame_at_level(level)).back();
+Access get_static_link(int level){
+    return full_frame.frame_at_level(level)->formals().back();
 }
-ir::expPtr translate_variable(F_access acc, int level){
+ir::expPtr translate_variable(Access acc, int level){
     int cur_level = full_frame.current_level();
-
+    Frame cur_frame = full_frame.current_frame();
     assert(level <= cur_level);
-    ir::expPtr cur_link_expr = to_expPtr(ir::Temp(F_FP()));
+    ir::expPtr cur_link_expr = to_expPtr(ir::Temp(cur_frame->getFP()));
     for(int l = cur_level; l > level; l--){
-        F_access static_link_acc = get_static_link(l);
-        ir::expPtr new_link_expr = F_Exp(static_link_acc, cur_link_expr);
+        Access static_link_acc = get_static_link(l);
+        ir::expPtr new_link_expr = static_link_acc->expStaticLink(cur_link_expr);
         cur_link_expr = new_link_expr;
     }
-    return F_Exp(acc,cur_link_expr);
+    return cur_link_expr;
 }
 IRTptr lvals::IdLval::translate(SymbolTable & env) const{
     VarEntry var_data = env.var_data(my_id);
