@@ -14,7 +14,9 @@ using namespace ir;
 
 IRTptr exprs::StringNode::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::NilNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::IntNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::IntNode::translate(SymbolTable & env) const{
+    return std::make_shared<ir::Const>(my_int); 
+}
 IRTptr exprs::LvalNode::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::NegateNode::translate(SymbolTable & env) const{return nullptr;}
 
