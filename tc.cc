@@ -23,6 +23,7 @@ int main(int argc, char* argv[]){
         auto b = buffman::Buffman(yyin);
         yyparse();
         SymbolTable env;
-        std::cout << rootnode->translate(env);
+        auto c =  rootnode->translate(env);
+        std::cout << c;
     }
 }

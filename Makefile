@@ -8,7 +8,7 @@ WARNINGS=-Wall -Wextra
 #CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -Wextra -Werror
 LDFLAGS=$(CXXFLAGS)
 
-all: test_parser test_lexer parse_and_print test_semantics test_translate
+all: test_parser test_lexer parse_and_print test_semantics test_translate tc
 
 lex.yy.c: tiger.l
 	flex $^

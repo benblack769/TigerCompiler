@@ -172,7 +172,9 @@ IRTptr ExprSequenceNode::translate(SymbolTable & env) const{
         else if(auto stmNode2 = dynamic_pointer_cast<ir::stm>(rNode)){
             rNode = std::make_shared<ir::Seq>(stmNode, stmNode2);
         } else {
-            throw "Got a pointer to neither an exp or stm type node. Probably a nullptr";
+            std::cerr << "In ExprSequenceNode::translate:" << std::endl;
+            std::cerr << "Got a pointer to neither an exp or stm type node. Probably a nullptr" << std::endl;
+            throw 1;
         }
     } 
     return rNode;
