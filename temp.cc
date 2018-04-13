@@ -10,7 +10,7 @@ int temp_label_count = 0;
 
 constexpr int uninitialized_temp_num = -1;
 
- /* list initializer */
+
 Temp_temp::Temp_temp(int temp) {
 	num = temp;
 };
