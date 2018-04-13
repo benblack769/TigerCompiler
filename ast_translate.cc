@@ -13,7 +13,10 @@ using namespace tiger;
 using namespace ir;
 
 IRTptr exprs::StringNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::NilNode::translate(SymbolTable & env) const{return nullptr;}
+// nil will just be a constant 0
+IRTptr exprs::NilNode::translate(SymbolTable & env) const{
+    return std::make_shared<Const>(0);
+}
 IRTptr exprs::IntNode::translate(SymbolTable & env) const{
     return std::make_shared<ir::Const>(my_int); 
 }
