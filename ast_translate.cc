@@ -175,6 +175,7 @@ IRTptr ExprSequenceNode::translate(SymbolTable & env) const{
             throw "Got a pointer to neither an exp or stm type node. Probably a nullptr";
         }
     } 
+    return rNode;
 }
 IRTptr FieldNode::translate(SymbolTable & env) const{return nullptr;}
 IRTptr TypeIDNode::translate(SymbolTable & env) const{return nullptr;}
