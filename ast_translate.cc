@@ -137,7 +137,25 @@ IRTptr exprs::IfThenElse::translate(SymbolTable & env) const{
                                cast_to_exprPtr(_res_1->translate(env)),
                                cast_to_exprPtr(_res_2->translate(env)));
 }
-IRTptr exprs::WhileDo::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::WhileDo::translate(SymbolTable & env) const{
+    // the condition must produce a value, but the body must not
+    auto irCond = cast_to_exprPtr(_cond->translate(env));
+    auto irBody = cast_to_exprPtr(_res->translate(env));
+
+    auto startLbl = newTemp(); // right before the Cjump
+    auto bodyLbl = newTemp(); // right before we start the body
+    auto endLbl = newTemp(); // after the body
+    
+    // add jump and label to the end of body
+    auto jumpEnd = std::make_shared<Seq>(std::make_shared<Jump>(startLbl), std::make_shared<Label>(endLbl));    
+    irBody = std::make_shared<Seq>(irBody, jumpEnd);    
+    // add label at the start of body
+    irBody = labelTreeStm(bodyLbl, irBody); 
+    // compare the cond to 0
+    auto cjmp = std::make_shared<CJump>(rel_op_k::NE, std::make_shared<Const>(0), irCond, bodyLbl, endLbl);
+    auto jmpNlbl = labelTreeStm(startLbl, cjmp);
+    return std::make_shared<Seq>(jmpNlbl, irBody);
+}
 IRTptr exprs::ForToDo::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::Break::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::ArrCreate::translate(SymbolTable & env) const{return nullptr;}
