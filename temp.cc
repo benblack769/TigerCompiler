@@ -10,18 +10,7 @@ int temp_label_count = 0;
 
 constexpr int uninitialized_temp_num = -1;
 
- /* list initializer */
-<<<<<<< HEAD
-Temp_temp::Temp_temp() {
-	// int num = ?
-	// const std::string specialName
-	// static int count =?
 
-};
-
-Temp_temp::~Temp_temp()	{
-	
-=======
 Temp_temp::Temp_temp(int temp) {
 	num = temp;
 };
@@ -43,7 +32,6 @@ newtemp() {
 	int old_count = temp_var_count;
 	temp_var_count++;
 	return Temp_temp(old_count);
->>>>>>> 496b2e6a6eee7a88af26b3e540b9937f4c6a0129
 };
 
 Temp_label::Temp_label(const std::string &in_name) {
