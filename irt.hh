@@ -313,6 +313,5 @@ class Label: public stm {
     label_t name_;
 };
 
-
 } // ir namespace
 
