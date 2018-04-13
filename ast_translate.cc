@@ -17,8 +17,15 @@ IRTptr exprs::NilNode::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::IntNode::translate(SymbolTable & env) const{
     return std::make_shared<ir::Const>(my_int); 
 }
-IRTptr exprs::LvalNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::NegateNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::LvalNode::translate(SymbolTable & env) const{
+    return lval->translate(env);    
+}
+// Make a (-1) * exp ast node then translate that
+IRTptr exprs::NegateNode::translate(SymbolTable & env) const{
+    auto neg1Node = new exprs::IntNode(-1);  
+    auto mulNode = new exprs::BinaryNode(neg1Node,child_,exprs::BinaryOp::MUL);
+    return mulNode->translate(env);
+}
 
 expPtr to_expr_seq(stmPtrList list,expPtr expr){
     expPtr res_expr = expr;
@@ -45,6 +52,18 @@ ir::expPtr compile_conditional(rel_op_k oper, ir::expPtr left, ir::expPtr right,
     };
     return to_expr_seq(stmts, to_expPtr(Temp(result)));
 }
+op_k to_op_k(exprs::BinaryOp op){
+    using namespace  exprs;
+    switch(op){
+    case BinaryOp::ADD: return op_k::PLUS;
+    case BinaryOp::SUB: return op_k::MINUS;
+    case BinaryOp::MUL: return op_k::MUL;
+    case BinaryOp::DIV: return op_k::DIV;
+    default:
+        assert(false && "bad binop to op_k");
+    }
+    return op_k::PLUS;
+}
 rel_op_k to_rel_op(exprs::BinaryOp op){
     using namespace  exprs;
     switch(op){
@@ -64,7 +83,13 @@ IRTptr exprs::BinaryNode::translate(SymbolTable & env) const{
             || op == BinaryOp::SUB
             || op == BinaryOp::MUL
             || op == BinaryOp::DIV){
-
+        if (auto irL = dynamic_pointer_cast<exp>(left->translate(env))){
+            if (auto irR = dynamic_pointer_cast<exp>(right->translate(env))){
+                return std::make_shared<BinOp>(to_op_k(op), irL, irR);
+            }
+        }
+        assert(false && "left or right of Binop is not an integer");
+        return nullptr;
     }
     else if(op == BinaryOp::AND ||
             op == BinaryOp::OR){

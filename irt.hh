@@ -202,7 +202,7 @@ class Move: public stm {
         {};
     virtual ~Move() = default;
     virtual std::string toStr(std::string spacing) const {
-        return twoChildToStr(spacing, "Eseq", dest_, src_);
+        return twoChildToStr(spacing, "Move", dest_, src_);
     };
   private:
     expPtr dest_;
@@ -216,7 +216,7 @@ class Exp: public stm {
         {};
     virtual ~Exp() = default;
     virtual std::string toStr(std::string spacing) const {
-        return oneChildToStr(spacing, "Exp: ", exp_);
+        return oneChildToStr(spacing, "Exp", exp_);
     };
   private:
     expPtr exp_;
