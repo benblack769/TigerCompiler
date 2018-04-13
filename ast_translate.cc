@@ -41,19 +41,30 @@ ir::expPtr compile_conditional(rel_op_k oper, ir::expPtr left, ir::expPtr right,
     Temp_temp result = newtemp();
 
     Temp_label then_l = newlabel();
-    Temp_label else_l = newlabel();
     Temp_label end_l = newlabel();
 
-    stmPtrList stmts = {
-        to_stmPtr(CJump(oper,left,right,then_l,else_l)),
-        to_stmPtr(Label(then_l)),
-        to_stmPtr(Move(to_expPtr(Temp(result)), then_expr)),
-        to_stmPtr(Jump(end_l)),
-        to_stmPtr(Label(else_l)),
-        to_stmPtr(Move(to_expPtr(Temp(result)), else_expr)),
-        to_stmPtr(Label(end_l)),
-    };
-    return to_expr_seq(stmts, to_expPtr(Temp(result)));
+    if(else_expr = nullptr){
+        stmPtrList stmts = {
+            to_stmPtr(CJump(oper,left,right,then_l,end_l)),
+            to_stmPtr(Label(then_l)),
+            to_stmPtr(Move(to_expPtr(Temp(result)), then_expr)),
+            to_stmPtr(Jump(end_l)),
+            to_stmPtr(Label(end_l)),
+        };
+        return to_expr_seq(stmts, to_expPtr(Temp(result)));
+    }else{
+        Temp_label else_l = newlabel();
+        stmPtrList stmts = {
+            to_stmPtr(CJump(oper,left,right,then_l,else_l)),
+            to_stmPtr(Label(then_l)),
+            to_stmPtr(Move(to_expPtr(Temp(result)), then_expr)),
+            to_stmPtr(Jump(end_l)),
+            to_stmPtr(Label(else_l)),
+            to_stmPtr(Move(to_expPtr(Temp(result)), else_expr)),
+            to_stmPtr(Label(end_l)),
+        };
+        return to_expr_seq(stmts, to_expPtr(Temp(result)));
+    }
 }
 op_k to_op_k(exprs::BinaryOp op){
     using namespace  exprs;
@@ -129,7 +140,13 @@ IRTptr exprs::FunctionCall::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::ExprSequenceEval::translate(SymbolTable & env) const{
     return exprs->translate(env); 
 }
-IRTptr exprs::IfThen::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::IfThen::translate(SymbolTable & env) const{
+    return compile_conditional(rel_op_k::EQ,
+                               to_expPtr(Const(0)),
+                               cast_to_exprPtr(_cond->translate(env)),
+                               cast_to_exprPtr(_res->translate(env)),
+                               nullptr);
+}
 IRTptr exprs::IfThenElse::translate(SymbolTable & env) const{
     return compile_conditional(rel_op_k::EQ,
                                to_expPtr(Const(0)),
