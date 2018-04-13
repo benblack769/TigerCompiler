@@ -13,7 +13,10 @@ using namespace tiger;
 using namespace ir;
 
 IRTptr exprs::StringNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::NilNode::translate(SymbolTable & env) const{return nullptr;}
+// nil will just be a constant 0
+IRTptr exprs::NilNode::translate(SymbolTable & env) const{
+    return std::make_shared<Const>(0);
+}
 IRTptr exprs::IntNode::translate(SymbolTable & env) const{
     return std::make_shared<ir::Const>(my_int); 
 }
@@ -139,7 +142,24 @@ IRTptr exprs::ForToDo::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::Break::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::ArrCreate::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::RecCreate::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::LetIn::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::LetIn::translate(SymbolTable & env) const{
+    auto irtDecs = _decl_list->translate(env); 
+    auto irtExps = _expr_sequ->translate(env); 
+    
+    // irtDecs must be an stm
+    auto stmNode = cast_to_stmPtr(irtDecs);
+    // irtExps may be an exp or a stm
+    if(auto expNode = dynamic_pointer_cast<ir::exp>(irtExps)){
+        return std::make_shared<ir::Eseq>(stmNode, expNode);
+    }
+    else if(auto stmNode2 = dynamic_pointer_cast<ir::stm>(irtExps)){
+        return std::make_shared<ir::Seq>(stmNode, stmNode2);
+    } else {
+        std::cerr << "In LetIn::translate:" << std::endl;
+        std::cerr << "Got a pointer to neither an exp or stm type node. Probably a nullptr" << std::endl;
+        throw 1;
+    }
+}
 
 Access get_static_link(int level){
     return full_frame.frame_at_level(level)->formals().back();
