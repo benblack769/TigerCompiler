@@ -15,4 +15,15 @@ TEST_CASE("example semantic check","[translate]") {
     //cout << rootnode->translate(SymbolTable & env);
 }
 
+
+TEST_CASE("Sequence","[translate]") {
+    auto b = buffman::Buffman("(567; 894)");
+    REQUIRE(yyparse() == 0);
+    SymbolTable env;
+    auto myIrt = rootnode->translate(env);
+    REQUIRE(myIrt->toStr().find("567") != std::string::npos);
+    REQUIRE(myIrt->toStr().find("894") != std::string::npos);
+}
+
+
 } // namespace
