@@ -313,6 +313,17 @@ class Label: public stm {
     label_t name_;
 };
 
+// given a label and a tree, it makes a sequence that is under that label
+expPtr labelTreeExp(label_t name, expPtr myExp){
+    auto myLabel = std::make_shared<Label>(name);
+    return std::make_shared<Eseq>(name, myExp); 
+}
+
+// same as last function but for stms
+stmPtr labelTreeStm(label_t name, stmPtr myStm){
+    auto myLabel = std::make_shared<Label>(name);
+    return std::make_shared<Seq>(name, myStm); 
+}
 
 } // ir namespace
 
