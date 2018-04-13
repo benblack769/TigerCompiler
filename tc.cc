@@ -16,14 +16,15 @@ extern ExprNode * rootnode;
 extern FILE* yyin;
 using namespace tiger;
 
+// runs symantic checks, then translates
 int main(int argc, char* argv[]){
-
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         auto b = buffman::Buffman(yyin);
         yyparse();
-        SymbolTable env;
-        auto c =  rootnode->translate(env);
-        std::cout << c;
+        SymbolTable evalEnv;
+        rootnode->eval_and_check_type(evalEnv);
+        SymbolTable translateEnv;
+        std::cout << rootnode->translate(translateEnv);
     }
 }
