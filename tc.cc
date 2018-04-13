@@ -20,11 +20,14 @@ using namespace tiger;
 int main(int argc, char* argv[]){
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
+        assert(yyin && "bad file opened");
         auto b = buffman::Buffman(yyin);
         yyparse();
         SymbolTable evalEnv;
+        assert(rootnode && "parsing failed");
         rootnode->eval_and_check_type(evalEnv);
         SymbolTable translateEnv;
-        std::cout << rootnode->translate(translateEnv);
+        IRTptr res = rootnode->translate(translateEnv);
+        std::cout << res;
     }
 }

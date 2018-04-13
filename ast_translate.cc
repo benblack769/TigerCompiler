@@ -18,14 +18,14 @@ IRTptr exprs::NilNode::translate(SymbolTable & env) const{
     return std::make_shared<Const>(0);
 }
 IRTptr exprs::IntNode::translate(SymbolTable & env) const{
-    return std::make_shared<ir::Const>(my_int); 
+    return std::make_shared<ir::Const>(my_int);
 }
 IRTptr exprs::LvalNode::translate(SymbolTable & env) const{
-    return lval->translate(env);    
+    return lval->translate(env);
 }
 // Make a (-1) * exp ast node then translate that
 IRTptr exprs::NegateNode::translate(SymbolTable & env) const{
-    auto neg1Node = new exprs::IntNode(-1);  
+    auto neg1Node = new exprs::IntNode(-1);
     auto mulNode = new exprs::BinaryNode(neg1Node,child_,exprs::BinaryOp::MUL);
     return mulNode->translate(env);
 }
@@ -43,7 +43,7 @@ ir::expPtr compile_conditional(rel_op_k oper, ir::expPtr left, ir::expPtr right,
     Temp_label then_l = newlabel();
     Temp_label end_l = newlabel();
 
-    if(else_expr = nullptr){
+    if(else_expr == nullptr){
         stmPtrList stmts = {
             to_stmPtr(CJump(oper,left,right,then_l,end_l)),
             to_stmPtr(Label(then_l)),
@@ -138,7 +138,7 @@ IRTptr exprs::AssignNode::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::FunctionCall::translate(SymbolTable & env) const{return nullptr;}
 // since this class wraps ExprSequenceNode, so will this function
 IRTptr exprs::ExprSequenceEval::translate(SymbolTable & env) const{
-    return exprs->translate(env); 
+    return exprs->translate(env);
 }
 IRTptr exprs::IfThen::translate(SymbolTable & env) const{
     return compile_conditional(rel_op_k::EQ,
@@ -178,9 +178,9 @@ IRTptr exprs::Break::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::ArrCreate::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::RecCreate::translate(SymbolTable & env) const{return nullptr;}
 IRTptr exprs::LetIn::translate(SymbolTable & env) const{
-    auto irtDecs = _decl_list->translate(env); 
-    auto irtExps = _expr_sequ->translate(env); 
-    
+    auto irtDecs = _decl_list->translate(env);
+    auto irtExps = _expr_sequ->translate(env);
+
     // irtDecs must be an stm
     auto stmNode = cast_to_stmPtr(irtDecs);
     // irtExps may be an exp or a stm
@@ -258,7 +258,7 @@ IRTptr ExprSequenceNode::translate(SymbolTable & env) const{
             std::cerr << "Got a pointer to neither an exp or stm type node. Probably a nullptr" << std::endl;
             throw 1;
         }
-    } 
+    }
     return rNode;
 }
 IRTptr FieldNode::translate(SymbolTable & env) const{return nullptr;}

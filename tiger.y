@@ -35,7 +35,7 @@ tiger::ExprNode * rootnode;
   tiger::TypeFeildsNode* type_fields;
   tiger::TypeFeildNode* type_field;
   tiger::TypeIDNode* type_id;
-  int64_t int_value;
+  long long int_value;
   char * str;
   IdArray arr_acc;
 }
