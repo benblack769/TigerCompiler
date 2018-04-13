@@ -1,90 +1,128 @@
 #include <stdlib.h>
-#include "temp.hh"
 #include "frame.hh"
 
-struct F_frame_{
-	Temp_label name;
-	F_formalsList formals;
-}F_frame_;
+Frame newFrame(ir::label_t name, formalsList forms){
+	Frame retFrame (new Frame_(name,forms));
+	retFrame->allocFormals(forms);
 
-struct F_access_{
-	enum {inFrame, inReg} kind;
-	union {
-		int offset;
-		Temp_temp reg;
-	}u;
-}F_access_;
-
-struct F_frag_{
-	enum {F_stringFrag, F_procFrag} kind;
-	union {
-		struct {Temp_label label; string str;} stringg;
-		struct {T_stm body; F_frame frame;} proc;
-	}u;
-}F_frag_;
-
-F_frame F_newFrame(Temp_label name, F_formalsList formals){
-	F_frame retFrame (new F_frame_);
-	retFrame->name = name;
-	retFrame->formals = formals;
 	return retFrame;
 }
-//pg 139 for more info
-F_access F_allocLocal(F_frame f, bool escape){
-	F_access retAccess (new F_access_);
-	retAccess->kind = F_access_::inFrame;
-	retAccess->u.int = 0;
-	return retAccess;
-};
-F_accessList F_formals(F_frame f){
-	std::vector<F_access> retAccessList {};
-	return retAccessList;
+
+Frame_::Frame_(ir::label_t name_, formalsList forms){
+	name = name_;
+	FP = newtemp();
+	//add FP to temp_map
+}
+
+void Frame_::allocFormals(formalsList forms){
+	for(bool i: forms){
+		if(i){
+			Access retAccess (new Access_(i,formalsOffset));
+			fList.push_back(retAccess);
+			formalsOffset += wordSize;
+		}else{
+			Access retAccess (new Access_(i,newtemp()));
+			fList.push_back(retAccess);
+		}
+	}
 };
 
-std::string F_getlabel(F_frame frame){
+//pg 139 for more info
+Access Frame_::allocLocal(bool escape){
+	if(escape){
+		Access retAccess (new Access_(escape,frameOffset));
+		frameOffset -= wordSize;
+		return retAccess;
+	}else{
+		Access retAccess (new Access_(escape,newtemp()));
+		return retAccess;
+	}
+};
+
+Access_::Access_(bool esc,int offset_){
+	escapes = esc;
+	offset = offset_;
+}
+
+Access_::Access_(bool esc,ir::temp_t temp_){
+	escapes = esc;
+	temp = temp_;
+}
+
+AccessList Frame_::formals(){
+	return fList;
+};
+
+std::string Frame_::getlabel(){
 	std::string retStr = "";
 	return retStr;
 };
 
-Temp_map F_tempMap{
+ir::temp_t Frame_::getFP(){
+	return FP;
+};
+
+/*
+Temp_map Frame_::F_tempMap(){
 	return nullptr;
 };
-Temp_tempList F_registers(void){
+Temp_tempList Frame_::getRegisters(){
 	return nullptr;
 };
-T_exp F_Exp(F_access acc, T_exp framePtr){
+Temp_temp Frame_::getSP(){
 	return nullptr;
 };
-Temp_label F_name(F_frame f){
+Temp_temp Frame_::getZERO(){
 	return nullptr;
 };
-Temp_temp F_FP(void){
+Temp_temp Frame_::getRA(){
 	return nullptr;
 };
-Temp_temp F_SP(void){
+Temp_temp Frame_::getRV(){
 	return nullptr;
 };
-Temp_temp F_ZERO(void){
-	return nullptr;
+
+*/
+
+ir::expPtr Frame_::externalCall(std::string s, ir::expPtrList args){
+	return to_expPtr(ir::Call(to_expPtr(ir::Name(newnamedlabel(s))),args));
 };
-Temp_temp F_RA(void){
-	return nullptr;
-};
-Temp_temp F_RV(void){
-	return nullptr;
-};
-T_exp F_externalCall(string s, T_expList args){
-	return nullptr;
-};
-F_frag F_StringFrag(Temp_label label, string str){
-	F_frag retStrFrag (new F_frag_);
-	retStrFrag->kind = F_Frag_::F_stringFrag;
-	retStrFrag->u.stringg = {label,str};
+
+ir::expPtr Access_::exp(ir::temp_t fp){
+	if(escapes){
+		auto tempFP = to_expPtr(ir::Temp(fp));
+		auto tempOffset = to_expPtr(ir::Const(offset));
+		auto tempBinOp = to_expPtr(ir::BinOp(ir::op_k::PLUS,tempFP,tempOffset));
+		return to_expPtr(ir::Mem(tempBinOp));
+	}else{
+		return to_expPtr(ir::Temp(temp));
+	}
+}
+
+ir::expPtr Access_::expStaticLink(ir::expPtr ptr){
+	auto tempOffset = to_expPtr(ir::Const(offset));
+	auto tempBinOp = to_expPtr(ir::BinOp(ir::op_k::PLUS,ptr,tempOffset));
+	return to_expPtr(ir::Mem(tempBinOp));
+
+}
+
+
+Frag newStringFrag(Temp_label label, std::string str){
+	Frag retStrFrag (new StringFrag_(label,str));
 	return retStrFrag;
 };
-F_frag F_ProcFrag(T_stm body, F_frame frame){
-	F_frag retProcFrag (new F_frag_);
-	retProcFrag->kind = F_Frag_::F_procFrag;
-	retProcFrag->u.proc = {body, fame};
+
+Frag newProcFrag(ir::stmPtr body, Frame frame){
+	Frag retProcFrag (new ProcFrag_(body, frame));
 	return retProcFrag;
 };
+
+StringFrag_::StringFrag_(ir::label_t label_, std::string str_){
+	label = label_;
+	str = str_;
+}
+
+ProcFrag_::ProcFrag_(ir::stmPtr body_, Frame frame_){
+	body = body_;
+	frame = frame_;
+}

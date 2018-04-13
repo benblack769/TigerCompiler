@@ -80,6 +80,12 @@ inline expPtr cast_to_exprPtr(IRTptr ptr){
     return res;
 }
 
+inline stmPtr cast_to_stmPtr(IRTptr ptr){
+    stmPtr res = std::dynamic_pointer_cast<stm>(ptr);
+    assert(bool(res));
+    return res;
+}
+
 
 // printing stuff
 inline std::ostream & operator << (std::ostream & os, const IRTNode & node){
@@ -202,7 +208,7 @@ class Move: public stm {
         {};
     virtual ~Move() = default;
     virtual std::string toStr(std::string spacing) const {
-        return twoChildToStr(spacing, "Eseq", dest_, src_);
+        return twoChildToStr(spacing, "Move", dest_, src_);
     };
   private:
     expPtr dest_;
@@ -216,7 +222,7 @@ class Exp: public stm {
         {};
     virtual ~Exp() = default;
     virtual std::string toStr(std::string spacing) const {
-        return oneChildToStr(spacing, "Exp: ", exp_);
+        return oneChildToStr(spacing, "Exp", exp_);
     };
   private:
     expPtr exp_;

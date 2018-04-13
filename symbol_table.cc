@@ -107,6 +107,6 @@ void SymbolTable::add_function_set(vector<pair<string, FuncHeader>> multu_rec_fu
         vars[fname] = VarFuncItem(func_res);
     }
 }
-void SymbolTable::add_variable(string name, TypeExpr type,int level, F_access frame_access){
+void SymbolTable::add_variable(string name, TypeExpr type,int level, Access frame_access){
     vars[name] = VarFuncItem(VarEntry{type,frame_access,level});
 }
