@@ -36,6 +36,7 @@ public:
     ~Frame_() = default;
     Access allocLocal(bool escape);
     AccessList formals();
+    void allocFormals(formalsList forms);
     std::string getlabel();
     //ir::expPtr externalCall(string s, ir::expPtrList args);
     //ir::stm procEntryExit1(ir::stm stm);
@@ -47,7 +48,8 @@ public:
 	//temp_t getRV();
 private:
 	ir::label_t name;
-	formalsList fList;
+	AccessList fList;
+	int formalsOffset = 0;
 	int frameOffset = 0;
 	const int wordSize = 4;
 	//Temp_tempList registers;
@@ -71,9 +73,9 @@ public:
 
 using Frag = std::shared_ptr<Frag_>;
 using FragList = std::vector<Frag>;
-/*
+
 Frag newStringFrag(ir::label_t label, std::string str);
-Frag newProcFrag(ir::stm body, Frame frame);
+Frag newProcFrag(ir::stmPtr body, Frame frame);
 
 class StringFrag_: public Frag_{
 public:
@@ -86,10 +88,9 @@ private:
 
 class ProcFrag_: public Frag_{
 public:
-    ProcFrag_(ir::stm body, Frame frame);
+    ProcFrag_(ir::stmPtr body, Frame frame);
     ~ProcFrag_() = default;
 private:
-    ir::stm body;
+    ir::stmPtr body;
     Frame frame;
 };
-*/

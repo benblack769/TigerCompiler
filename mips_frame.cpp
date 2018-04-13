@@ -3,19 +3,34 @@
 
 Frame newFrame(ir::label_t name, formalsList forms){
 	Frame retFrame (new Frame_(name,forms));
+	retFrame->allocFormals(forms);
+
 	return retFrame;
 }
 
 Frame_::Frame_(ir::label_t name_, formalsList forms){
 	name = name_;
-	fList = forms;
 	FP = newtemp();
 }
+
+void Frame_::allocFormals(formalsList forms){
+	for(bool i: forms){
+		if(i){
+			Access retAccess (new Access_(i,formalsOffset));
+			fList.push_back(retAccess);
+			formalsOffset += wordSize;
+		}else{
+			Access retAccess (new Access_(i,newtemp()));
+			fList.push_back(retAccess);
+		}
+	}
+};
+
 //pg 139 for more info
 Access Frame_::allocLocal(bool escape){
 	if(escape){
 		Access retAccess (new Access_(escape,frameOffset));
-		frameOffset += wordSize;
+		frameOffset -= wordSize;
 		return retAccess;
 	}else{
 		Access retAccess (new Access_(escape,newtemp()));
@@ -34,8 +49,7 @@ Access_::Access_(bool esc,ir::temp_t temp_){
 }
 
 AccessList Frame_::formals(){
-	AccessList retAccessList {};
-	return retAccessList;
+	return fList;
 };
 
 std::string Frame_::getlabel(){
@@ -89,14 +103,14 @@ ir::expPtr Access_::expStaticLink(ir::expPtr ptr){
 
 }
 
-/*
+
 Frag newStringFrag(Temp_label label, std::string str){
 	Frag retStrFrag (new StringFrag_(label,str));
 	return retStrFrag;
 };
 
-Frag newProcFrag(ir::stm body, Frame frame){
-	Frag retProcFrag (new ProFrag_(body, frame));
+Frag newProcFrag(ir::stmPtr body, Frame frame){
+	Frag retProcFrag (new ProcFrag_(body, frame));
 	return retProcFrag;
 };
 
@@ -105,8 +119,7 @@ StringFrag_::StringFrag_(ir::label_t label_, std::string str_){
 	str = str_;
 }
 
-ProcFrag_::ProcFrag_(ir::stm body_, Frame frame_){
+ProcFrag_::ProcFrag_(ir::stmPtr body_, Frame frame_){
 	body = body_;
 	frame = frame_;
 }
-*/
