@@ -80,6 +80,12 @@ inline expPtr cast_to_exprPtr(IRTptr ptr){
     return res;
 }
 
+inline stmPtr cast_to_stmPtr(IRTptr ptr){
+    stmPtr res = std::dynamic_pointer_cast<stm>(ptr);
+    assert(bool(res));
+    return res;
+}
+
 
 // printing stuff
 inline std::ostream & operator << (std::ostream & os, const IRTNode & node){
