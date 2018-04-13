@@ -38,10 +38,11 @@ public:
     AccessList formals();
     void allocFormals(formalsList forms);
     std::string getlabel();
-    //ir::expPtr externalCall(string s, ir::expPtrList args);
+    ir::expPtr externalCall(std::string s, ir::expPtrList args);
     //ir::stm procEntryExit1(ir::stm stm);
 	//Temp_tempList getRegisters();
 	ir::temp_t getFP();
+	Temp_map F_tempMap();
 	//temp_t getSP();
 	//temp_t getZERO();
 	//temp_t getRA();
@@ -49,6 +50,7 @@ public:
 private:
 	ir::label_t name;
 	AccessList fList;
+	//Temp_map tempNames;
 	int formalsOffset = 0;
 	int frameOffset = 0;
 	const int wordSize = 4;

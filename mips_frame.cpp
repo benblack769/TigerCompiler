@@ -11,6 +11,7 @@ Frame newFrame(ir::label_t name, formalsList forms){
 Frame_::Frame_(ir::label_t name_, formalsList forms){
 	name = name_;
 	FP = newtemp();
+	//add FP to temp_map
 }
 
 void Frame_::allocFormals(formalsList forms){
@@ -60,11 +61,11 @@ std::string Frame_::getlabel(){
 ir::temp_t Frame_::getFP(){
 	return FP;
 };
+
 /*
 Temp_map Frame_::F_tempMap(){
 	return nullptr;
 };
-
 Temp_tempList Frame_::getRegisters(){
 	return nullptr;
 };
@@ -80,10 +81,12 @@ Temp_temp Frame_::getRA(){
 Temp_temp Frame_::getRV(){
 	return nullptr;
 };
-ir::exp Frame_::externalCall(string s, ir::expPtrList args){
-	return nullptr;
-};
+
 */
+
+ir::expPtr Frame_::externalCall(std::string s, ir::expPtrList args){
+	return to_expPtr(ir::Call(to_expPtr(ir::Name(newnamedlabel(s))),args));
+};
 
 ir::expPtr Access_::exp(ir::temp_t fp){
 	if(escapes){

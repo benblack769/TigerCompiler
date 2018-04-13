@@ -40,5 +40,9 @@ newlabel(){
 	return Temp_label("");
 }
 
+Temp_label 
+newnamedlabel(std::string s){
+	return Temp_label(s);
+}
 
 

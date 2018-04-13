@@ -42,6 +42,7 @@ class Temp_label {
 
 // methods on Temp_label:
 Temp_label newlabel();
+Temp_label newnamedlabel(std::string s);
 	// call constructor
 //Temp_label namedlabel(std::string){};
 	// call constructor
