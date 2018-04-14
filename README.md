@@ -62,6 +62,68 @@ stm. An assembly label, but with no expected value. So, you'd use Name before a 
 
 Each class of `ASTNode` has a `translate` function that returns a pointer to an IR tree. These functions are defined in `ast_translate.cc`. The main function in `tc.cc` calls the semantic checks on the root node, then calls translate on it.
 
+### Output format
+
+Since we did not have time to make an automated checker, we simply implemented a print method for the IR tree nodes. When `tc` is run, all nodes in the main expression, and all fragments (strings constants and functions) are printed.
+
+For example, the program:
+
+    let
+        function f(x:int):int = x + 5
+        var str = "hi there"
+    in
+        f(2) > 3
+    end
+
+Gives the output:
+
+        Seq:
+          Exp:
+            Const: 0
+          Move:
+            Mem:
+              BinOp +:
+                Temp: 0
+                Const: 0
+            Name: L52
+        Eseq:
+          CJump op: >
+          CJump left:
+            Call: L40
+              args:
+                Const: 2
+          CJump right:
+            Const: 3
+          CJump true label: L53
+          CJump false label: L55
+          Eseq:
+            Label: L53
+            Eseq:
+              Move:
+                Temp: 4
+                Const: 1
+              Eseq:
+                Jump: L54
+                Eseq:
+                  Label: L55
+                  Eseq:
+                    Move:
+                      Temp: 4
+                      Const: 0
+                    Eseq:
+                      Label: L54
+                      Temp: 4
+      FunctionFragment:
+      BinOp +:
+        Mem:
+          BinOp +:
+            Temp: 1
+            Const: 0
+        Const: 5
+
+      StringFragment:
+      L52: ""hi there""
+
 # HW6: Semantic Checking
 
 ### Symbol tables

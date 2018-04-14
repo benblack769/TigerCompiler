@@ -223,7 +223,10 @@ IRTptr exprs::ArrCreate::translate(const SymbolTable & env) const{
     };
     return full_frame.current_frame()->externalCall("createArray",args);
 }
-IRTptr exprs::RecCreate::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr exprs::RecCreate::translate(const SymbolTable & env) const{
+    assert(false && "Records not implemented");
+    return nullptr;
+}
 IRTptr exprs::LetIn::translate(const SymbolTable & ) const{
     auto irtDecs = _decl_list->translate(new_env);
     auto irtExps = _expr_sequ->translate(new_env);
