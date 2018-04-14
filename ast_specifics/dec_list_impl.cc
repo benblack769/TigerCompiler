@@ -24,16 +24,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
         if(start_type == DeclType::VAR){
             //processes variable decleration using old environment to evaluate variable descrition
             VarDecl * var = to_sub_class<VarDecl>(list[list_idx].get());
-            TypeExpr evaled_expr = var->_expr->eval_and_check_type(env);
-            TypeExpr res_expr;
-            if(var->has_type()){
-                res_expr = env.get_checked_type(var->type_name());
-                assert_type_equality(evaled_expr,res_expr,var->get_source_loc());
-            }
-            else{
-                res_expr = evaled_expr;
-            }
-            env.add_variable(var->name(),res_expr,full_frame.current_level(), full_frame.current_frame()->allocLocal(true));
+            var->get_and_check_var_type(env);
             list_idx += 1;
         }
         else if(start_type == DeclType::TYPE ||
@@ -69,17 +60,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
                 //checks types inside function definitions, verifies that the expression is correct, and also checks the consistency of the return type
                 for(size_t idx = list_idx; idx < list_end; idx++){
                     FuncDecl * func = to_sub_class<FuncDecl>(list[idx].get());
-                    //create new table for function arguments
-                    SymbolTable new_env = env;
-                    full_frame.new_frame(newFrame(newlabel().toString(),formalsList(func->number_args())));
-                    for(auto var_pair : func->arg_types()){
-                        new_env.add_variable(var_pair.first,new_env.get_checked_type(var_pair.second),full_frame.current_level(),full_frame.current_frame()->allocLocal(true));
-                    }
-                    TypeExpr func_ret_ty = func->_expr->eval_and_check_type(new_env);
-                    if(func->has_type()){
-                        assert_type_equality(func_ret_ty,env.get_checked_type(func->ret_type()),func->get_source_loc());
-                    }
-                    full_frame.pop_frame();
+                    func->check_function_body(env);
                 }
             }
             list_idx = list_end;

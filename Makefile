@@ -4,7 +4,7 @@ CXX=g++   # Can switch to g++ if desired
 # CXX=g++-6
 #CFLAGS=-g -O0 -Wall -pedantic
 CXXFLAGS=-g -O0 -std=c++14  -I . #-Werror
-WARNINGS=-Wall -Wextra --pedantic
+WARNINGS=-Wall -Wextra
 #CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -Wextra -Werror
 LDFLAGS=$(CXXFLAGS)
 

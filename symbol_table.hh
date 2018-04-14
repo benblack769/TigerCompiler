@@ -88,14 +88,14 @@ public:
         _type = VarOrFunc::FUNC;
         func_data = in_func;
     }
-    VarOrFunc type(){
+    VarOrFunc type()const{
         return _type;
     }
-    FuncEntry & func(){
+    const FuncEntry & func()const{
         assert(_type == VarOrFunc::FUNC);
         return func_data;
     }
-    VarEntry & var(){
+    const  VarEntry & var()const{
         assert(_type == VarOrFunc::VAR);
         return var_data;
     }
@@ -111,13 +111,13 @@ public:
     bool has_type(string tyid){
         return types.has_type(tyid);
     }
-    bool has_var_symbol(string var_id){
+    bool has_var_symbol(string var_id)const{
         return vars.count(var_id);
     }
-    bool symbol_is_var(string var_id){
+    bool symbol_is_var(string var_id)const{
         return has_var_symbol(var_id) && vars.at(var_id).type() == VarOrFunc::VAR;
     }
-    bool symbol_is_func(string var_id){
+    bool symbol_is_func(string var_id)const{
         return has_var_symbol(var_id) && vars.at(var_id).type() == VarOrFunc::FUNC;
     }
     void add_type_set(vector<pair<string, UnresolvedType>> multu_rec_types);
@@ -125,7 +125,7 @@ public:
     void add_variable(string name, TypeExpr type, int func_depth_level, Access frame_access);
     bool verify_function_args(string func_name, vector<TypeExpr> arg_types){
         assert(symbol_is_func(func_name));
-        vector<TypeExpr> & expected_types = vars[func_name].func().arg_types;
+        const vector<TypeExpr> & expected_types = vars[func_name].func().arg_types;
         return expected_types.size() == arg_types.size() &&
                 std::equal(arg_types.begin(), arg_types.end(), expected_types.begin(), [](TypeExpr o, TypeExpr t){return o.is_convertible(t);});
     }
@@ -161,7 +161,7 @@ public:
         assert(symbol_is_var(varid));
         return vars.at(varid).var().type;
     }
-    VarEntry var_data(string varid){
+    VarEntry var_data(string varid)const{
         assert(symbol_is_var(varid));
         return vars.at(varid).var();
     }

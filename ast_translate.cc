@@ -12,19 +12,19 @@ FrameStack full_frame;
 using namespace tiger;
 using namespace ir;
 
-IRTptr exprs::StringNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::StringNode::translate(const SymbolTable & env) const{return nullptr;}
 // nil will just be a constant 0
-IRTptr exprs::NilNode::translate(SymbolTable & env) const{
+IRTptr exprs::NilNode::translate(const SymbolTable & env) const{
     return std::make_shared<Const>(0);
 }
-IRTptr exprs::IntNode::translate(SymbolTable & env) const{
+IRTptr exprs::IntNode::translate(const SymbolTable & env) const{
     return std::make_shared<ir::Const>(my_int);
 }
-IRTptr exprs::LvalNode::translate(SymbolTable & env) const{
+IRTptr exprs::LvalNode::translate(const SymbolTable & env) const{
     return lval->translate(env);
 }
 // Make a (-1) * exp ast node then translate that
-IRTptr exprs::NegateNode::translate(SymbolTable & env) const{
+IRTptr exprs::NegateNode::translate(const SymbolTable & env) const{
     auto neg1Node = new exprs::IntNode(-1);
     auto mulNode = new exprs::BinaryNode(neg1Node,child_,exprs::BinaryOp::MUL);
     return mulNode->translate(env);
@@ -92,7 +92,7 @@ rel_op_k to_rel_op(exprs::BinaryOp op){
     }
     return rel_op_k::EQ;
 }
-IRTptr exprs::BinaryNode::translate(SymbolTable & env) const{
+IRTptr exprs::BinaryNode::translate(const SymbolTable & env) const{
     if(op == BinaryOp::ADD
             || op == BinaryOp::SUB
             || op == BinaryOp::MUL
@@ -134,40 +134,42 @@ IRTptr exprs::BinaryNode::translate(SymbolTable & env) const{
                                    to_expPtr(Const(0)));
     }
 }
-IRTptr exprs::AssignNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::FunctionCall::translate(SymbolTable & env) const{return nullptr;}
+IRTptr exprs::AssignNode::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr exprs::FunctionCall::translate(const SymbolTable & env) const{return nullptr;}
 // since this class wraps ExprSequenceNode, so will this function
-IRTptr exprs::ExprSequenceEval::translate(SymbolTable & env) const{
+IRTptr exprs::ExprSequenceEval::translate(const SymbolTable & env) const{
     return exprs->translate(env);
 }
-IRTptr exprs::IfThen::translate(SymbolTable & env) const{
+IRTptr exprs::IfThen::translate(const SymbolTable & env) const{
     return compile_conditional(rel_op_k::EQ,
                                to_expPtr(Const(0)),
                                cast_to_exprPtr(_cond->translate(env)),
                                cast_to_exprPtr(_res->translate(env)),
                                nullptr);
 }
-IRTptr exprs::IfThenElse::translate(SymbolTable & env) const{
+IRTptr exprs::IfThenElse::translate(const SymbolTable & env) const{
     return compile_conditional(rel_op_k::EQ,
                                to_expPtr(Const(0)),
                                cast_to_exprPtr(_cond->translate(env)),
                                cast_to_exprPtr(_res_1->translate(env)),
                                cast_to_exprPtr(_res_2->translate(env)));
 }
-IRTptr exprs::WhileDo::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::ForToDo::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::Break::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::ArrCreate::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::RecCreate::translate(SymbolTable & env) const{return nullptr;}
-IRTptr exprs::LetIn::translate(SymbolTable & env) const{
-    auto irtDecs = _decl_list->translate(env);
-    auto irtExps = _expr_sequ->translate(env);
+IRTptr exprs::WhileDo::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr exprs::ForToDo::translate(const SymbolTable & ) const{
+    this->new_env;
+}
+IRTptr exprs::Break::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr exprs::ArrCreate::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr exprs::RecCreate::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr exprs::LetIn::translate(const SymbolTable & ) const{
+    auto irtDecs = _decl_list->translate(new_env);
+    auto irtExps = _expr_sequ->translate(new_env);
 
     // irtDecs must be an stm
     auto stmNode = cast_to_stmPtr(irtDecs);
     // irtExps may be an exp or a stm
     if(auto expNode = dynamic_pointer_cast<ir::exp>(irtExps)){
-        return std::make_shared<ir::Eseq>(stmNode, expNode);
+        return std::make_shared<ir::Eseq>(stmNode, cast_to_exprPtr(expNode));
     }
     else if(auto stmNode2 = dynamic_pointer_cast<ir::stm>(irtExps)){
         return std::make_shared<ir::Seq>(stmNode, stmNode2);
@@ -193,27 +195,37 @@ ir::expPtr translate_variable(Access acc, int level){
     }
     return cur_link_expr;
 }
-IRTptr lvals::IdLval::translate(SymbolTable & env) const{
-    VarEntry var_data = env.var_data(my_id);
+ir::expPtr get_and_translate_var(const SymbolTable & env, string id){
+    VarEntry var_data = env.var_data(id);
     return translate_variable(var_data.access, var_data.level);
 }
-IRTptr lvals::AttrAccess::translate(SymbolTable & env) const{return nullptr;}
-IRTptr lvals::BracketAccess::translate(SymbolTable & env) const{return nullptr;}
+IRTptr lvals::IdLval::translate(const SymbolTable & env) const{
+    return get_and_translate_var(env, my_id);
+}
+IRTptr lvals::AttrAccess::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr lvals::BracketAccess::translate(const SymbolTable & env) const{return nullptr;}
 
-IRTptr decls::VarDecl::translate(SymbolTable & env) const{return nullptr;}
-IRTptr decls::FuncDecl::translate(SymbolTable & env) const{return nullptr;}
-IRTptr decls::TypeDecl::translate(SymbolTable & env) const{return nullptr;}
+IRTptr decls::VarDecl::translate(const SymbolTable & old_env) const{
+    return to_stmPtr(Move(get_and_translate_var(new_env,_id), cast_to_exprPtr(this->_expr->translate(old_env))));
+}
+IRTptr decls::FuncDecl::translate(const SymbolTable &) const{
 
-IRTptr types::BasicType::translate(SymbolTable & env) const{return nullptr;}
-IRTptr types::ArrayType::translate(SymbolTable & env) const{return nullptr;}
-IRTptr types::TypeFeildType::translate(SymbolTable & env) const{return nullptr;}
+}
+IRTptr decls::TypeDecl::translate(const SymbolTable & env) const{
+    assert("types should not be translated");
+    return nullptr;
+}
 
-IRTptr ExprListNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr types::BasicType::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr types::ArrayType::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr types::TypeFeildType::translate(const SymbolTable & env) const{return nullptr;}
+
+IRTptr ExprListNode::translate(const SymbolTable & env) const{return nullptr;}
 /*
  If the last value in this sequence returns a value, this function will return
  An Eseq, otherwise it will return a Seq
  */
-IRTptr ExprSequenceNode::translate(SymbolTable & env) const{
+IRTptr ExprSequenceNode::translate(const SymbolTable & env) const{
     if(empty()){
         return nullptr;
     }
@@ -243,12 +255,12 @@ IRTptr ExprSequenceNode::translate(SymbolTable & env) const{
     }
     return rNode;
 }
-IRTptr FieldNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr TypeIDNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr TypeFeildNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr FieldListNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr DeclarationListNode::translate(SymbolTable & env) const{return nullptr;}
-IRTptr TypeFeildsNode::translate(SymbolTable & env) const{return nullptr;}
+IRTptr FieldNode::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr TypeIDNode::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr TypeFeildNode::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr FieldListNode::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr DeclarationListNode::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr TypeFeildsNode::translate(const SymbolTable & env) const{return nullptr;}
 
 //conditional evaluation helper function (used for boolean operations like | as well as if statements)
 

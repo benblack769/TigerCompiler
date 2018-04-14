@@ -31,6 +31,19 @@ class VarDecl: public DeclarationNode {
     DeclType type(){
         return DeclType::VAR;
     }
+    void get_and_check_var_type(SymbolTable & old_env){
+        TypeExpr evaled_expr = this->_expr->eval_and_check_type(old_env);
+        TypeExpr res_expr;
+        if(this->has_type()){
+            res_expr = old_env.get_checked_type(this->type_name());
+            assert_type_equality(evaled_expr,res_expr,this->get_source_loc());
+        }
+        else{
+            res_expr = evaled_expr;
+        }
+        old_env.add_variable(this->name(),res_expr,full_frame.current_level(), full_frame.current_frame()->allocLocal(true));
+        new_env = old_env;
+    }
     virtual void print(std::ostream & os) const override{
         os << " var " << _id;
         if(_has_type_decl){
@@ -38,11 +51,12 @@ class VarDecl: public DeclarationNode {
         }
         os <<  " := " << *_expr;
     }
+     SymbolTable new_env;
      std::string _id;
      TypeIDNode * _type_id;
      ExprNode * _expr;
      bool _has_type_decl;
-  virtual IRTptr translate(SymbolTable & env) const override;
+  virtual IRTptr translate(const SymbolTable & env) const override;
 };
 class FuncDecl: public DeclarationNode {
  public:
@@ -85,8 +99,21 @@ class FuncDecl: public DeclarationNode {
         }
         os <<  " = " << *_expr;
     }
-    virtual IRTptr translate(SymbolTable & env) const override;
+    void check_function_body(SymbolTable & old_env){
+        new_env = old_env;
+        full_frame.new_frame(newFrame(newlabel().toString(),formalsList(this->number_args())));
+        for(auto var_pair : this->arg_types()){
+            new_env.add_variable(var_pair.first,new_env.get_checked_type(var_pair.second),full_frame.current_level(),full_frame.current_frame()->allocLocal(true));
+        }
+        TypeExpr func_ret_ty = this->_expr->eval_and_check_type(new_env);
+        if(this->has_type()){
+            assert_type_equality(func_ret_ty,new_env.get_checked_type(this->ret_type()),this->get_source_loc());
+        }
+        full_frame.pop_frame();
+    }
+    virtual IRTptr translate(const SymbolTable & env) const override;
  //protected:
+     SymbolTable new_env;
      std::string _id;
      TypeFeildsNode * _ty_fields;
      TypeIDNode * _type_id;
@@ -113,7 +140,7 @@ class TypeDecl: public DeclarationNode {
     virtual void print(std::ostream & os) const override{
         os << " type " << *_id << "=" << *_type;
     }
-  virtual IRTptr translate(SymbolTable & env) const override;
+  virtual IRTptr translate(const SymbolTable & env) const override;
  protected:
      TypeIDNode * _id;
      TypeNode * _type;
