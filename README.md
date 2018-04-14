@@ -3,11 +3,50 @@
 
 ### IR Trees
 
-All of our ir tree classes come in two flavors: `stm` and `exp`. `exp` produces a value, `stm` does not. All of the ir tree classes inherit from `stm` or `exp` which in turn inherit from an `IRTreeNode` class. 
+All of our ir tree classes come in two flavors: `stm` and `exp`. `exp` produces a value, `stm` does not. All of the ir tree classes inherit from `stm` or `exp` which in turn inherit from an `IRTreeNode` class.  All of the IRtree nodes have a `toStr` class which will print out their sub tree, with each level of the tree getting indented more. Here are the types of IR tree nodes, they're mostly the same as the book but classes:
+
+##### Const
+Inherits from exp. Represents a literal word written in assembly as an integer.
+
+##### Name
+Inherits from exp. Represents an assembly label. Exacly like `Label` but it is an exp rather than a stm.
+
+##### Temp
+exp. Like a register, but there are infinite of them.
+
+##### Binop
+exp. Does some operation on two exps. Types of operations are: PLUS, MINUS, MUL, DIV, AND,  OR, XOR, Left SHIFT, Right SHIFT, Arithemtic Right SHIFT.
+
+##### Mem
+exp. Access or write to memory at the given address.
+
+##### Call
+exp. Call a function at the given label with the given arguments.
+
+##### Eseq
+exp. Two nodes joined together where the left one is a stm and the right is an exp. The value of the sequence is the value of the right
+
+##### Move
+stm. Put a value into a temp or into memory
+
+##### Exp
+stm. Points to a node of type exp, but does not return a value. If I want to make a node that doesn't do anything, I make a `Exp(Const(0))`
+
+##### Jump
+stm. Go to a label. Unlike the book, it does not take a labelist since we will not do dataflow analysis.
+
+##### CJump
+stm. Compare two exps and then jump to one label if the comparision is true and another if it's false.
+
+##### Seq
+stm. Like Eseq, but both nodes are stms
+
+##### Label
+stm. An assembly label, but with no expected value. So, you'd use Name before a function, but Label before a procedure.
 
 ### Translating
 
-Each class of `ASTNode` has a `translate` function that returns a pointer to an IR tree. The main function in `tc.cc` calls the semantic checks on the root node, then calls translate on it.
+Each class of `ASTNode` has a `translate` function that returns a pointer to an IR tree. The main function in `tc.cc` calls the semantic checks on the root node, then calls translate on it. 
 
 
 ### Symbol tables
