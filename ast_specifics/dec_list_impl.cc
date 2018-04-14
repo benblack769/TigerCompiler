@@ -52,7 +52,7 @@ void DeclarationListNode::load_and_check_types(SymbolTable & env){
                 vector<pair<string, FuncHeader>> func_data;
                 for(size_t idx = list_idx; idx < list_end; idx++){
                     FuncDecl * func = to_sub_class<FuncDecl>(list[idx].get());
-                    FuncHeader header = {func->has_type(), func->has_type() ? func->ret_type() : "??", second_of_pairs(func->arg_types())};
+                    FuncHeader header = {func->has_type(), func->has_type() ? func->ret_type() : "??", newlabel(), second_of_pairs(func->arg_types())};
                     func_data.push_back(make_pair(func->name(), header));
                 }
                 env.add_function_set(func_data,full_frame.current_level());

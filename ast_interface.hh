@@ -56,7 +56,6 @@ class TypeNode: public ASTNode {
   virtual ~TypeNode() = default;
   virtual UnresolvedType unresolved_type() = 0;
   virtual void print(std::ostream & os) const override = 0;
-  virtual IRTptr translate(const SymbolTable & env) const = 0;
 };
 
 class ExprListNode: public ASTNode {
@@ -77,7 +76,7 @@ class ExprListNode: public ASTNode {
       print_list(os, base_list(list), ", ");
   }
   virtual IRTptr translate(const SymbolTable & env) const;
-protected:
+//protected:
   std::vector<std::unique_ptr<ExprNode>> list;
 };
 
@@ -148,7 +147,6 @@ class TypeIDNode : public ASTNode {
   virtual void print(std::ostream & os) const override{
       os << my_id;
   }
-  virtual IRTptr translate(const SymbolTable & env) const;
  private:
   std::string my_id;
 };
@@ -223,7 +221,6 @@ class TypeFeildsNode: public ASTNode {
        print_list(os, base_list(list), ", ");
    }
    std::vector<std::unique_ptr<TypeFeildNode>> list;
-   virtual IRTptr translate(const SymbolTable & env) const;
 };
 
 } //namespace tiger

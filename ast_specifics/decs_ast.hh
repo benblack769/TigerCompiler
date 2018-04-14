@@ -101,7 +101,7 @@ class FuncDecl: public DeclarationNode {
     }
     void check_function_body(SymbolTable & old_env){
         new_env = old_env;
-        full_frame.new_frame(newFrame(newlabel().toString(),formalsList(this->number_args())));
+        full_frame.new_frame(newFrame(newlabel().toString(),formalsList(this->number_args()+1)));
         for(auto var_pair : this->arg_types()){
             new_env.add_variable(var_pair.first,new_env.get_checked_type(var_pair.second),full_frame.current_level(),full_frame.current_frame()->allocLocal(true));
         }
@@ -109,11 +109,13 @@ class FuncDecl: public DeclarationNode {
         if(this->has_type()){
             assert_type_equality(func_ret_ty,new_env.get_checked_type(this->ret_type()),this->get_source_loc());
         }
+        my_frame = full_frame.current_frame();
         full_frame.pop_frame();
     }
     virtual IRTptr translate(const SymbolTable & env) const override;
  //protected:
      SymbolTable new_env;
+     Frame my_frame;
      std::string _id;
      TypeFeildsNode * _ty_fields;
      TypeIDNode * _type_id;

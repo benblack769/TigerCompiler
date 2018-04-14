@@ -85,7 +85,7 @@ Temp_temp Frame_::getRV(){
 */
 
 ir::expPtr Frame_::externalCall(std::string s, ir::expPtrList args){
-	return to_expPtr(ir::Call(to_expPtr(ir::Name(newnamedlabel(s))),args));
+    return ir::to_expPtr(ir::Call(newnamedlabel(s),args));
 };
 
 ir::expPtr Access_::exp(ir::temp_t fp){

@@ -72,6 +72,7 @@ struct VarEntry{
 struct FuncEntry{
     TypeExpr ret_type;
     vector<TypeExpr> arg_types;
+    Temp_label func_label;
     int level;
 };
 enum class VarOrFunc{BAD,VAR,FUNC};
@@ -162,8 +163,15 @@ public:
         return vars.at(varid).var().type;
     }
     VarEntry var_data(string varid)const{
+        if(!symbol_is_var(varid)){
+            int i = 0;
+        }
         assert(symbol_is_var(varid));
         return vars.at(varid).var();
+    }
+    FuncEntry func_data(string func_id)const{
+        assert(symbol_is_func(func_id));
+        return vars.at(func_id).func();
     }
     TypeExpr get_checked_type(string tyid){
         if(!has_type(tyid)){

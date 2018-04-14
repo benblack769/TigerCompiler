@@ -303,6 +303,7 @@ class ForToDo : public ExprNode {
         new_env.add_variable(_var_id,int_type(),full_frame.current_level(), full_frame.current_frame()->allocLocal(true));
         assert_type_equality(_initial->eval_and_check_type(old_env), int_type(), loc);
         assert_type_equality(_end->eval_and_check_type(old_env), int_type(), loc);
+        _eval_expr->eval_and_check_type(new_env);
         return void_type();
     }
     virtual void print(std::ostream & os) const override{

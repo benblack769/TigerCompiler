@@ -20,7 +20,6 @@ class BasicType : public TypeNode {
     virtual void print(std::ostream & os) const override{
         os << *type;
     }
-    virtual IRTptr translate(const SymbolTable & env) const override;
 private:
     TypeIDNode * type;
 };
@@ -38,7 +37,6 @@ class ArrayType : public TypeNode {
     virtual void print(std::ostream & os) const override{
         os << " array of " << *type;
     }
-    virtual IRTptr translate(const SymbolTable & env) const override;
 private:
     TypeIDNode * type;
 };
@@ -63,7 +61,6 @@ class TypeFeildType : public TypeNode {
     virtual void print(std::ostream & os) const override{
         os << "{" << *type_fields << "}";
     }
-    virtual IRTptr translate(const SymbolTable & env) const override;
 private:
     TypeFeildsNode * type_fields;
 };

@@ -27,6 +27,7 @@ class IRTNode {
     virtual std::string toStr(std::string spacing = "") const = 0;
 };
 
+
 // class for things that dont return a value
 class stm: public IRTNode {
   public:
@@ -76,12 +77,18 @@ inline stmPtr to_stmPtr(const stm_ty & stmt){
 }
 inline expPtr cast_to_exprPtr(IRTptr ptr){
     expPtr res = std::dynamic_pointer_cast<exp>(ptr);
+    if(!bool(res)){
+        int i = 0;
+    }
     assert(bool(res));
     return res;
 }
 
 inline stmPtr cast_to_stmPtr(IRTptr ptr){
     stmPtr res = std::dynamic_pointer_cast<stm>(ptr);
+    if(!bool(res)){
+        int i = 0;
+    }
     assert(bool(res));
     return res;
 }
@@ -171,17 +178,17 @@ class Mem: public exp {
 // evauates exp_ and returns the value at that loaction
 class Call: public exp {
   public:
-    Call(expPtr f, expPtrList l): func_(f), args_{l} {};
+    Call(label_t f, expPtrList l): func_(f), args_{l} {};
     virtual ~Call() = default;
     virtual std::string toStr(std::string spacing) const {
         std::string argsStr = spacing + ws + "args:\n";        
         for (auto arg : args_){
             argsStr += arg->toStr(spacing + ws + ws);
         }
-        return oneChildToStr(spacing, "Call", func_) + argsStr;
+        return spacing + "Call: " + func_.toString() + "\n" + argsStr;
     }
   private:
-    expPtr func_;
+    label_t func_;
     expPtrList args_;
 };
 
@@ -316,6 +323,25 @@ class Label: public stm {
   private:
     label_t name_;
 };
+
+inline stmPtr make_stmPtr(IRTptr ptr){
+    stmPtr res = std::dynamic_pointer_cast<stm>(ptr);
+    if(bool(res)){
+        return res;
+    }
+    else{
+        return to_stmPtr(Exp(cast_to_exprPtr(ptr)));
+    }
+}
+inline expPtr make_expPtr(IRTptr ptr){
+    expPtr res = std::dynamic_pointer_cast<exp>(ptr);
+    if(bool(res)){
+        return res;
+    }
+    else{
+        return to_expPtr(Eseq(cast_to_stmPtr(ptr),to_expPtr(Const(0))));
+    }
+}
 
 } // ir namespace
 

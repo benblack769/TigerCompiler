@@ -96,3 +96,15 @@ private:
     ir::stmPtr body;
     Frame frame;
 };
+
+struct FuncFrag{
+    Frame frame;
+    ir::IRTptr body;
+};
+extern std::vector<FuncFrag> func_fragments;
+
+struct StringFrag{
+    std::string str_const;
+    Temp_label str_label;
+};
+extern std::vector<StringFrag> str_fragments;
