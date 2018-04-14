@@ -1,6 +1,14 @@
 ## ReadMe
 ### Ben Black, Brandon Finley, Matt Atteberry, Alex Grant
 
+### Working features
+
+Currently, basic variables, Let, If then else, if then, While, For, integers, and strings all seem to be working somewhat correctly.
+
+Arrays, static links, and function calls do not crash the program, but they are somewhat incomplete, and will take significant extra effort to turn into working assembly.
+
+Records and break statements are not implemented at all, and will crash the program if used.
+
 ### IR Trees
 
 All of our ir tree classes come in two flavors: `stm` and `exp`. `exp` produces a value, `stm` does not. All of the ir tree classes inherit from `stm` or `exp` which in turn inherit from an `IRTreeNode` class.  All of the IRtree nodes have a `toStr` class which will print out their sub tree, with each level of the tree getting indented more. Here are the types of IR tree nodes, they're mostly the same as the book but classes:
@@ -52,8 +60,9 @@ stm. An assembly label, but with no expected value. So, you'd use Name before a 
 
 ### Translating
 
-Each class of `ASTNode` has a `translate` function that returns a pointer to an IR tree. These functions are defined in `ast_translate.cc`. The main function in `tc.cc` calls the semantic checks on the root node, then calls translate on it. 
+Each class of `ASTNode` has a `translate` function that returns a pointer to an IR tree. These functions are defined in `ast_translate.cc`. The main function in `tc.cc` calls the semantic checks on the root node, then calls translate on it.
 
+# HW6: Semantic Checking
 
 ### Symbol tables
 
