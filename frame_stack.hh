@@ -4,6 +4,9 @@
 
 class FrameStack{
 public:
+    FrameStack(){
+        frames.push_back(newFrame(newnamedlabel("_main"),formalsList()));
+    }
     void new_frame(Frame frame){
         frames.push_back(frame);
     }

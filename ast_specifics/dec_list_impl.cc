@@ -6,17 +6,17 @@
 using namespace tiger;
 using namespace decls;
 
-void DeclarationListNode::append_to(DeclarationNode * expr){
-   list.push_back(std::unique_ptr<DeclarationNode>(expr));
-}
-void DeclarationListNode::print(std::ostream & os) const {
-   print_list(os, base_list(list), "\n");
-}
 template<typename ty_ty>
 ty_ty * to_sub_class(DeclarationNode * node){
     ty_ty * decl = dynamic_cast<ty_ty *>(node);
     assert(decl != nullptr);
     return decl;
+}
+void DeclarationListNode::append_to(DeclarationNode * expr){
+   list.push_back(std::unique_ptr<DeclarationNode>(expr));
+}
+void DeclarationListNode::print(std::ostream & os) const {
+   print_list(os, base_list(list), "\n");
 }
 void DeclarationListNode::load_and_check_types(SymbolTable & env){
     for(size_t list_idx = 0; list_idx < list.size(); ){

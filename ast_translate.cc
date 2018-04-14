@@ -32,10 +32,18 @@ IRTptr exprs::NegateNode::translate(const SymbolTable & env) const{
 
 expPtr to_expr_seq(stmPtrList list,expPtr expr){
     expPtr res_expr = expr;
-    for(stmPtr st : list){
-        res_expr = to_expPtr(Eseq(st,res_expr));
+    for(int64_t i = int64_t(list.size())-1; i >= 0; i--){
+        res_expr = to_expPtr(Eseq(list[i],res_expr));
     }
     return res_expr;
+}
+stmPtr to_stm_seq(stmPtrList list){
+    assert(list.size() > 0);
+    stmPtr res_stm = NoOp();
+    for(size_t i = 0; i < list.size(); i++){
+        res_stm = to_stmPtr(Seq(res_stm,list[i]));
+    }
+    return res_stm;
 }
 ir::expPtr compile_conditional(rel_op_k oper, ir::expPtr left, ir::expPtr right, ir::expPtr then_expr, ir::expPtr else_expr){
     Temp_temp result = newtemp();
@@ -174,7 +182,8 @@ IRTptr exprs::WhileDo::translate(const SymbolTable & env) const{
     return std::make_shared<Seq>(jmpNlbl, irBody);
 }
 IRTptr exprs::ForToDo::translate(const SymbolTable & ) const{
-    this->new_env;
+    //this->new_env;
+    return nullptr;
 }
 IRTptr exprs::Break::translate(const SymbolTable & env) const{return nullptr;}
 IRTptr exprs::ArrCreate::translate(const SymbolTable & env) const{return nullptr;}
@@ -211,7 +220,7 @@ ir::expPtr translate_variable(Access acc, int level){
         ir::expPtr new_link_expr = static_link_acc->expStaticLink(cur_link_expr);
         cur_link_expr = new_link_expr;
     }
-    return cur_link_expr;
+    return acc->expStaticLink(cur_link_expr);
 }
 ir::expPtr get_and_translate_var(const SymbolTable & env, string id){
     VarEntry var_data = env.var_data(id);
@@ -227,7 +236,8 @@ IRTptr decls::VarDecl::translate(const SymbolTable & old_env) const{
     return to_stmPtr(Move(get_and_translate_var(new_env,_id), cast_to_exprPtr(this->_expr->translate(old_env))));
 }
 IRTptr decls::FuncDecl::translate(const SymbolTable &) const{
-
+    assert("functions not yet implemented");
+    return nullptr;
 }
 IRTptr decls::TypeDecl::translate(const SymbolTable & env) const{
     assert("types should not be translated");
@@ -277,7 +287,17 @@ IRTptr FieldNode::translate(const SymbolTable & env) const{return nullptr;}
 IRTptr TypeIDNode::translate(const SymbolTable & env) const{return nullptr;}
 IRTptr TypeFeildNode::translate(const SymbolTable & env) const{return nullptr;}
 IRTptr FieldListNode::translate(const SymbolTable & env) const{return nullptr;}
-IRTptr DeclarationListNode::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr DeclarationListNode::translate(const SymbolTable & env) const{
+    stmPtrList stmts;
+    for(auto & decl_node : list){
+        switch(decl_node->type()){
+        case DeclType::VAR: stmts.push_back(cast_to_stmPtr(decl_node->translate(env))); break;
+        case DeclType::FUNC: stmts.push_back(cast_to_stmPtr(decl_node->translate(env))); break;
+        case DeclType::TYPE: break;
+        }
+    }
+    return to_stm_seq(stmts);
+}
 IRTptr TypeFeildsNode::translate(const SymbolTable & env) const{return nullptr;}
 
 //conditional evaluation helper function (used for boolean operations like | as well as if statements)

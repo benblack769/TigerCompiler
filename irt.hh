@@ -228,6 +228,10 @@ class Exp: public stm {
     expPtr exp_;
 };
 
+inline stmPtr NoOp(){
+    return to_stmPtr(Exp(to_expPtr(Const(0))));
+}
+
 // jump to address exp_. labs_ contains all of the locations
 // exp_ could be
 class Jump: public stm {
@@ -273,9 +277,9 @@ class CJump: public stm {
     virtual std::string toStr(std::string spacing) const {
         
         return spacing + "CJump op: " + rel_op_names.at(static_cast<int>(op_)) + "\n" +
-            spacing + "CJump left:\n" + left_->toStr(spacing + ws) +
-            spacing + "CJump right:\n" + right_->toStr(spacing + ws) +
-            spacing + "CJump true label: " + trueLab_.toString() +
+            spacing + "CJump left:\n" + left_->toStr(spacing + ws) + "\n" +
+            spacing + "CJump right:\n" + right_->toStr(spacing + ws) + "\n" +
+            spacing + "CJump true label: " + trueLab_.toString() + "\n" +
             spacing + "CJump false label: " + falseLab_.toString();
     };
   private:
