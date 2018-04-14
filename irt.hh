@@ -175,7 +175,7 @@ class Mem: public exp {
     expPtr exp_;
 };
 
-// evauates exp_ and returns the value at that loaction
+// function call
 class Call: public exp {
   public:
     Call(label_t f, expPtrList l): func_(f), args_{l} {};
