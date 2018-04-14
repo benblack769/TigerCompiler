@@ -44,9 +44,15 @@ stm. Like Eseq, but both nodes are stms
 ##### Label
 stm. An assembly label, but with no expected value. So, you'd use Name before a function, but Label before a procedure.
 
+### Temp
+`temp.hh`/`.cc` Has functions `newlabel` and `newtemp` that get called by translate functions whenever you need to make a label or temp with a unique name. Makes sure names don't overlap.
+
+### Frame
+`frame.hh` has functions relating to the frame. It will generate an ir tree for getting the frame pointer for the translate functions.
+
 ### Translating
 
-Each class of `ASTNode` has a `translate` function that returns a pointer to an IR tree. The main function in `tc.cc` calls the semantic checks on the root node, then calls translate on it. 
+Each class of `ASTNode` has a `translate` function that returns a pointer to an IR tree. These functions are defined in `ast_translate.cc`. The main function in `tc.cc` calls the semantic checks on the root node, then calls translate on it. 
 
 
 ### Symbol tables
