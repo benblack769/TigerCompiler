@@ -154,7 +154,25 @@ IRTptr exprs::IfThenElse::translate(const SymbolTable & env) const{
                                cast_to_exprPtr(_res_1->translate(env)),
                                cast_to_exprPtr(_res_2->translate(env)));
 }
-IRTptr exprs::WhileDo::translate(const SymbolTable & env) const{return nullptr;}
+IRTptr exprs::WhileDo::translate(const SymbolTable & env) const{
+    // the condition must produce a value, but the body must not
+    auto irCond = cast_to_exprPtr(_cond->translate(env));
+    std::shared_ptr<stm> irBody = cast_to_stmPtr(_res->translate(env));
+
+    auto startLbl = newlabel().toString(); // right before the Cjump
+    auto bodyLbl = newlabel().toString(); // right before we start the body
+    auto endLbl = newlabel().toString(); // after the body
+    
+    // add jump and label to the end of body
+    auto jumpEnd = std::make_shared<Seq>(std::make_shared<Jump>(startLbl), std::make_shared<Label>(endLbl));    
+    irBody = std::make_shared<Seq>(irBody, jumpEnd);    
+    // add label at the start of body
+    irBody = std::make_shared<Seq>(std::make_shared<Label>(bodyLbl), irBody); 
+    // compare the cond to 0
+    auto cjmp = std::make_shared<CJump>(rel_op_k::NE, std::make_shared<Const>(0), irCond, bodyLbl, endLbl);
+    auto jmpNlbl = std::make_shared<Seq>(std::make_shared<Label>(startLbl), cjmp);
+    return std::make_shared<Seq>(jmpNlbl, irBody);
+}
 IRTptr exprs::ForToDo::translate(const SymbolTable & ) const{
     this->new_env;
 }
@@ -227,7 +245,7 @@ IRTptr ExprListNode::translate(const SymbolTable & env) const{return nullptr;}
  */
 IRTptr ExprSequenceNode::translate(const SymbolTable & env) const{
     if(empty()){
-        return nullptr;
+        return std::make_shared<Exp>(std::make_shared<Const>(0)); 
     }
     if(singleton()){
         return list.at(0)->translate(env);

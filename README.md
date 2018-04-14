@@ -1,6 +1,14 @@
 ## ReadMe
 ### Ben Black, Brandon Finley, Matt Atteberry, Alex Grant
 
+### IR Trees
+
+All of our ir tree classes come in two flavors: `stm` and `exp`. `exp` produces a value, `stm` does not. All of the ir tree classes inherit from `stm` or `exp` which in turn inherit from an `IRTreeNode` class. 
+
+### Translating
+
+Each class of `ASTNode` has a `translate` function that returns a pointer to an IR tree. The main function in `tc.cc` calls the semantic checks on the root node, then calls translate on it.
+
 
 ### Symbol tables
 
