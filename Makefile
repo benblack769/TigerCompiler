@@ -85,10 +85,13 @@ buffman.o: buffman.cc
 tc.o: tc.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-tc: tiger.tab.o lex.yy.o parse_err.o tc.o temp.o mips_frame.o dec_list_impl.o ast_translate.o buffman.o symbol_table.o mips_munch.o
+tc: tiger.tab.o lex.yy.o parse_err.o tc.o temp.o mips_frame.o dec_list_impl.o ast_translate.o buffman.o symbol_table.o mips_munch.o mips_generate.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 mips_munch.o: mips_munch.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
+
+mips_generate.o: mips_generate.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
 test: all

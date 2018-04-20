@@ -12,6 +12,7 @@
 #include "tiger.tab.h"
 #include "buffman.hh"
 #include "frame.hh"
+#include "generate.hh"
 
 extern ExprNode * rootnode;
 extern FILE* yyin;
@@ -40,3 +41,4 @@ int main(int argc, char* argv[]){
         }
     }
 }
+
