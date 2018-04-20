@@ -17,6 +17,7 @@ SET (BASE_SRC
         temp.cc
         tiger.tab.c
         lex.yy.c
+        mips_munch.cc
         semantic_check.cc)
 
 
