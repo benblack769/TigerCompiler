@@ -76,7 +76,7 @@ ast_translate.o: ast_translate.cc
 test_translate.o: test_translate.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-test_translate: tiger.tab.o lex.yy.o parse_err.o catch.o temp.o mips_frame.o dec_list_impl.o ast_translate.o test_translate.o buffman.o symbol_table.o
+test_translate: tiger.tab.o lex.yy.o parse_err.o catch.o temp.o mips_frame.o dec_list_impl.o ast_translate.o test_translate.o buffman.o symbol_table.o mips_munch.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
 
 buffman.o: buffman.cc
@@ -85,8 +85,11 @@ buffman.o: buffman.cc
 tc.o: tc.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
-tc: tiger.tab.o lex.yy.o parse_err.o tc.o temp.o mips_frame.o dec_list_impl.o ast_translate.o buffman.o symbol_table.o
+tc: tiger.tab.o lex.yy.o parse_err.o tc.o temp.o mips_frame.o dec_list_impl.o ast_translate.o buffman.o symbol_table.o mips_munch.o
 	$(CXX) $(LDFLAGS) $(LIBS) -o $@ $^
+
+mips_munch.o: mips_munch.cc
+	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
 test: all
 	./test_lexer

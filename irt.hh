@@ -25,6 +25,7 @@ class IRTNode {
     IRTNode() = default;
     virtual ~IRTNode() = default;
     virtual std::string toStr(std::string spacing = "") const = 0;
+    virtual std::string munch() = 0;
 };
 
 
@@ -36,6 +37,7 @@ class stm: public IRTNode {
     stm() = default;
     virtual ~stm() = default;
     virtual std::string toStr(std::string spacing) const = 0;
+    virtual std::string munch() = 0;
 };
 
 // class for things that do return a value
@@ -46,6 +48,7 @@ class exp: public IRTNode {
     exp() = default;
     virtual ~exp() = default;
     virtual std::string toStr(std::string spacing) const = 0;
+    virtual std::string munch() = 0;
 };
 
 // like an expList but with pointers
@@ -117,6 +120,7 @@ class Const: public exp {
     virtual std::string toStr(std::string spacing) const {
         return spacing + "Const: " + std::to_string(val_);
     };
+    virtual std::string munch();
   private:
     const const_t val_;
 };
@@ -129,6 +133,7 @@ class Name: public exp {
     virtual std::string toStr(std::string spacing) const {
         return spacing + "Name: " + val_.toString();
     };
+    virtual std::string munch();
   private:
     const label_t val_;
 };
@@ -141,6 +146,7 @@ class Temp: public exp {
     virtual std::string toStr(std::string spacing) const {
         return spacing + "Temp: " + val_.toString();
     };
+    virtual std::string munch();
   private:
     const temp_t val_;
 };
@@ -157,6 +163,7 @@ class BinOp: public exp {
     virtual std::string toStr(std::string spacing) const {
         return twoChildToStr(spacing, "BinOp " + op_names.at(static_cast<int>(op_)), l_, r_);
     };
+    virtual std::string munch();
   private:
     op_k op_;
     expPtr l_;
@@ -171,6 +178,7 @@ class Mem: public exp {
     virtual std::string toStr(std::string spacing) const {
         return oneChildToStr(spacing, "Mem", exp_);
     }
+    virtual std::string munch();
   private:
     expPtr exp_;
 };
@@ -187,6 +195,7 @@ class Call: public exp {
         }
         return spacing + "Call: " + func_.toString() + "\n" + argsStr;
     }
+    virtual std::string munch();
   private:
     label_t func_;
     expPtrList args_;
@@ -203,6 +212,7 @@ class Eseq: public exp {
     virtual std::string toStr(std::string spacing) const {
         return twoChildToStr(spacing, "Eseq", stm_, exp_);
     };
+    virtual std::string munch();
   private:
     stmPtr stm_;
     expPtr exp_;
@@ -217,6 +227,7 @@ class Move: public stm {
     virtual std::string toStr(std::string spacing) const {
         return twoChildToStr(spacing, "Move", dest_, src_);
     };
+    virtual std::string munch();
   private:
     expPtr dest_;
     expPtr src_;
@@ -231,6 +242,7 @@ class Exp: public stm {
     virtual std::string toStr(std::string spacing) const {
         return oneChildToStr(spacing, "Exp", exp_);
     };
+    virtual std::string munch();
   private:
     expPtr exp_;
 };
@@ -249,6 +261,7 @@ class Jump: public stm {
     virtual std::string toStr(std::string spacing) const {
         return spacing + "Jump: " + lab_.toString();
     }
+    virtual std::string munch();
   private:
     label_t lab_;
 };
@@ -289,6 +302,7 @@ class CJump: public stm {
             spacing + "CJump true label: " + trueLab_.toString() + "\n" +
             spacing + "CJump false label: " + falseLab_.toString();
     };
+    virtual std::string munch();
   private:
     rel_op_k op_;
     expPtr left_;
@@ -306,6 +320,7 @@ class Seq: public stm {
     virtual std::string toStr(std::string spacing) const {
         return twoChildToStr(spacing, "Seq", stm1_, stm2_);
     };
+    virtual std::string munch();
   private:
     stmPtr stm1_;
     stmPtr stm2_;
@@ -320,6 +335,7 @@ class Label: public stm {
     virtual std::string toStr(std::string spacing) const {
         return spacing + "Label: " + name_.toString();
     };
+    virtual std::string munch();
   private:
     label_t name_;
 };
