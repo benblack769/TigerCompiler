@@ -29,7 +29,7 @@ string indirect_acc(string ptr_reg, int offset=0){
     return to_string(offset) + "(" + ptr_reg + ")";
 }
 string pop_into(string reg){
-    string line_1 = format_instruction("sw", reg, indirect_acc(stack_pointer));
+    string line_1 = format_instruction("lw", reg, indirect_acc(stack_pointer));
     string line_2 = format_instruction("addiu",stack_pointer,stack_pointer,"-"+word_size_str);
     return line_1 + line_2;
 }
@@ -54,7 +54,32 @@ std::string Name::munch(){
     return line_1 + line_2;
 }
 std::string Temp::munch(){return "";}
-std::string BinOp::munch(){return "";}
+string binop_instr_name(op_k op){
+    switch(op){
+    case op_k::PLUS:    return "add";
+    case op_k::MINUS:   return "sub";
+    case op_k::MUL:     return "mult";
+    case op_k::DIV:     return "div";
+    case op_k::AND:     return "and";
+    case op_k::OR:      return "or";
+    case op_k::XOR:     return "xor";
+    case op_k::LSHIFT:  return "sllv";
+    case op_k::RSHIFT:  return "srlv";
+    case op_k::ARSHIFT: return "srav";
+    default:
+        assert(false && "bad case");
+        return "";
+    }
+}
+// put the values of left and right on the stack
+// then pop them off and apply the operation
+// then push the result to the stack
+std::string BinOp::munch(){
+    return  l_->munch() + r_->munch() +
+    pop_into(gp_register_1) + pop_into(gp_register_2) +
+    format_instruction(binop_instr_name(op_), gp_register_1, gp_register_1, gp_register_2) +
+    push_onto(gp_register_1);
+}
 std::string Mem::munch(){return "";}
 std::string Call::munch(){return "";}
 std::string Eseq::munch(){return "";}
