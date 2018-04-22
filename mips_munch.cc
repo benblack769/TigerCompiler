@@ -39,8 +39,20 @@ string push_onto(string reg){
     return line_1 + line_2;
 }
 
-std::string Const::munch(){return "";}
-std::string Name::munch(){return "";}
+// push the value of the const on the stack
+std::string Const::munch(){
+    string line_1 = format_instruction("li", gp_register_1, to_string(val_));
+    string line_2 = push_onto(gp_register_1);
+    return line_1 + line_2;
+}
+// in ast_translate, Name is only used for strings.
+// This function pushes the memory address of the string the Name is 
+// associated with onto the stack
+std::string Name::munch(){
+    string line_1 = format_instruction("la", gp_register_1, val_.toString());
+    string line_2 = push_onto(gp_register_1);
+    return line_1 + line_2;
+}
 std::string Temp::munch(){return "";}
 std::string BinOp::munch(){return "";}
 std::string Mem::munch(){return "";}
