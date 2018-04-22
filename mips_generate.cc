@@ -15,6 +15,7 @@ std::string generateStringHeader(std::vector<StringFrag> strTable){
 }
 
 std::string generate(IRTNode::IRTptr root){
-    return ".data\n" + generateStringHeader(str_fragments);
+    return ".data\n" + generateStringHeader(str_fragments)+
+           ".text\nmain:\n" + root->munch() + "jr $ra\n";
 }
 

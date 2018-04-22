@@ -29,7 +29,7 @@ string indirect_acc(string ptr_reg, int offset=0){
     return to_string(offset) + "(" + ptr_reg + ")";
 }
 string pop_into(string reg){
-    string line_1 = format_instruction("sw", reg, indirect_acc(stack_pointer));
+    string line_1 = format_instruction("lw", reg, indirect_acc(stack_pointer));
     string line_2 = format_instruction("addiu",stack_pointer,stack_pointer,"-"+word_size_str);
     return line_1 + line_2;
 }
