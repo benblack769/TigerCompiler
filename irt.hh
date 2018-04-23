@@ -179,6 +179,9 @@ class Mem: public exp {
         return oneChildToStr(spacing, "Mem", exp_);
     }
     virtual std::string munch();
+    virtual expPtr getExp() {
+        return exp_;
+    }
   private:
     expPtr exp_;
 };

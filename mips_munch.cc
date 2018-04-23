@@ -80,13 +80,46 @@ std::string BinOp::munch(){
     format_instruction(binop_instr_name(op_), gp_register_1, gp_register_1, gp_register_2) +
     push_onto(gp_register_1);
 }
-std::string Mem::munch(){return "";}
+// evaluate exp_, get the value at exp_'s address, push that value on the stack
+std::string Mem::munch(){
+    return exp_->munch() + 
+    pop_into(gp_register_1) + 
+    // load the value at the memory address stored in gp_register_1 into gp_register_1
+    format_instruction("lw", gp_register_1, gp_register_1) +
+    push_onto(gp_register_1);
+}
 std::string Call::munch(){return "";}
-std::string Eseq::munch(){return "";}
-std::string Move::munch(){return "";}
+
+// evaluates stm_ then exp_
+// since the last value on the stack will be from exp_,
+// then this node will "return" the value of exp_
+// without manipulating the stack
+std::string Eseq::munch(){
+   return stm_->munch() + exp_->munch(); 
+}
+
+// put value from src_ into dest_
+// dest_ must be a Temp or a Mem
+std::string Move::munch(){
+    auto srcStr = src_->munch();
+    if(auto memP = dynamic_pointer_cast<Mem>(dest_)){
+        // store the value of src_ in the memory location refered to
+        // by memP
+        return srcStr + memP->getExp()->munch() +
+        pop_into(gp_register_1) + pop_into(gp_register_2) +
+        format_instruction("sw", gp_register_2, gp_register_1);
+    } else if(auto tempP = dynamic_pointer_cast<Temp>(dest_)){
+        //TODO
+        return "";
+    } else {
+        assert(false && "dest of Move ir node is not Temp or Mem");
+    }
+}
 std::string Exp::munch(){
     return exp_->munch() +
            pop_into(gp_register_1);
+    // it doesn't matter that the result gets store in gp_register_1,
+    // we just want to get rid of the result of exp_, so we pop it off the stack
 }
 std::string Jump::munch(){
     return lab_.toString();
