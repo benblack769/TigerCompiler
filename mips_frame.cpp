@@ -54,8 +54,7 @@ AccessList Frame_::formals(){
 };
 
 std::string Frame_::getlabel(){
-	std::string retStr = "";
-	return retStr;
+	return name.toString();
 };
 
 ir::temp_t Frame_::getFP(){
