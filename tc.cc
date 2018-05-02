@@ -12,6 +12,7 @@
 #include "tiger.tab.h"
 #include "buffman.hh"
 #include "frame.hh"
+#include "generate.hh"
 
 extern ExprNode * rootnode;
 extern FILE* yyin;
@@ -29,14 +30,7 @@ int main(int argc, char* argv[]){
         rootnode->eval_and_check_type(evalEnv);
         SymbolTable translateEnv;
         IRTptr res = rootnode->translate(translateEnv);
-        std::cout << res;
-        for(auto & frag : func_fragments){
-            cout << "FunctionFragment:\n";
-            std::cout << frag.body << endl;
-        }
-        for(auto & frag : str_fragments){
-            cout << "StringFragment:\n";
-            std::cout << frag.str_label.toString() << ": " << "\"" << frag.str_const << "\"" << endl;
-        }
+        std::cout << generate(res);
     }
 }
+
