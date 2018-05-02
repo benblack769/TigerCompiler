@@ -22,10 +22,10 @@ tiger.tab.o: tiger.tab.c
 lex.yy.o: lex.yy.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
-parse_err.o:  parse_err.cpp
+parse_err.o:  parse_err.cc
 	$(CXX) $(CXXFLAGS) $(WARNINGS) -c -o $@  $^
 
-mips_frame.o: mips_frame.cpp
+mips_frame.o: mips_frame.cc
 	$(CXX) $(LDFLAGS) $(WARNINGS) $(LIBS) -c -o $@ $^
 
 catch.o: catch.cc

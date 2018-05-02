@@ -12,8 +12,8 @@ SET (BASE_SRC
         ast_specifics/dec_list_impl.cc
         ast_translate.cc
         buffman.cc
-        mips_frame.cpp
-        parse_err.cpp
+        mips_frame.cc
+        parse_err.cc
         temp.cc
         tiger.tab.c
         lex.yy.c

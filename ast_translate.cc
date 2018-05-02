@@ -169,7 +169,7 @@ IRTptr exprs::IfThen::translate(const SymbolTable & env) const{
     return to_stm_seq(stmts);
 }
 IRTptr exprs::IfThenElse::translate(const SymbolTable & env) const{
-    return compile_conditional(rel_op_k::EQ,
+    return compile_conditional(rel_op_k::NE,
                                to_expPtr(Const(0)),
                                cast_to_exprPtr(_cond->translate(env)),
                                make_expPtr(_res_1->translate(env)),
