@@ -8,6 +8,7 @@ using namespace ir;
 const string gp_register_1 = "$t0";
 const string gp_register_2 = "$t1";
 const string stack_pointer = "$sp";
+const string frame_pointer = "$fp";
 const int word_size = 4;
 const string word_size_str = to_string(word_size);
 
@@ -54,7 +55,10 @@ std::string Name::munch(){
     return line_1 + line_2;
 }
 std::string Temp::munch(){return "";}
-std::string Fp::munch(){return "";}
+// push fp onto the stack
+std::string Fp::munch(){
+    return push_onto(gp_register_1);
+}
 string binop_instr_name(op_k op){
     switch(op){
     case op_k::PLUS:    return "add";
@@ -86,7 +90,7 @@ std::string Mem::munch(){
     return exp_->munch() + 
     pop_into(gp_register_1) + 
     // load the value at the memory address stored in gp_register_1 into gp_register_1
-    format_instruction("lw", gp_register_1, gp_register_1) +
+    format_instruction("lw", gp_register_1, indirect_acc(gp_register_1)) +
     push_onto(gp_register_1);
 }
 std::string Call::munch(){return "";}
@@ -108,7 +112,7 @@ std::string Move::munch(){
         // by memP
         return srcStr + memP->getExp()->munch() +
         pop_into(gp_register_1) + pop_into(gp_register_2) +
-        format_instruction("sw", gp_register_2, gp_register_1);
+        format_instruction("sw", gp_register_2, indirect_acc(gp_register_1));
     } else if(auto tempP = dynamic_pointer_cast<Temp>(dest_)){
         //TODO
         return "";
