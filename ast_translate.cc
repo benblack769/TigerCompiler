@@ -253,7 +253,7 @@ ir::expPtr translate_variable(Access acc, int level){
     int cur_level = full_frame.current_level();
     Frame cur_frame = full_frame.current_frame();
     assert(level <= cur_level);
-    ir::expPtr cur_link_expr = to_expPtr(ir::Temp(cur_frame->getFP()));
+    ir::expPtr cur_link_expr = to_expPtr(ir::Fp());
     for(int l = cur_level; l > level; l--){
         Access static_link_acc = get_static_link(l);
         ir::expPtr new_link_expr = static_link_acc->expStaticLink(cur_link_expr);

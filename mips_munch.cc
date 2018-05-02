@@ -54,6 +54,7 @@ std::string Name::munch(){
     return line_1 + line_2;
 }
 std::string Temp::munch(){return "";}
+std::string Fp::munch(){return "";}
 string binop_instr_name(op_k op){
     switch(op){
     case op_k::PLUS:    return "add";

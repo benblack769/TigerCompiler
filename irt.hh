@@ -154,7 +154,7 @@ class Temp: public exp {
 // this will be the return the value of the frame pointer
 class Fp: public exp {
   public:
-    Fp() = default;
+    Fp(){};
     virtual ~Fp() = default;
     virtual std::string toStr(std::string spacing) const {
         return spacing + "Frame Pointer";
