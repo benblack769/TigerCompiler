@@ -151,6 +151,17 @@ class Temp: public exp {
     const temp_t val_;
 };
 
+// this will be the return the value of the frame pointer
+class Fp: public exp {
+  public:
+    Fp(){};
+    virtual ~Fp() = default;
+    virtual std::string toStr(std::string spacing) const {
+        return spacing + "Frame Pointer";
+    };
+    virtual std::string munch();
+};
+
 enum class op_k: int                {PLUS, MINUS, MUL, DIV, AND,  OR, XOR, LSHIFT, RSHIFT, ARSHIFT};
 namespace {
 std::vector<std::string> op_names = { "+",   "-", "*", "/", "&", "|", "^",   "<<",   ">>","ARSHIFT"};
@@ -179,6 +190,9 @@ class Mem: public exp {
         return oneChildToStr(spacing, "Mem", exp_);
     }
     virtual std::string munch();
+    virtual expPtr getExp() {
+        return exp_;
+    }
   private:
     expPtr exp_;
 };

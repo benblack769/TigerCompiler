@@ -14,22 +14,66 @@
 #include "frame.hh"
 #include "generate.hh"
 
+const std::string PRINT_IRT_FLAG = "-i";
+const std::string PRINT_AST_FLAG = "-p";
+const std::string PRINT_FUNC_FRAGS_FLAG = "-f";
+
 extern ExprNode * rootnode;
 extern FILE* yyin;
+extern std::vector<FuncFrag> func_fragments;
 using namespace tiger;
 
 // runs symantic checks, then translates
 int main(int argc, char* argv[]){
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        assert(yyin && "bad file opened");
-        auto b = buffman::Buffman(yyin);
-        yyparse();
-        SymbolTable evalEnv;
-        assert(rootnode && "parsing failed");
-        rootnode->eval_and_check_type(evalEnv);
-        SymbolTable translateEnv;
-        IRTptr res = rootnode->translate(translateEnv);
+    // flags
+    auto printIRT = false;
+    auto printAST = false;
+    auto printFuncFrags = false;
+    auto makeASM = true;
+    // location of filename in argv
+    int fileLoc = 0; // it can't be zero because that will be './tc' or similar
+    for (int i = 1; i < argc; i++){
+        if (argv[i][0] == '-'){
+            std::string flag = argv[i];
+            if (flag == PRINT_IRT_FLAG){
+                printIRT = true;
+                makeASM = false;
+            }
+            if (flag == PRINT_AST_FLAG){
+                printAST = true;
+                makeASM = false;
+            }
+            if (flag == PRINT_FUNC_FRAGS_FLAG){
+                printFuncFrags = true;
+                makeASM = false;
+            }
+        } else if(fileLoc == 0){ // only eval first file
+            fileLoc = i;
+        }
+    }
+    assert(fileLoc && "no file given");
+    yyin = fopen(argv[fileLoc], "r");
+    assert(yyin && "bad file opened");
+    auto b = buffman::Buffman(yyin);
+    yyparse();
+    SymbolTable evalEnv;
+    assert(rootnode && "parsing failed");
+    if (printAST){
+        std::cout << rootnode << std::endl;
+    }
+    rootnode->eval_and_check_type(evalEnv);
+    SymbolTable translateEnv;
+    IRTptr res = rootnode->translate(translateEnv);
+    if (printIRT) {
+        std::cout << res;
+    }
+    if (printFuncFrags) {
+        for (auto frag : func_fragments){
+            std::cout << frag.frame->getlabel() + ":" << std::endl;
+            std::cout << frag.body->toStr("  ") << std::endl;
+        } 
+    }
+    if (makeASM){
         std::cout << generate(res);
     }
 }
