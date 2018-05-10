@@ -1,6 +1,17 @@
 ## ReadMe
 ### Ben Black, Brandon Finley, Matt Atteberry, Alex Grant
 
+## Code Generation
+After runnning make, run `./tc file.tig` to print the assembly of tiger file to standard out. To save the file to run in qtspim, run `./tc file.tig > a.asm`.
+We implemented our exp ir classes with a stack machine. So when generating the code for and exp ir node, we will push the value that the exp produces onto the stack. In the code generation for it's parent, it will pop that value from the stack. 
+### What works
+Simple programs like `2+3` will compile and run correctly. Programs like `let var a : int := 1 in a end` will compile and load into qtspim without error, but running them produces errors.
+
+### What doesn't work
+loops, functions, pretty much everything else. 
+
+## Translation
+
 ### Working features
 
 Currently, basic variables, Let, If then else, if then, While, For, integers, and strings all seem to be working somewhat correctly.
